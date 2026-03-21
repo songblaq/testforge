@@ -1,17 +1,176 @@
-"""Manual test checklist generation."""
+"""Manual test checklist generation and session workflow."""
 
 from __future__ import annotations
 
 import json
 import logging
+import uuid
 from dataclasses import asdict, dataclass, field
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 from testforge.core.config import load_config
 from testforge.core.project import load_analysis
+from testforge.llm import create_adapter
 
 logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# Session workflow
+# ---------------------------------------------------------------------------
+
+_MANUAL_DIR = ".testforge/manual"
+
+
+def _manual_dir(project_dir: Path) -> Path:
+    return project_dir / _MANUAL_DIR
+
+
+def _active_session_path(project_dir: Path) -> Path:
+    return _manual_dir(project_dir) / "active-session.json"
+
+
+@dataclass
+class ChecklistSession:
+    """State of an in-progress manual test session."""
+
+    session_id: str
+    started_at: str
+    items: list[dict[str, Any]] = field(default_factory=list)
+    results: dict[str, dict[str, Any]] = field(default_factory=dict)
+    finished_at: str = ""
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "ChecklistSession":
+        return cls(
+            session_id=data["session_id"],
+            started_at=data["started_at"],
+            items=data.get("items", []),
+            results=data.get("results", {}),
+            finished_at=data.get("finished_at", ""),
+        )
+
+
+def _now_iso() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+
+def start_session(project_dir: Path) -> ChecklistSession:
+    """Start a new manual test checklist session.
+
+    Generates checklist items and saves a session JSON to
+    ``{project_dir}/.testforge/manual/active-session.json``.
+
+    Returns the new session object.
+    """
+    items = generate_checklist(project_dir)
+    session = ChecklistSession(
+        session_id=str(uuid.uuid4()),
+        started_at=_now_iso(),
+        items=items,
+    )
+    _save_session(project_dir, session)
+    return session
+
+
+def check_item(
+    project_dir: Path,
+    item_id: str,
+    status: str,
+    note: str = "",
+) -> ChecklistSession:
+    """Record a pass/fail result for *item_id* in the active session.
+
+    Parameters
+    ----------
+    project_dir:
+        Root of the TestForge project.
+    item_id:
+        Checklist item ID (e.g. ``"CL-001"``).
+    status:
+        ``"pass"`` or ``"fail"``.
+    note:
+        Optional tester note.
+
+    Returns the updated session.
+    """
+    session = _load_active_session(project_dir)
+    session.results[item_id] = {
+        "status": status,
+        "note": note,
+        "checked_at": _now_iso(),
+    }
+    _save_session(project_dir, session)
+    return session
+
+
+def session_progress(project_dir: Path) -> dict[str, Any]:
+    """Return progress statistics for the active session.
+
+    Returns a dict with keys: ``total``, ``checked``, ``passed``, ``failed``,
+    ``pending``, ``percent``.
+    """
+    session = _load_active_session(project_dir)
+    total = len(session.items)
+    checked = len(session.results)
+    passed = sum(1 for r in session.results.values() if r.get("status") == "pass")
+    failed = sum(1 for r in session.results.values() if r.get("status") == "fail")
+    pending = total - checked
+    percent = round(checked / total * 100) if total else 0
+    return {
+        "total": total,
+        "checked": checked,
+        "passed": passed,
+        "failed": failed,
+        "pending": pending,
+        "percent": percent,
+    }
+
+
+def finish_session(project_dir: Path) -> Path:
+    """Finish the active session and persist the final report.
+
+    Writes a timestamped result file to
+    ``{project_dir}/.testforge/manual/{session_id}.json`` and removes the
+    active-session pointer.
+
+    Returns the path of the saved report.
+    """
+    session = _load_active_session(project_dir)
+    session.finished_at = _now_iso()
+
+    manual_dir = _manual_dir(project_dir)
+    manual_dir.mkdir(parents=True, exist_ok=True)
+    result_path = manual_dir / f"{session.session_id}.json"
+    result_path.write_text(json.dumps(session.to_dict(), indent=2, ensure_ascii=False))
+
+    active_path = _active_session_path(project_dir)
+    if active_path.exists():
+        active_path.unlink()
+
+    return result_path
+
+
+def _save_session(project_dir: Path, session: ChecklistSession) -> None:
+    manual_dir = _manual_dir(project_dir)
+    manual_dir.mkdir(parents=True, exist_ok=True)
+    _active_session_path(project_dir).write_text(
+        json.dumps(session.to_dict(), indent=2, ensure_ascii=False)
+    )
+
+
+def _load_active_session(project_dir: Path) -> ChecklistSession:
+    active_path = _active_session_path(project_dir)
+    if not active_path.exists():
+        raise FileNotFoundError(
+            f"No active session found in {project_dir}. Run 'testforge manual start' first."
+        )
+    data = json.loads(active_path.read_text())
+    return ChecklistSession.from_dict(data)
 
 
 @dataclass
@@ -50,8 +209,6 @@ def generate_checklist(project_dir: Path) -> list[dict[str, Any]]:
     if analysis is None or not analysis.features:
         logger.info("No analysis results; skipping checklist generation")
         return []
-
-    from testforge.llm import create_adapter
 
     adapter_kwargs: dict[str, Any] = {}
     if config.llm_model:

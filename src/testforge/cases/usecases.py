@@ -10,6 +10,7 @@ from typing import Any
 
 from testforge.core.config import load_config
 from testforge.core.project import load_analysis
+from testforge.llm import create_adapter
 
 logger = logging.getLogger(__name__)
 
@@ -53,8 +54,6 @@ def generate_usecase_tests(project_dir: Path) -> list[dict[str, Any]]:
     if analysis is None or not analysis.features:
         logger.info("No analysis results; skipping use case generation")
         return []
-
-    from testforge.llm import create_adapter
 
     adapter_kwargs: dict[str, Any] = {}
     if config.llm_model:

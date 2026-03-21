@@ -93,15 +93,27 @@ def analyze(project: str, inputs: tuple[str, ...]) -> None:
 @cli.command()
 @click.argument("project", type=click.Path(exists=True))
 @click.option("--type", "-t", "case_type", default="all", help="Test case type: functional, usecase, checklist, all.")
-def generate(project: str, case_type: str) -> None:
+@click.option("--use-cases", "use_cases", is_flag=True, default=False, help="Generate use case scenarios.")
+@click.option("--checklists", is_flag=True, default=False, help="Generate manual test checklists.")
+def generate(project: str, case_type: str, use_cases: bool, checklists: bool) -> None:
     """Generate test cases from analysis results."""
     from testforge.cases.generator import generate_cases
 
-    cases = generate_cases(Path(project), case_type)
+    # --use-cases / --checklists flags override the --type option
+    if use_cases and checklists:
+        effective_type = "all"
+    elif use_cases:
+        effective_type = "usecase"
+    elif checklists:
+        effective_type = "checklist"
+    else:
+        effective_type = case_type
+
+    cases = generate_cases(Path(project), effective_type)
     if not cases:
         console.print("[yellow]No cases generated. Run 'testforge analyze' first.[/yellow]")
         return
-    console.print(f"[green]Generated:[/green] {len(cases)} test cases ({case_type})")
+    console.print(f"[green]Generated:[/green] {len(cases)} test cases ({effective_type})")
 
 
 @cli.command()
@@ -160,6 +172,91 @@ def pipeline(project: str, stages: tuple[str, ...], inputs: tuple[str, ...]) -> 
     else:
         console.print(f"[red]Pipeline failed:[/red] {'; '.join(result.errors)}")
         console.print(f"  Completed stages: {', '.join(result.stages_completed)}")
+
+
+@cli.group()
+def manual() -> None:
+    """Manual test checklist workflow commands."""
+
+
+@manual.command("start")
+@click.argument("project", type=click.Path(exists=True))
+def manual_start(project: str) -> None:
+    """Start a manual test checklist session."""
+    from testforge.cases.checklist import start_session
+
+    session = start_session(Path(project))
+    console.print(f"[green]Session started:[/green] {session.session_id}")
+    console.print(f"  Items: {len(session.items)}")
+    console.print(f"  State saved to: {project}/.testforge/manual/active-session.json")
+
+
+@manual.command("check")
+@click.argument("project", type=click.Path(exists=True))
+@click.argument("item_id")
+@click.option("--status", "-s", default="pass", type=click.Choice(["pass", "fail"]), help="pass or fail.")
+@click.option("--note", "-n", default="", help="Optional tester note.")
+def manual_check(project: str, item_id: str, status: str, note: str) -> None:
+    """Record pass/fail for a checklist item."""
+    from testforge.cases.checklist import check_item
+
+    try:
+        session = check_item(Path(project), item_id, status, note)
+    except FileNotFoundError as exc:
+        console.print(f"[red]Error:[/red] {exc}")
+        raise SystemExit(1)
+
+    checked = len(session.results)
+    total = len(session.items)
+    console.print(f"[green]Checked:[/green] {item_id} -> {status}  ({checked}/{total})")
+
+
+@manual.command("progress")
+@click.argument("project", type=click.Path(exists=True))
+def manual_progress(project: str) -> None:
+    """Show progress of the active manual test session."""
+    from testforge.cases.checklist import session_progress
+
+    try:
+        prog = session_progress(Path(project))
+    except FileNotFoundError as exc:
+        console.print(f"[red]Error:[/red] {exc}")
+        raise SystemExit(1)
+
+    console.print(f"Progress: {prog['checked']}/{prog['total']} ({prog['percent']}%)")
+    console.print(f"  Passed:  {prog['passed']}")
+    console.print(f"  Failed:  {prog['failed']}")
+    console.print(f"  Pending: {prog['pending']}")
+
+
+@manual.command("finish")
+@click.argument("project", type=click.Path(exists=True))
+def manual_finish(project: str) -> None:
+    """Finish the active session and save the final report."""
+    from testforge.cases.checklist import finish_session
+
+    try:
+        report_path = finish_session(Path(project))
+    except FileNotFoundError as exc:
+        console.print(f"[red]Error:[/red] {exc}")
+        raise SystemExit(1)
+
+    console.print(f"[green]Session finished:[/green] {report_path}")
+
+
+@cli.command()
+@click.argument("project", type=click.Path(), required=False, default=None)
+def tui(project: str | None) -> None:
+    """Launch the interactive TUI interface."""
+    try:
+        from testforge.tui import run_tui
+    except ImportError:
+        console.print(
+            "[red]The TUI requires 'textual'.[/red]\n"
+            "Install it with:  pip install 'testforge[tui]'"
+        )
+        raise SystemExit(1)
+    run_tui(project_path=project)
 
 
 @cli.command()
