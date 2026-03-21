@@ -5,7 +5,7 @@ from __future__ import annotations
 import html
 from datetime import datetime
 
-from testforge.report.generator import TestRun
+from testforge.report.generator import ReportRun
 
 
 def _status_class(status: str) -> str:
@@ -25,7 +25,7 @@ def _e(text: str) -> str:
     return html.escape(str(text))
 
 
-def render_html(test_run: TestRun) -> str:
+def render_html(test_run: ReportRun) -> str:
     """Render an HTML test report.
 
     Parameters

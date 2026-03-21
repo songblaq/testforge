@@ -24,6 +24,15 @@ console = Console()
     is_eager=True,
     callback=lambda ctx, _param, value: ctx.ensure_object(dict).__setitem__("non_interactive", value),
 )
+@click.option(
+    "--no-llm",
+    is_flag=True,
+    default=False,
+    help="Force offline mode -- skip all LLM calls and suppress LLM warnings.",
+    expose_value=False,
+    is_eager=True,
+    callback=lambda ctx, _param, value: ctx.ensure_object(dict).__setitem__("no_llm", value),
+)
 @click.pass_context
 def cli(ctx: click.Context) -> None:
     """TestForge -- LLM-powered QA automation platform."""
@@ -62,9 +71,12 @@ def init(name: str, directory: str, provider: str, model: str) -> None:
 @cli.command()
 @click.argument("project", type=click.Path(exists=True))
 @click.option("--input", "-i", "inputs", multiple=True, help="Input files or URLs to analyze.")
-def analyze(project: str, inputs: tuple[str, ...]) -> None:
+@click.pass_context
+def analyze(ctx: click.Context, project: str, inputs: tuple[str, ...]) -> None:
     """Analyze input documents and extract features."""
     from testforge.analysis.analyzer import run_analysis
+
+    no_llm: bool = ctx.obj.get("no_llm", False) if ctx.obj else False
 
     if not inputs:
         # Auto-discover files in project inputs/ directory
@@ -85,7 +97,7 @@ def analyze(project: str, inputs: tuple[str, ...]) -> None:
         console.print("[yellow]No input files specified. Use -i or place files in inputs/ directory.[/yellow]")
         return
 
-    results = run_analysis(Path(project), list(inputs))
+    results = run_analysis(Path(project), list(inputs), no_llm=no_llm)
     total_features = sum(len(r.get("features", [])) for r in results)
     console.print(f"[green]Analysis complete:[/green] {len(results)} source(s), {total_features} features extracted")
 

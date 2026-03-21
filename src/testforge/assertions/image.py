@@ -23,4 +23,6 @@ class ImageMatchAssertion(BaseAssertion):
         expected:
             Path to the expected reference image.
         """
-        raise NotImplementedError("Image comparison not yet implemented")
+        raise NotImplementedError(
+            "Image comparison requires Pillow. Install 'testforge[vision]' to enable."
+        )

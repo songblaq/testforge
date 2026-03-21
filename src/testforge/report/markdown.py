@@ -7,7 +7,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from testforge.report.generator import TestRun
+from testforge.report.generator import ReportRun
 
 if TYPE_CHECKING:
     from testforge.coverage.tracker import CoverageReport
@@ -145,7 +145,7 @@ def _status_badge(status: str) -> str:
 
 
 def _render_with_jinja2(
-    test_run: TestRun,
+    test_run: ReportRun,
     coverage: "CoverageReport | None" = None,
 ) -> str:
     """Render using Jinja2."""
@@ -183,7 +183,7 @@ def _render_with_jinja2(
 
 
 def _render_simple(
-    test_run: TestRun,
+    test_run: ReportRun,
     coverage: "CoverageReport | None" = None,
 ) -> str:
     """Render using string.Template (no Jinja2 required)."""
@@ -243,7 +243,7 @@ def _render_simple(
 
 
 def render_markdown(
-    test_run: TestRun,
+    test_run: ReportRun,
     coverage: "CoverageReport | None" = None,
 ) -> str:
     """Render a Markdown test report.

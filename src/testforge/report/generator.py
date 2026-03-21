@@ -29,8 +29,10 @@ class TestCaseResult:
 
 
 @dataclass
-class TestRun:
+class ReportRun:
     """Aggregated result of a full test execution."""
+
+    __test__ = False  # prevent pytest from collecting this as a test class
 
     project: str
     started_at: str = ""
@@ -55,8 +57,8 @@ class TestRun:
         return sum(1 for r in self.results if r.status == "skipped")
 
     @classmethod
-    def from_results_json(cls, project: str, path: Path) -> "TestRun":
-        """Load a TestRun from a results.json file produced by the run stage."""
+    def from_results_json(cls, project: str, path: Path) -> "ReportRun":
+        """Load a ReportRun from a results.json file produced by the run stage."""
         with open(path) as f:
             data = json.load(f)
 
@@ -84,15 +86,19 @@ class TestRun:
         )
 
 
+# Backward-compatible alias (pytest warning fix: class was renamed from TestRun)
+TestRun = ReportRun
+
+
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
 
 
-def load_test_run(project_dir: Path) -> TestRun:
+def load_test_run(project_dir: Path) -> ReportRun:
     """Load test run results from project output directory.
 
-    Falls back to an empty TestRun when no results file exists.
+    Falls back to an empty ReportRun when no results file exists.
     """
     from testforge.core.config import load_config
 
@@ -100,9 +106,9 @@ def load_test_run(project_dir: Path) -> TestRun:
     results_path = project_dir / config.output_dir / "results.json"
 
     if results_path.exists():
-        return TestRun.from_results_json(config.project_name, results_path)
+        return ReportRun.from_results_json(config.project_name, results_path)
 
-    return TestRun(
+    return ReportRun(
         project=config.project_name,
         started_at=datetime.now().isoformat(),
     )

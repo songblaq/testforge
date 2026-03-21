@@ -9,6 +9,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from testforge.assertions.base import ASSERTION_REGISTRY, AssertionResult
 from testforge.execution.evidence import Evidence, EvidenceCollector
 
 logger = logging.getLogger(__name__)
@@ -65,7 +66,54 @@ class TestRunner:
         )
         self._collector = EvidenceCollector(evidence_dir)
 
-    def run_case(self, script_path: str, case_id: str) -> CaseResult:
+    def _evaluate_assertions(
+        self,
+        assertion_defs: list[dict[str, Any]],
+        context: dict[str, Any],
+    ) -> tuple[list[AssertionResult], bool]:
+        """Evaluate a list of assertion definitions against *context*.
+
+        Returns
+        -------
+        tuple[list[AssertionResult], bool]:
+            All assertion results and whether every assertion passed.
+        """
+        # Ensure plugins are registered by importing the assertion modules.
+        import testforge.assertions.api  # noqa: F401
+        import testforge.assertions.custom  # noqa: F401
+        import testforge.assertions.file  # noqa: F401
+        import testforge.assertions.text  # noqa: F401
+
+        results: list[AssertionResult] = []
+        all_passed = True
+        for a in assertion_defs:
+            atype = a.get("type", "")
+            params = a.get("params", {})
+            plugin_cls = ASSERTION_REGISTRY.get(atype)
+            if plugin_cls is None:
+                result = AssertionResult(
+                    passed=False,
+                    message=f"Unknown assertion type: {atype!r}",
+                )
+            else:
+                try:
+                    result = plugin_cls().evaluate(atype, params, context)
+                except Exception as exc:
+                    result = AssertionResult(
+                        passed=False,
+                        message=f"Assertion {atype!r} raised: {exc}",
+                    )
+            results.append(result)
+            if not result.passed:
+                all_passed = False
+        return results, all_passed
+
+    def run_case(
+        self,
+        script_path: str,
+        case_id: str,
+        assertions: list[dict[str, Any]] | None = None,
+    ) -> CaseResult:
         """Execute a single test case.
 
         Parameters
@@ -74,6 +122,9 @@ class TestRunner:
             Path to the test script to execute.
         case_id:
             Identifier for this test case.
+        assertions:
+            Optional list of assertion definitions.  Each entry is a dict with
+            ``type`` and ``params`` keys.
 
         Returns
         -------
@@ -95,6 +146,16 @@ class TestRunner:
                 ev = self._collector.add_log(case_id, output, step="stdout")
                 evidence.append(ev)
 
+            # Evaluate assertions if provided
+            assertion_results: list[AssertionResult] = []
+            if assertions:
+                context: dict[str, Any] = {"output": output, "raw": raw}
+                assertion_results, all_passed = self._evaluate_assertions(
+                    assertions, context
+                )
+                if not all_passed:
+                    status = "failed"
+
             return CaseResult(
                 case_id=case_id,
                 status=status,
@@ -102,6 +163,15 @@ class TestRunner:
                 output=output,
                 error=error,
                 evidence=evidence,
+                assertions=[
+                    {
+                        "passed": r.passed,
+                        "message": r.message,
+                        "expected": r.expected,
+                        "actual": r.actual,
+                    }
+                    for r in assertion_results
+                ],
             )
         except Exception as exc:
             duration_ms = int((time.monotonic() - start) * 1000)
@@ -113,13 +183,18 @@ class TestRunner:
                 error=str(exc),
             )
 
-    def run_suite(self, scripts: list[tuple[str, str]], mode: str = "full") -> TestRun:
+    def run_suite(
+        self,
+        scripts: list[tuple[str, str]] | list[tuple[str, str, list[dict[str, Any]]]],
+        mode: str = "full",
+    ) -> TestRun:
         """Execute a list of test cases and aggregate results.
 
         Parameters
         ----------
         scripts:
-            List of ``(script_path, case_id)`` tuples.
+            List of ``(script_path, case_id)`` or
+            ``(script_path, case_id, assertions)`` tuples.
         mode:
             ``"smoke"`` runs only MUST-priority cases (those whose case_id
             contains ``"must"``).  ``"full"`` runs everything.
@@ -132,12 +207,15 @@ class TestRunner:
         run = TestRun()
         suite_start = time.monotonic()
 
-        for script_path, case_id in scripts:
+        for entry in scripts:
+            script_path, case_id = entry[0], entry[1]
+            assertions: list[dict[str, Any]] | None = entry[2] if len(entry) > 2 else None  # type: ignore[misc]
+
             if mode == "smoke" and "must" not in case_id.lower():
                 result = CaseResult(case_id=case_id, status="skipped")
                 run.skipped += 1
             else:
-                result = self.run_case(script_path, case_id)
+                result = self.run_case(script_path, case_id, assertions=assertions)
                 if result.status == "passed":
                     run.passed += 1
                 elif result.status == "failed":

@@ -17,7 +17,11 @@ from testforge.llm.utils import parse_llm_json
 logger = logging.getLogger(__name__)
 
 
-def run_analysis(project_dir: Path, inputs: list[str]) -> list[dict[str, Any]]:
+def run_analysis(
+    project_dir: Path,
+    inputs: list[str],
+    no_llm: bool = False,
+) -> list[dict[str, Any]]:
     """Analyze input files and produce a structured feature list.
 
     Parameters
@@ -26,6 +30,8 @@ def run_analysis(project_dir: Path, inputs: list[str]) -> list[dict[str, Any]]:
         Root of the TestForge project.
     inputs:
         List of file paths or URLs to analyze.
+    no_llm:
+        When True, skip LLM entirely and use offline extraction without warnings.
 
     Returns
     -------
@@ -47,6 +53,10 @@ def run_analysis(project_dir: Path, inputs: list[str]) -> list[dict[str, Any]]:
         logger.info("No documents parsed; returning empty analysis")
         return []
 
+    # Skip LLM entirely when --no-llm is set
+    if no_llm:
+        return _offline_analysis(parsed_docs)
+
     # Build combined text for LLM analysis
     combined_text = _build_combined_text(parsed_docs)
 
@@ -61,6 +71,13 @@ def run_analysis(project_dir: Path, inputs: list[str]) -> list[dict[str, Any]]:
         adapter = create_adapter(config.llm_provider, **adapter_kwargs)
     except (ValueError, ImportError) as exc:
         logger.warning("LLM adapter unavailable (%s), using offline extraction", exc)
+        import click as _click
+        _click.echo(
+            "[Warning] No LLM provider configured or available. "
+            "Falling back to offline extraction (no features will be derived). "
+            "Set ANTHROPIC_API_KEY / OPENAI_API_KEY or use --no-llm to suppress this warning.",
+            err=True,
+        )
         return _offline_analysis(parsed_docs)
 
     # Run LLM-powered analysis
@@ -68,6 +85,11 @@ def run_analysis(project_dir: Path, inputs: list[str]) -> list[dict[str, Any]]:
         analysis_result = _llm_analysis(adapter, combined_text, parsed_docs)
     except Exception as exc:
         logger.warning("LLM analysis failed (%s), falling back to offline", exc)
+        import click as _click
+        _click.echo(
+            f"[Warning] LLM analysis failed ({exc}). Falling back to offline extraction.",
+            err=True,
+        )
         return _offline_analysis(parsed_docs)
 
     # Persist results

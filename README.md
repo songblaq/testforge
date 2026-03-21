@@ -35,7 +35,7 @@ manual QA checklist workflow for scenarios that require a human eye.
 - **Multi-format input** — PDF, PowerPoint, Word, Excel, images, URLs, GitHub repositories
 - **LLM-powered analysis** — automatic feature extraction, persona derivation, business-rule identification
 - **Smart test generation** — functional tests, use-case scenarios, manual checklists
-- **Script generation** — Playwright browser tests, HTTP API scripts, shell scripts
+- **Script generation** — Playwright browser tests (LLM-powered with skeleton fallback), HTTP API scripts, shell scripts
 - **Dual-track QA** — automated execution track + structured manual-checklist track
 - **Flexible execution** — Browser (Playwright), HTTP, Shell, and SSH connectors
 - **Evidence collection** — screenshots, logs, network HAR traces per test run
@@ -74,6 +74,7 @@ pip install testforge
 # With specific LLM provider
 pip install "testforge[anthropic]"   # Anthropic Claude
 pip install "testforge[openai]"      # OpenAI GPT
+pip install "testforge[browser]"     # Browser testing (Playwright)
 pip install "testforge[tui]"         # TUI interface (Textual)
 pip install "testforge[all]"         # Everything
 
@@ -223,7 +224,7 @@ See [docs/configuration.md](docs/configuration.md) for the full schema and globa
 | Anthropic Claude | `testforge[anthropic]` | `ANTHROPIC_API_KEY` |
 | OpenAI GPT | `testforge[openai]` | `OPENAI_API_KEY` |
 | CLI tools (claude, codex) | _(none)_ | _(CLI must be in PATH)_ |
-| Ollama (local) | _(none)_ | Configure `llm_model` in config |
+| Ollama (local) | _(none)_ | Configure `llm_model` in config — **Coming in v0.2** |
 
 ## Connectors
 
@@ -234,7 +235,7 @@ TestForge uses connectors for test execution. Each connector maps to a test type
 | **Browser** (Playwright) | UI/UX tests, end-to-end flows |
 | **HTTP** (httpx) | REST API tests, webhook verification |
 | **Shell** (subprocess) | CLI tool tests, build script verification |
-| **SSH** | Remote server tests (placeholder, extensible) |
+| **SSH** | Remote server tests (placeholder — extensible, not yet implemented) |
 
 ## Project Structure
 

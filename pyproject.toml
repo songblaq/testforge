@@ -24,7 +24,6 @@ classifiers = [
 ]
 dependencies = [
     "click>=8.1",
-    "playwright>=1.40",
     "httpx>=0.25",
     "PyMuPDF>=1.23",
     "python-pptx>=0.6",
@@ -37,8 +36,9 @@ dependencies = [
 [project.optional-dependencies]
 anthropic = ["anthropic>=0.40"]
 openai = ["openai>=1.50"]
+browser = ["playwright>=1.40"]
 tui = ["textual>=0.80"]
-all = ["testforge[anthropic,openai,tui]"]
+all = ["testforge[anthropic,openai,browser,tui]"]
 dev = [
     "pytest>=8.0",
     "pytest-cov>=4.0",

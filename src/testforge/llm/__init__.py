@@ -35,5 +35,9 @@ def create_adapter(provider: str = "anthropic", **kwargs) -> "LLMAdapter":
         from testforge.llm.cli import CLIAdapter
 
         return CLIAdapter(**kwargs)
+    elif provider == "ollama":
+        from testforge.llm.ollama import OllamaAdapter
+
+        return OllamaAdapter(**kwargs)
     else:
         raise ValueError(f"Unknown LLM provider: {provider!r}")
