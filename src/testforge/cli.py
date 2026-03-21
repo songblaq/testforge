@@ -14,8 +14,20 @@ console = Console()
 
 @click.group()
 @click.version_option(version=__version__, prog_name="testforge")
-def cli() -> None:
+@click.option(
+    "--non-interactive",
+    "-y",
+    is_flag=True,
+    default=False,
+    help="Skip confirmation prompts and auto-approve.",
+    expose_value=False,
+    is_eager=True,
+    callback=lambda ctx, _param, value: ctx.ensure_object(dict).__setitem__("non_interactive", value),
+)
+@click.pass_context
+def cli(ctx: click.Context) -> None:
     """TestForge -- LLM-powered QA automation platform."""
+    ctx.ensure_object(dict)
 
 
 @cli.command()
@@ -161,3 +173,57 @@ def projects() -> None:
         return
     for p in project_list:
         console.print(f"  {p}")
+
+
+@cli.command()
+@click.option("--verbose", "-v", is_flag=True, help="Show stdout/stderr for each script.")
+def selftest(verbose: bool) -> None:
+    """Run built-in self-test suite against the installed TestForge."""
+    import subprocess
+
+    # Locate the selftest scripts directory relative to this file
+    selftest_dir = Path(__file__).parent.parent.parent.parent / "tests" / "selftest"
+    if not selftest_dir.exists():
+        # Fallback: look relative to package install root
+        selftest_dir = Path(__file__).parent / "tests" / "selftest"
+
+    if not selftest_dir.exists():
+        console.print("[yellow]No selftest directory found. Expected: tests/selftest/[/yellow]")
+        raise SystemExit(0)
+
+    scripts = sorted(selftest_dir.glob("*.sh"))
+    if not scripts:
+        console.print("[yellow]No selftest scripts found in tests/selftest/[/yellow]")
+        raise SystemExit(0)
+
+    passed: list[str] = []
+    failed: list[str] = []
+
+    for script in scripts:
+        console.print(f"  [dim]running[/dim] {script.name} ...", end=" ")
+        proc = subprocess.run(
+            ["bash", str(script)],
+            capture_output=True,
+            text=True,
+        )
+        if proc.returncode == 0:
+            console.print("[green]PASS[/green]")
+            passed.append(script.name)
+        else:
+            console.print("[red]FAIL[/red]")
+            failed.append(script.name)
+
+        if verbose:
+            if proc.stdout:
+                console.print(proc.stdout.rstrip())
+            if proc.stderr:
+                console.print(f"[red]{proc.stderr.rstrip()}[/red]")
+
+    total = len(passed) + len(failed)
+    console.print(f"\n[bold]Results:[/bold] {len(passed)}/{total} passed", end="")
+    if failed:
+        console.print(f"  [red]Failed: {', '.join(failed)}[/red]")
+    else:
+        console.print("  [green]All tests passed.[/green]")
+
+    raise SystemExit(1 if failed else 0)

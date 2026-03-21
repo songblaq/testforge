@@ -39,3 +39,21 @@ def test_projects_empty() -> None:
     runner = CliRunner()
     result = runner.invoke(cli, ["projects"])
     assert result.exit_code == 0
+
+
+def test_selftest_command_exists() -> None:
+    """testforge selftest --help is recognised as a valid command."""
+    runner = CliRunner()
+    result = runner.invoke(cli, ["selftest", "--help"])
+    assert result.exit_code == 0
+    assert "self-test" in result.output.lower() or "selftest" in result.output.lower()
+
+
+def test_non_interactive_flag() -> None:
+    """--non-interactive / -y flag is recognised at the group level."""
+    runner = CliRunner()
+    result = runner.invoke(cli, ["--non-interactive", "--help"])
+    assert result.exit_code == 0
+
+    result_short = runner.invoke(cli, ["-y", "--help"])
+    assert result_short.exit_code == 0

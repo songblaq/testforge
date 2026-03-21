@@ -35,7 +35,8 @@ def run_analysis(project_dir: Path, inputs: list[str]) -> list[dict[str, Any]]:
     config = load_config(project_dir)
 
     # Parse all input documents
-    parsed_docs: list[dict[str, Any]] = []
+    from testforge.input.parser import ParsedDocument
+    parsed_docs: list[ParsedDocument] = []
     for inp in inputs:
         try:
             parsed_docs.append(parse(inp))
@@ -73,10 +74,11 @@ def run_analysis(project_dir: Path, inputs: list[str]) -> list[dict[str, Any]]:
     save_analysis(project_dir, analysis_result)
 
     # Return flat feature list for CLI compatibility
+    from testforge.input.parser import ParsedDocument
     return [
         {
-            "source": doc.get("source", ""),
-            "type": doc.get("type", ""),
+            "source": doc.source_path if isinstance(doc, ParsedDocument) else doc.get("source", ""),
+            "type": doc.source_type if isinstance(doc, ParsedDocument) else doc.get("type", ""),
             "features": [f.name for f in analysis_result.features],
             "personas": [p.name for p in analysis_result.personas],
             "rules": [r.name for r in analysis_result.rules],
@@ -85,23 +87,36 @@ def run_analysis(project_dir: Path, inputs: list[str]) -> list[dict[str, Any]]:
     ]
 
 
-def _build_combined_text(parsed_docs: list[dict[str, Any]]) -> str:
+def _build_combined_text(parsed_docs: list[Any]) -> str:
     """Flatten parsed documents into a single text block for LLM consumption."""
+    from testforge.input.parser import ParsedDocument
     parts: list[str] = []
     for doc in parsed_docs:
-        source = doc.get("source", "unknown")
-        doc_type = doc.get("type", "unknown")
-        parts.append(f"--- Document: {source} (type: {doc_type}) ---")
-
-        if "pages" in doc:
-            for page in doc["pages"]:
-                text = page.get("text", "").strip()
-                if text:
-                    parts.append(f"[Page {page.get('page', '?')}]\n{text}")
-        elif "text" in doc:
-            parts.append(doc["text"])
-        elif "content" in doc:
-            parts.append(str(doc["content"]))
+        if isinstance(doc, ParsedDocument):
+            source = doc.source_path
+            doc_type = doc.source_type
+            parts.append(f"--- Document: {source} (type: {doc_type}) ---")
+            if doc.pages:
+                for page in doc.pages:
+                    text = page.get("text", "").strip()
+                    if text:
+                        parts.append(f"[Page {page.get('page', '?')}]\n{text}")
+            elif doc.text:
+                parts.append(doc.text)
+        else:
+            # legacy dict path
+            source = doc.get("source", "unknown")
+            doc_type = doc.get("type", "unknown")
+            parts.append(f"--- Document: {source} (type: {doc_type}) ---")
+            if "pages" in doc:
+                for page in doc["pages"]:
+                    text = page.get("text", "").strip()
+                    if text:
+                        parts.append(f"[Page {page.get('page', '?')}]\n{text}")
+            elif "text" in doc:
+                parts.append(doc["text"])
+            elif "content" in doc:
+                parts.append(str(doc["content"]))
 
     return "\n\n".join(parts)
 
@@ -109,13 +124,14 @@ def _build_combined_text(parsed_docs: list[dict[str, Any]]) -> str:
 def _llm_analysis(
     adapter: Any,
     combined_text: str,
-    parsed_docs: list[dict[str, Any]],
+    parsed_docs: list[Any],
 ) -> AnalysisResult:
     """Run full LLM-powered analysis over the combined document text."""
     from testforge.analysis.features import extract_features
     from testforge.analysis.personas import derive_personas
     from testforge.analysis.rules import extract_rules
     from testforge.core.project import Feature, Persona, BusinessRule, Screen
+    from testforge.input.parser import ParsedDocument
 
     prompt = _build_analysis_prompt(combined_text)
     response = adapter.complete(prompt, max_tokens=4096)
@@ -178,7 +194,7 @@ def _llm_analysis(
         screens=screens,
         personas=personas,
         rules=rules,
-        raw_sources=[{"source": d.get("source", "")} for d in parsed_docs],
+        raw_sources=[{"source": d.source_path if isinstance(d, ParsedDocument) else d.get("source", "")} for d in parsed_docs],
     )
 
 
@@ -227,13 +243,14 @@ def _parse_json_response(text: str) -> dict[str, Any]:
     return {"features": [], "screens": [], "personas": [], "rules": []}
 
 
-def _offline_analysis(parsed_docs: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def _offline_analysis(parsed_docs: list[Any]) -> list[dict[str, Any]]:
     """Fallback: produce minimal analysis without LLM when adapter is unavailable."""
+    from testforge.input.parser import ParsedDocument
     results: list[dict[str, Any]] = []
     for doc in parsed_docs:
         results.append({
-            "source": doc.get("source", ""),
-            "type": doc.get("type", ""),
+            "source": doc.source_path if isinstance(doc, ParsedDocument) else doc.get("source", ""),
+            "type": doc.source_type if isinstance(doc, ParsedDocument) else doc.get("type", ""),
             "features": [],
             "personas": [],
             "rules": [],
