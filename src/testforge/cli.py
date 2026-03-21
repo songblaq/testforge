@@ -21,13 +21,30 @@ def cli() -> None:
 @cli.command()
 @click.argument("name")
 @click.option("--directory", "-d", type=click.Path(), default=".", help="Parent directory.")
-def init(name: str, directory: str) -> None:
+@click.option("--provider", "-p", default="anthropic", help="LLM provider: anthropic, openai, cli.")
+@click.option("--model", "-m", default="", help="LLM model name.")
+def init(name: str, directory: str, provider: str, model: str) -> None:
     """Create a new TestForge project."""
+    from testforge.core.config import TestForgeConfig, save_config
     from testforge.core.project import create_project
 
     project_dir = Path(directory) / name
     create_project(project_dir)
+
+    # Update config with user-specified LLM settings
+    if provider != "anthropic" or model:
+        config = TestForgeConfig(
+            project_name=name,
+            llm_provider=provider,
+            llm_model=model,
+        )
+        save_config(project_dir, config)
+
     console.print(f"[green]Project created:[/green] {project_dir}")
+    console.print(f"  LLM provider: {provider}")
+    if model:
+        console.print(f"  LLM model: {model}")
+    console.print(f"  Config: {project_dir / '.testforge' / 'config.yaml'}")
 
 
 @cli.command()
@@ -37,8 +54,28 @@ def analyze(project: str, inputs: tuple[str, ...]) -> None:
     """Analyze input documents and extract features."""
     from testforge.analysis.analyzer import run_analysis
 
+    if not inputs:
+        # Auto-discover files in project inputs/ directory
+        from testforge.core.config import load_config
+
+        config = load_config(Path(project))
+        input_dir = Path(project) / config.input_dir
+        if input_dir.exists():
+            discovered = [
+                str(f) for f in input_dir.iterdir()
+                if f.is_file() and not f.name.startswith(".")
+            ]
+            if discovered:
+                console.print(f"[dim]Auto-discovered {len(discovered)} input file(s)[/dim]")
+                inputs = tuple(discovered)
+
+    if not inputs:
+        console.print("[yellow]No input files specified. Use -i or place files in inputs/ directory.[/yellow]")
+        return
+
     results = run_analysis(Path(project), list(inputs))
-    console.print(f"[green]Analysis complete:[/green] {len(results)} features extracted")
+    total_features = sum(len(r.get("features", [])) for r in results)
+    console.print(f"[green]Analysis complete:[/green] {len(results)} source(s), {total_features} features extracted")
 
 
 @cli.command()
@@ -49,7 +86,10 @@ def generate(project: str, case_type: str) -> None:
     from testforge.cases.generator import generate_cases
 
     cases = generate_cases(Path(project), case_type)
-    console.print(f"[green]Generated:[/green] {len(cases)} test cases")
+    if not cases:
+        console.print("[yellow]No cases generated. Run 'testforge analyze' first.[/yellow]")
+        return
+    console.print(f"[green]Generated:[/green] {len(cases)} test cases ({case_type})")
 
 
 @cli.command()
@@ -87,6 +127,27 @@ def report(project: str, fmt: str, output: str | None) -> None:
 
     path = generate_report(Path(project), fmt, output)
     console.print(f"[green]Report generated:[/green] {path}")
+
+
+@cli.command()
+@click.argument("project", type=click.Path(exists=True))
+@click.option("--stages", "-s", multiple=True, help="Pipeline stages to run.")
+@click.option("--input", "-i", "inputs", multiple=True, help="Input files for analysis.")
+def pipeline(project: str, stages: tuple[str, ...], inputs: tuple[str, ...]) -> None:
+    """Run the full TestForge pipeline end to end."""
+    from testforge.core.pipeline import run_pipeline
+
+    result = run_pipeline(
+        Path(project),
+        stages=list(stages) if stages else None,
+        inputs=list(inputs) if inputs else None,
+    )
+
+    if result.success:
+        console.print(f"[green]Pipeline complete:[/green] {', '.join(result.stages_completed)}")
+    else:
+        console.print(f"[red]Pipeline failed:[/red] {'; '.join(result.errors)}")
+        console.print(f"  Completed stages: {', '.join(result.stages_completed)}")
 
 
 @cli.command()

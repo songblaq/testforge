@@ -2,8 +2,13 @@
 
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 from typing import Any
+
+from testforge.core.project import save_cases
+
+logger = logging.getLogger(__name__)
 
 
 def generate_cases(project_dir: Path, case_type: str = "all") -> list[dict[str, Any]]:
@@ -30,12 +35,18 @@ def generate_cases(project_dir: Path, case_type: str = "all") -> list[dict[str, 
     }
 
     if case_type == "all":
-        for gen in generators.values():
+        for gen_name, gen in generators.items():
+            logger.info("Generating %s cases...", gen_name)
             cases.extend(gen(project_dir))
     elif case_type in generators:
         cases.extend(generators[case_type](project_dir))
     else:
         raise ValueError(f"Unknown case type: {case_type}")
+
+    # Persist generated cases
+    if cases:
+        save_cases(project_dir, cases)
+        logger.info("Saved %d test cases to project", len(cases))
 
     return cases
 

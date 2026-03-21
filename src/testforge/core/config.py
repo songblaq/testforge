@@ -20,6 +20,8 @@ class TestForgeConfig:
     input_dir: str = "inputs"
     output_dir: str = "output"
     evidence_dir: str = "evidence"
+    cases_dir: str = "cases"
+    analysis_dir: str = "analysis"
     extra: dict[str, Any] = field(default_factory=dict)
 
 
@@ -40,6 +42,8 @@ def load_config(project_dir: Path) -> TestForgeConfig:
         input_dir=data.get("input_dir", "inputs"),
         output_dir=data.get("output_dir", "output"),
         evidence_dir=data.get("evidence_dir", "evidence"),
+        cases_dir=data.get("cases_dir", "cases"),
+        analysis_dir=data.get("analysis_dir", "analysis"),
         extra=data.get("extra", {}),
     )
 
@@ -58,6 +62,8 @@ def save_config(project_dir: Path, config: TestForgeConfig) -> Path:
         "input_dir": config.input_dir,
         "output_dir": config.output_dir,
         "evidence_dir": config.evidence_dir,
+        "cases_dir": config.cases_dir,
+        "analysis_dir": config.analysis_dir,
         "extra": config.extra,
     }
 
