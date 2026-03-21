@@ -1,6 +1,10 @@
 # TestForge
 
-> LLM-powered QA automation platform -- from documents to test reports
+> LLM-powered QA automation platform — from documents to test reports
+
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.11+-green.svg)](https://www.python.org/)
+[![GitHub](https://img.shields.io/badge/GitHub-songblaq%2Ftestforge-black.svg)](https://github.com/songblaq/testforge)
 
 ```
  _____ _____ ____ _____ _____ ___  ____   ____ _____
@@ -12,76 +16,259 @@
 
 ## What is TestForge?
 
-TestForge transforms project documents (PDFs, specs, designs, URLs) into comprehensive
-test suites using LLM-powered analysis. It automates the entire QA pipeline:
+TestForge transforms project documents — PDFs, specs, design slides, screenshots, and URLs — into
+comprehensive test suites, ready to run. Feed it a requirements document and it extracts features,
+derives user personas, identifies business rules, then produces functional test cases, use-case
+scenarios, and manual QA checklists automatically.
 
-```
-  Documents        Analysis         Test Cases       Scripts          Execution        Reports
- +---------+     +---------+     +-----------+     +---------+     +-----------+     +---------+
- | PDF     |     | Feature |     | Functional|     |Playwright|    | Browser   |     | Markdown|
- | PPT     | --> | Extract | --> | Use Case  | --> | HTTP    | --> | API       | --> | HTML    |
- | Word    |     | Persona |     | Checklist |     | Shell   |     | Shell     |     | JSON    |
- | URL     |     | Rules   |     |           |     |         |     | SSH       |     |         |
- | GitHub  |     |         |     |           |     |         |     |           |     |         |
- +---------+     +---------+     +-----------+     +---------+     +-----------+     +---------+
-```
+Where LLM inference is the right tool (analysis, generation, judgment), TestForge uses it. Where
+deterministic code is the right tool (script execution, evidence collection, report rendering),
+TestForge uses that instead. The result is a platform that is both intelligent and reliable:
+LLMs handle the hard parts, programmatic code handles the rest.
 
-## Features
+The full pipeline takes you from raw documents to a shareable HTML or Markdown test report in a
+single session, including Playwright browser scripts, HTTP API tests, shell-command runners, and a
+manual QA checklist workflow for scenarios that require a human eye.
 
-- **Multi-format Input** -- PDF, PowerPoint, Word, Excel, images, URLs, GitHub repos
-- **LLM-powered Analysis** -- Automatic feature extraction, persona derivation, business rule identification
-- **Smart Test Generation** -- Functional tests, use case scenarios, manual checklists
-- **Script Generation** -- Playwright browser tests, HTTP API tests, shell scripts
-- **Flexible Execution** -- Browser, HTTP, shell, and SSH connectors
-- **Evidence Collection** -- Screenshots, logs, network traces
-- **Rich Reports** -- Markdown and HTML reports with evidence attachments
+## Key Features
 
-## Quick Start
-
-```bash
-# Install
-pip install testforge
-
-# With LLM support
-pip install "testforge[anthropic]"   # Anthropic Claude
-pip install "testforge[openai]"      # OpenAI GPT
-pip install "testforge[all]"         # All providers
-
-# Create a new project
-testforge init my-project
-
-# Analyze input documents
-testforge analyze my-project --input spec.pdf --input design.pptx
-
-# Generate test cases
-testforge generate my-project
-
-# Generate automation scripts
-testforge script my-project --framework playwright
-
-# Run tests
-testforge run my-project
-
-# Generate report
-testforge report my-project --format html
-```
+- **Multi-format input** — PDF, PowerPoint, Word, Excel, images, URLs, GitHub repositories
+- **LLM-powered analysis** — automatic feature extraction, persona derivation, business-rule identification
+- **Smart test generation** — functional tests, use-case scenarios, manual checklists
+- **Script generation** — Playwright browser tests, HTTP API scripts, shell scripts
+- **Dual-track QA** — automated execution track + structured manual-checklist track
+- **Flexible execution** — Browser (Playwright), HTTP, Shell, and SSH connectors
+- **Evidence collection** — screenshots, logs, network HAR traces per test run
+- **Rich reports** — Markdown and HTML reports with evidence attachments
+- **TUI interface** — full interactive terminal UI built with Textual
+- **Multi-project management** — `testforge projects` lists all local projects
+- **Self-test / dogfooding** — `testforge selftest` runs TestForge against itself
+- **Multiple LLM providers** — Anthropic Claude, OpenAI GPT, CLI tools (claude, codex), Ollama-compatible
 
 ## Pipeline
 
-| Stage | Command | Description |
-|-------|---------|-------------|
-| 1. Init | `testforge init` | Create a new test project |
-| 2. Analyze | `testforge analyze` | Parse inputs and extract features |
-| 3. Generate | `testforge generate` | Generate test cases from analysis |
-| 4. Script | `testforge script` | Generate automation scripts |
-| 5. Run | `testforge run` | Execute test scripts |
-| 6. Report | `testforge report` | Generate test reports |
+```
+  Documents        Analysis         Test Cases        Scripts          Execution        Reports
+ +---------+     +-----------+     +-----------+     +----------+     +-----------+     +---------+
+ | PDF     |     | Features  |     | Functional|     |Playwright|     | Browser   |     |Markdown |
+ | PPT     | --> | Personas  | --> | Use Cases | --> | HTTP     | --> | API       | --> | HTML    |
+ | Word    |     | Rules     |     | Checklist |     | Shell    |     | Shell     |     | JSON    |
+ | Excel   |     | Screens   |     |           |     |          |     | SSH       |     |         |
+ | Images  |     |           |     |           |     |          |     |           |     |         |
+ | URLs    |     |           |     |           |     |          |     |           |     |         |
+ | GitHub  |     |           |     |           |     |          |     |           |     |         |
+ +---------+     +-----------+     +-----------+     +----------+     +-----------+     +---------+
+```
 
-## Requirements
+Each stage persists its output to disk. You can run stages individually or chain the full pipeline
+with a single `testforge pipeline` command.
 
-- Python 3.11+
-- For browser testing: Playwright (`playwright install`)
-- For LLM features: API key for Anthropic or OpenAI
+## Quick Start
+
+### Installation
+
+```bash
+# Core installation
+pip install testforge
+
+# With specific LLM provider
+pip install "testforge[anthropic]"   # Anthropic Claude
+pip install "testforge[openai]"      # OpenAI GPT
+pip install "testforge[tui]"         # TUI interface (Textual)
+pip install "testforge[all]"         # Everything
+
+# Install Playwright browsers (required for browser testing)
+playwright install chromium
+```
+
+### Your First Project
+
+```bash
+# 1. Create a project
+$ testforge init my-webapp --provider anthropic
+# Project created: my-webapp
+#   LLM provider: anthropic
+#   Config: my-webapp/.testforge/config.yaml
+
+# 2. Place your documents in my-webapp/inputs/, then analyze
+$ testforge analyze my-webapp --input my-webapp/inputs/requirements.pdf
+# Auto-discovered 1 input file(s)
+# Analysis complete: 1 source(s), 12 features extracted
+
+# 3. Generate test cases
+$ testforge generate my-webapp
+# Generated: 24 test cases (all)
+
+# 4. Generate automation scripts
+$ testforge script my-webapp --framework playwright
+# Generated: 8 scripts (playwright)
+
+# 5. Run tests
+$ testforge run my-webapp
+# Passed: 7  Failed: 1
+
+# 6. Generate report
+$ testforge report my-webapp --format html
+# Report generated: my-webapp/output/report.html
+```
+
+Alternatively, run the entire pipeline in one command:
+
+```bash
+$ testforge pipeline my-webapp --input my-webapp/inputs/requirements.pdf
+# Pipeline complete: analyze, generate, script, run, report
+```
+
+## CLI Reference
+
+See [docs/cli-reference.md](docs/cli-reference.md) for the full command reference.
+
+| Command | Description |
+|---------|-------------|
+| `testforge init NAME` | Create a new project |
+| `testforge analyze PROJECT` | Parse inputs and extract features |
+| `testforge generate PROJECT` | Generate test cases |
+| `testforge script PROJECT` | Generate automation scripts |
+| `testforge run PROJECT` | Execute tests and collect evidence |
+| `testforge report PROJECT` | Generate test report |
+| `testforge pipeline PROJECT` | Run the full pipeline end-to-end |
+| `testforge manual start PROJECT` | Start a manual QA checklist session |
+| `testforge manual check PROJECT ITEM_ID` | Record pass/fail for a checklist item |
+| `testforge manual progress PROJECT` | Show checklist session progress |
+| `testforge manual finish PROJECT` | Finish session and save report |
+| `testforge tui [PROJECT]` | Launch TUI interface |
+| `testforge projects` | List all local TestForge projects |
+| `testforge selftest` | Run built-in self-test suite |
+
+## Manual QA Workflow
+
+For test scenarios that require human judgment, TestForge generates a structured checklist and
+tracks your progress through it:
+
+```bash
+# Generate checklists first
+$ testforge generate my-webapp --type checklist
+
+# Start a manual session
+$ testforge manual start my-webapp
+# Session started: session-20260322-143000
+#   Items: 15
+#   State saved to: my-webapp/.testforge/manual/active-session.json
+
+# Record results item by item
+$ testforge manual check my-webapp CL-001 --note "Login form renders correctly"
+# Checked: CL-001 -> pass  (1/15)
+
+$ testforge manual check my-webapp CL-002 --status fail --note "Submit button misaligned on mobile"
+# Checked: CL-002 -> fail  (2/15)
+
+# Check progress at any time
+$ testforge manual progress my-webapp
+# Progress: 2/15 (13%)
+#   Passed:  1
+#   Failed:  1
+#   Pending: 13
+
+# Finish and save the report
+$ testforge manual finish my-webapp
+# Session finished: my-webapp/output/manual-report-20260322-143000.md
+```
+
+## TUI Mode
+
+Launch the interactive terminal interface for a visual project dashboard:
+
+```bash
+$ testforge tui
+# or open a specific project directly
+$ testforge tui my-webapp
+```
+
+Requires the `tui` extra: `pip install "testforge[tui]"`.
+
+The TUI provides:
+- **Dashboard** — project overview, pipeline status, recent runs
+- **Cases** — browsable test case table with filtering
+- **Runner** — live execution view with pass/fail indicators
+- **Manual** — guided checklist walkthrough
+
+Key bindings: `Tab` to switch screens, `q` to quit, `r` to run, `Enter` to inspect.
+
+## Configuration
+
+Each project has a `.testforge/config.yaml` file:
+
+```yaml
+project_name: my-webapp
+version: "0.1.0"
+
+# LLM settings
+llm_provider: anthropic   # anthropic | openai | cli | ollama
+llm_model: ""             # leave empty to use provider default
+
+# Directory layout (relative to project root)
+input_dir: inputs
+output_dir: output
+evidence_dir: evidence
+cases_dir: cases
+analysis_dir: analysis
+```
+
+See [docs/configuration.md](docs/configuration.md) for the full schema and global config.
+
+## LLM Providers
+
+| Provider | Install extra | Environment variable |
+|----------|--------------|----------------------|
+| Anthropic Claude | `testforge[anthropic]` | `ANTHROPIC_API_KEY` |
+| OpenAI GPT | `testforge[openai]` | `OPENAI_API_KEY` |
+| CLI tools (claude, codex) | _(none)_ | _(CLI must be in PATH)_ |
+| Ollama (local) | _(none)_ | Configure `llm_model` in config |
+
+## Connectors
+
+TestForge uses connectors for test execution. Each connector maps to a test type:
+
+| Connector | Use case |
+|-----------|----------|
+| **Browser** (Playwright) | UI/UX tests, end-to-end flows |
+| **HTTP** (httpx) | REST API tests, webhook verification |
+| **Shell** (subprocess) | CLI tool tests, build script verification |
+| **SSH** | Remote server tests (placeholder, extensible) |
+
+## Project Structure
+
+```
+my-webapp/
+  .testforge/
+    config.yaml          # Project configuration
+    manual/
+      active-session.json  # Active manual QA session state
+  inputs/                # Source documents (PDFs, specs, images, etc.)
+  analysis/
+    analysis.json        # Extracted features, personas, rules
+  cases/
+    cases.json           # Generated test cases
+  scripts/               # Generated automation scripts (.py, .sh)
+  evidence/              # Screenshots, logs, HAR files from test runs
+  output/                # Generated reports
+```
+
+## Self-Test
+
+TestForge can test itself using the `selftest` command. This is useful to verify your installation
+is working correctly:
+
+```bash
+$ testforge selftest
+  running smoke.sh ... PASS
+  running pipeline.sh ... PASS
+
+Results: 2/2 passed  All tests passed.
+
+# Verbose mode shows stdout/stderr from each script
+$ testforge selftest --verbose
+```
 
 ## Development
 
@@ -100,10 +287,16 @@ pytest
 ruff check src/
 ```
 
+## Part of the Forge Series
+
+TestForge is the first product of the **LucaBlaq Tech Forge Series** — a collection of
+developer-focused tools that apply LLM intelligence to common engineering workflows.
+
+## Contributing
+
+Contributions are welcome. Please open an issue first to discuss the change you have in mind,
+then submit a pull request against `main`.
+
 ## License
 
-Apache License 2.0 -- see [LICENSE](LICENSE) for details.
-
----
-
-Part of the **LucaBlaq Tech Forge Series**
+Apache License 2.0 — see [LICENSE](LICENSE) for details.
