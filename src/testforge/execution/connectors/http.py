@@ -27,7 +27,8 @@ class HttpConnector(BaseConnector):
 
         *command* should be in the form ``METHOD /path``, e.g. ``GET /api/users``.
         """
-        assert self._client is not None, "Not connected"
+        if self._client is None:
+            raise RuntimeError("HttpConnector.execute() called before connect()")
 
         parts = command.split(None, 1)
         method = parts[0].upper()

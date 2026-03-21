@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import concurrent.futures
 import logging
 import time
 from dataclasses import dataclass, field
@@ -31,7 +32,7 @@ class CaseResult:
 
 
 @dataclass
-class TestRun:
+class RunnerTestRun:
     """Aggregated result of a test suite run."""
 
     total: int = 0
@@ -45,6 +46,10 @@ class TestRun:
     @property
     def success(self) -> bool:
         return self.failed == 0 and self.errors == 0
+
+
+# Canonical alias used by report generation
+TestRun = RunnerTestRun
 
 
 class TestRunner:
@@ -175,14 +180,29 @@ def run_tests(
     if not scripts_dir.exists():
         return []
 
-    _ = tags, parallel
-    results: list[dict[str, Any]] = []
-    for script in sorted(scripts_dir.glob("*.py")):
+    scripts = sorted(scripts_dir.glob("*.py"))
+
+    # Filter by tags: keep scripts whose stem contains any of the requested tags
+    if tags:
+        scripts = [s for s in scripts if any(tag in s.stem for tag in tags)]
+
+    def _run_one(script: Path) -> dict[str, Any]:
         from testforge.execution.connectors.shell import ShellConnector
 
         connector = ShellConnector(cwd=str(project_dir))
         with connector:
-            raw = connector.execute(f"python {script}")
-        results.append({"case_id": script.stem, **raw})
+            raw = connector.execute(str(script))
+        return {"case_id": script.stem, **raw}
+
+    results: list[dict[str, Any]] = []
+    workers = max(1, parallel)
+    if workers == 1:
+        for script in scripts:
+            results.append(_run_one(script))
+    else:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
+            futures = {pool.submit(_run_one, s): s for s in scripts}
+            for future in concurrent.futures.as_completed(futures):
+                results.append(future.result())
 
     return results

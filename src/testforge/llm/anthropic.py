@@ -38,7 +38,7 @@ class AnthropicAdapter(LLMAdapter):
         )
 
         return LLMResponse(
-            text=response.content[0].text,
+            text=response.content[0].text if response.content else "",
             model=response.model,
             usage={
                 "input_tokens": response.usage.input_tokens,
@@ -73,7 +73,7 @@ class AnthropicAdapter(LLMAdapter):
         )
 
         return LLMResponse(
-            text=response.content[0].text,
+            text=response.content[0].text if response.content else "",
             model=response.model,
             usage={
                 "input_tokens": response.usage.input_tokens,

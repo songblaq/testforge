@@ -30,3 +30,4 @@ class SshConnector(BaseConnector):
 
     def disconnect(self) -> None:
         """Close SSH connection."""
+        raise NotImplementedError("SSH connector is not yet implemented")

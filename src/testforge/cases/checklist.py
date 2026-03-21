@@ -13,6 +13,12 @@ from typing import Any
 from testforge.core.config import load_config
 from testforge.core.project import load_analysis
 from testforge.llm import create_adapter
+from testforge.llm.utils import parse_llm_json
+
+
+def _parse_json_array(text: str) -> list:
+    """Backward-compatible shim; delegates to parse_llm_json."""
+    return parse_llm_json(text)
 
 logger = logging.getLogger(__name__)
 
@@ -259,7 +265,7 @@ Include checks for: UI consistency, accessibility, error handling, edge cases, c
 Return a JSON array only."""
 
     response = adapter.complete(prompt, max_tokens=4096)
-    items_data = _parse_json_array(response.text)
+    items_data = parse_llm_json(response.text)
 
     items: list[dict[str, Any]] = []
     for i, item in enumerate(items_data):
@@ -299,27 +305,3 @@ def _generate_skeleton_checklist(analysis: Any) -> list[dict[str, Any]]:
         )
         items.append(cl.to_dict())
     return items
-
-
-def _parse_json_array(text: str) -> list[dict[str, Any]]:
-    """Parse a JSON array from LLM response."""
-    cleaned = text.strip()
-    if cleaned.startswith("```"):
-        lines = cleaned.split("\n")
-        lines = [l for l in lines if not l.strip().startswith("```")]
-        cleaned = "\n".join(lines)
-
-    try:
-        result = json.loads(cleaned)
-        if isinstance(result, list):
-            return result
-    except json.JSONDecodeError:
-        start = cleaned.find("[")
-        end = cleaned.rfind("]") + 1
-        if start >= 0 and end > start:
-            try:
-                return json.loads(cleaned[start:end])
-            except json.JSONDecodeError:
-                pass
-
-    return []

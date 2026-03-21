@@ -5,8 +5,12 @@ from __future__ import annotations
 import string
 from datetime import datetime
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from testforge.report.generator import TestRun
+
+if TYPE_CHECKING:
+    from testforge.coverage.tracker import CoverageReport
 
 
 # ---------------------------------------------------------------------------
@@ -30,6 +34,17 @@ _Generated: {{ generated_at }}_
 | Skipped | {{ skipped }} |
 {% if pass_rate is not none %}| Pass Rate | {{ pass_rate }}% |{% endif %}
 
+{% if coverage %}
+## Coverage
+
+| Metric | Value |
+|--------|-------|
+| Features Covered | {{ coverage.covered_features }}/{{ coverage.total_features }} ({{ "%.0f"|format(coverage.feature_coverage_pct) }}%) |
+| Rules Covered | {{ coverage.covered_rules }}/{{ coverage.total_rules }} ({{ "%.0f"|format(coverage.rule_coverage_pct) }}%) |
+{% if coverage.uncovered_features %}| Uncovered Features | {{ coverage.uncovered_features | join(", ") }} |{% endif %}
+{% if coverage.uncovered_rules %}| Uncovered Rules | {{ coverage.uncovered_rules | join(", ") }} |{% endif %}
+
+{% endif %}
 {% if started_at or finished_at %}
 ## Execution Info
 
@@ -110,6 +125,7 @@ _Generated: $generated_at
 | Failed | $failed |
 | Skipped | $skipped |
 
+$coverage_section
 ## Test Results
 
 $results_section
@@ -128,7 +144,10 @@ def _status_badge(status: str) -> str:
     return badges.get(status.lower(), status.upper())
 
 
-def _render_with_jinja2(test_run: TestRun) -> str:
+def _render_with_jinja2(
+    test_run: TestRun,
+    coverage: "CoverageReport | None" = None,
+) -> str:
     """Render using Jinja2."""
     from jinja2 import Environment
 
@@ -158,11 +177,15 @@ def _render_with_jinja2(test_run: TestRun) -> str:
         environment=test_run.environment,
         results=test_run.results,
         all_screenshots=all_screenshots,
+        coverage=coverage,
         none=None,
     )
 
 
-def _render_simple(test_run: TestRun) -> str:
+def _render_simple(
+    test_run: TestRun,
+    coverage: "CoverageReport | None" = None,
+) -> str:
     """Render using string.Template (no Jinja2 required)."""
     lines: list[str] = []
     for i, r in enumerate(test_run.results, 1):
@@ -190,6 +213,22 @@ def _render_simple(test_run: TestRun) -> str:
 
     results_section = "\n".join(lines) if lines else "_No test results available._"
 
+    coverage_section = ""
+    if coverage is not None:
+        uncovered_f = ", ".join(coverage.uncovered_features) if coverage.uncovered_features else "none"
+        uncovered_r = ", ".join(coverage.uncovered_rules) if coverage.uncovered_rules else "none"
+        coverage_section = (
+            "## Coverage\n\n"
+            "| Metric | Value |\n"
+            "|--------|-------|\n"
+            f"| Features Covered | {coverage.covered_features}/{coverage.total_features}"
+            f" ({coverage.feature_coverage_pct:.0f}%) |\n"
+            f"| Rules Covered | {coverage.covered_rules}/{coverage.total_rules}"
+            f" ({coverage.rule_coverage_pct:.0f}%) |\n"
+            f"| Uncovered Features | {uncovered_f} |\n"
+            f"| Uncovered Rules | {uncovered_r} |\n\n"
+        )
+
     tmpl = string.Template(_SIMPLE_TEMPLATE)
     return tmpl.substitute(
         project=test_run.project,
@@ -198,17 +237,23 @@ def _render_simple(test_run: TestRun) -> str:
         passed=test_run.passed,
         failed=test_run.failed,
         skipped=test_run.skipped,
+        coverage_section=coverage_section,
         results_section=results_section,
     )
 
 
-def render_markdown(test_run: TestRun) -> str:
+def render_markdown(
+    test_run: TestRun,
+    coverage: "CoverageReport | None" = None,
+) -> str:
     """Render a Markdown test report.
 
     Parameters
     ----------
     test_run:
         Aggregated test run data.
+    coverage:
+        Optional coverage report to include a Coverage section.
 
     Returns
     -------
@@ -216,6 +261,6 @@ def render_markdown(test_run: TestRun) -> str:
         Markdown content.
     """
     try:
-        return _render_with_jinja2(test_run)
+        return _render_with_jinja2(test_run, coverage)
     except ImportError:
-        return _render_simple(test_run)
+        return _render_simple(test_run, coverage)

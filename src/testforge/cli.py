@@ -95,9 +95,12 @@ def analyze(project: str, inputs: tuple[str, ...]) -> None:
 @click.option("--type", "-t", "case_type", default="all", help="Test case type: functional, usecase, checklist, all.")
 @click.option("--use-cases", "use_cases", is_flag=True, default=False, help="Generate use case scenarios.")
 @click.option("--checklists", is_flag=True, default=False, help="Generate manual test checklists.")
-def generate(project: str, case_type: str, use_cases: bool, checklists: bool) -> None:
+@click.pass_context
+def generate(ctx: click.Context, project: str, case_type: str, use_cases: bool, checklists: bool) -> None:
     """Generate test cases from analysis results."""
     from testforge.cases.generator import generate_cases
+
+    non_interactive: bool = ctx.obj.get("non_interactive", False) if ctx.obj else False
 
     # --use-cases / --checklists flags override the --type option
     if use_cases and checklists:
@@ -108,6 +111,9 @@ def generate(project: str, case_type: str, use_cases: bool, checklists: bool) ->
         effective_type = "checklist"
     else:
         effective_type = case_type
+
+    if non_interactive:
+        console.print("[dim]--non-interactive: auto-approving generation without prompts.[/dim]")
 
     cases = generate_cases(Path(project), effective_type)
     if not cases:
@@ -155,6 +161,43 @@ def report(project: str, fmt: str, output: str | None) -> None:
 
 @cli.command()
 @click.argument("project", type=click.Path(exists=True))
+def coverage(project: str) -> None:
+    """Show feature and rule coverage for a project."""
+    from testforge.core.config import load_config
+
+    project_dir = Path(project)
+    config = load_config(project_dir)
+
+    analysis_path = project_dir / config.analysis_dir / "analysis.json"
+    cases_path = project_dir / config.cases_dir / "cases.json"
+
+    if not analysis_path.exists():
+        console.print("[yellow]No analysis results found. Run 'testforge analyze' first.[/yellow]")
+        raise SystemExit(1)
+
+    if not cases_path.exists():
+        console.print("[yellow]No test cases found. Run 'testforge generate' first.[/yellow]")
+        raise SystemExit(1)
+
+    from testforge.coverage.tracker import compute_coverage
+
+    report = compute_coverage(analysis_path, cases_path)
+
+    console.print("\n[bold]Coverage Report[/bold]")
+    console.print(f"  Features: {report.covered_features}/{report.total_features} ({report.feature_coverage_pct:.0f}%)")
+    console.print(f"  Rules:    {report.covered_rules}/{report.total_rules} ({report.rule_coverage_pct:.0f}%)")
+
+    if report.uncovered_features:
+        console.print(f"\n[yellow]Uncovered features:[/yellow] {', '.join(report.uncovered_features)}")
+    if report.uncovered_rules:
+        console.print(f"[yellow]Uncovered rules:[/yellow] {', '.join(report.uncovered_rules)}")
+
+    if not report.uncovered_features and not report.uncovered_rules:
+        console.print("\n[green]Full coverage achieved.[/green]")
+
+
+@cli.command()
+@click.argument("project", type=click.Path(exists=True))
 @click.option("--stages", "-s", multiple=True, help="Pipeline stages to run.")
 @click.option("--input", "-i", "inputs", multiple=True, help="Input files for analysis.")
 def pipeline(project: str, stages: tuple[str, ...], inputs: tuple[str, ...]) -> None:
@@ -175,8 +218,15 @@ def pipeline(project: str, stages: tuple[str, ...], inputs: tuple[str, ...]) -> 
 
 
 @cli.group()
-def manual() -> None:
+@click.pass_context
+def manual(ctx: click.Context) -> None:
     """Manual test checklist workflow commands."""
+    non_interactive: bool = ctx.obj.get("non_interactive", False) if ctx.obj else False
+    if non_interactive:
+        console.print(
+            "[yellow]Warning: --non-interactive has no effect on manual checklist commands "
+            "(human verification is required).[/yellow]"
+        )
 
 
 @manual.command("start")

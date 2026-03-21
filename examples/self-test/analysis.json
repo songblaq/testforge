@@ -1,0 +1,147 @@
+{
+  "features": [
+    {
+      "id": "F-001",
+      "name": "Project Initialization",
+      "description": "Create a new TestForge project with default directory structure and config",
+      "category": "setup",
+      "priority": "high",
+      "screens": [],
+      "tags": ["cli", "init"],
+      "source": "docs/getting-started.md"
+    },
+    {
+      "id": "F-002",
+      "name": "Input Analysis",
+      "description": "Analyze input documents (PDF, markdown, URL) and extract testable features",
+      "category": "analysis",
+      "priority": "high",
+      "screens": [],
+      "tags": ["cli", "llm"],
+      "source": "docs/cli-reference.md"
+    },
+    {
+      "id": "F-003",
+      "name": "Test Case Generation",
+      "description": "Generate functional, use-case, and checklist test cases from analysis results",
+      "category": "generation",
+      "priority": "high",
+      "screens": [],
+      "tags": ["cli", "llm"],
+      "source": "docs/cli-reference.md"
+    },
+    {
+      "id": "F-004",
+      "name": "Script Generation",
+      "description": "Generate Playwright automation scripts from test cases",
+      "category": "automation",
+      "priority": "medium",
+      "screens": [],
+      "tags": ["cli", "playwright"],
+      "source": "docs/cli-reference.md"
+    },
+    {
+      "id": "F-005",
+      "name": "Test Execution",
+      "description": "Execute generated test scripts and collect evidence",
+      "category": "execution",
+      "priority": "high",
+      "screens": [],
+      "tags": ["cli", "runner"],
+      "source": "docs/cli-reference.md"
+    },
+    {
+      "id": "F-006",
+      "name": "Report Generation",
+      "description": "Generate markdown or HTML reports from test results",
+      "category": "reporting",
+      "priority": "medium",
+      "screens": [],
+      "tags": ["cli", "markdown"],
+      "source": "docs/cli-reference.md"
+    },
+    {
+      "id": "F-007",
+      "name": "Coverage Tracking",
+      "description": "Compute and report feature/rule coverage across test cases",
+      "category": "coverage",
+      "priority": "medium",
+      "screens": [],
+      "tags": ["cli", "coverage"],
+      "source": "docs/cli-reference.md"
+    },
+    {
+      "id": "F-008",
+      "name": "Manual Checklist Workflow",
+      "description": "Interactive manual test checklist session (start, check, progress, finish)",
+      "category": "manual",
+      "priority": "medium",
+      "screens": [],
+      "tags": ["cli", "manual"],
+      "source": "docs/cli-reference.md"
+    },
+    {
+      "id": "F-009",
+      "name": "TUI Interface",
+      "description": "Interactive terminal UI for managing projects and running tests",
+      "category": "ui",
+      "priority": "low",
+      "screens": [],
+      "tags": ["tui", "textual"],
+      "source": "docs/getting-started.md"
+    },
+    {
+      "id": "F-010",
+      "name": "Pipeline Orchestration",
+      "description": "Run the full analyze → generate → script → run → report pipeline end-to-end",
+      "category": "orchestration",
+      "priority": "high",
+      "screens": [],
+      "tags": ["cli", "pipeline"],
+      "source": "docs/cli-reference.md"
+    }
+  ],
+  "screens": [],
+  "personas": [
+    {
+      "id": "P-001",
+      "name": "QA Engineer",
+      "description": "Professional QA engineer using TestForge to automate test case generation",
+      "goals": ["reduce manual test writing", "increase coverage", "catch regressions"],
+      "pain_points": ["writing boilerplate test code", "maintaining test suites"],
+      "tech_level": "advanced"
+    }
+  ],
+  "rules": [
+    {
+      "id": "R-001",
+      "name": "Analysis Required Before Generation",
+      "description": "Test cases can only be generated after analysis has been run",
+      "condition": "when 'testforge generate' is invoked",
+      "expected_behavior": "error if no analysis results exist",
+      "source": "docs/cli-reference.md"
+    },
+    {
+      "id": "R-002",
+      "name": "Config Precedence",
+      "description": "testforge.yaml in project root takes precedence over .testforge/config.yaml",
+      "condition": "when loading project configuration",
+      "expected_behavior": ".testforge/config.yaml overrides testforge.yaml values",
+      "source": "docs/configuration.md"
+    },
+    {
+      "id": "R-003",
+      "name": "LLM Offline Fallback",
+      "description": "When LLM adapter is unavailable, analysis falls back to offline extraction",
+      "condition": "when LLM API key is missing or provider is unavailable",
+      "expected_behavior": "returns empty feature list without crashing",
+      "source": "docs/configuration.md"
+    }
+  ],
+  "raw_sources": [
+    {"source": "README.md"},
+    {"source": "docs/getting-started.md"},
+    {"source": "docs/cli-reference.md"},
+    {"source": "docs/configuration.md"}
+  ]
+}

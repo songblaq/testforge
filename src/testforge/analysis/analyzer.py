@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 import logging
 from pathlib import Path
 from typing import Any
@@ -13,6 +12,7 @@ from testforge.core.project import (
     save_analysis,
 )
 from testforge.input.parser import parse
+from testforge.llm.utils import parse_llm_json
 
 logger = logging.getLogger(__name__)
 
@@ -137,7 +137,7 @@ def _llm_analysis(
     response = adapter.complete(prompt, max_tokens=4096)
 
     # Parse structured JSON from LLM response
-    data = _parse_json_response(response.text)
+    data = parse_llm_json(response.text, expected_type="object")
 
     features = [
         Feature(
@@ -215,32 +215,6 @@ DOCUMENTATION:
 
 Respond with valid JSON only, no markdown fences."""
 
-
-def _parse_json_response(text: str) -> dict[str, Any]:
-    """Parse JSON from LLM response, handling common formatting issues."""
-    cleaned = text.strip()
-
-    # Strip markdown code fences if present
-    if cleaned.startswith("```"):
-        lines = cleaned.split("\n")
-        # Remove first line (```json or ```) and last line (```)
-        lines = [l for l in lines if not l.strip().startswith("```")]
-        cleaned = "\n".join(lines)
-
-    try:
-        return json.loads(cleaned)
-    except json.JSONDecodeError:
-        # Try to find JSON object in the text
-        start = cleaned.find("{")
-        end = cleaned.rfind("}") + 1
-        if start >= 0 and end > start:
-            try:
-                return json.loads(cleaned[start:end])
-            except json.JSONDecodeError:
-                pass
-
-    logger.warning("Failed to parse LLM response as JSON")
-    return {"features": [], "screens": [], "personas": [], "rules": []}
 
 
 def _offline_analysis(parsed_docs: list[Any]) -> list[dict[str, Any]]:

@@ -1,0 +1,78 @@
+[
+  {
+    "id": "TC-001",
+    "name": "Initialize new project",
+    "type": "functional",
+    "feature_id": "F-001",
+    "rule_ids": [],
+    "description": "Run 'testforge init myproject' and verify directory structure is created",
+    "steps": [
+      {"action": "run", "command": "testforge init myproject"},
+      {"action": "assert", "path": "myproject/.testforge/config.yaml", "exists": true},
+      {"action": "assert", "path": "myproject/inputs", "exists": true}
+    ],
+    "expected": "Project directory created with default structure",
+    "tags": ["cli", "init", "smoke"],
+    "priority": "high"
+  },
+  {
+    "id": "TC-002",
+    "name": "Analyze with no inputs shows warning",
+    "type": "functional",
+    "feature_id": "F-002",
+    "rule_ids": ["R-001"],
+    "description": "Run 'testforge analyze' with empty inputs directory",
+    "steps": [
+      {"action": "run", "command": "testforge analyze myproject"},
+      {"action": "assert", "output_contains": "No input files"}
+    ],
+    "expected": "Warning message displayed, no crash",
+    "tags": ["cli", "analysis", "negative"],
+    "priority": "medium"
+  },
+  {
+    "id": "TC-003",
+    "name": "Generate cases requires prior analysis",
+    "type": "functional",
+    "feature_id": "F-003",
+    "rule_ids": ["R-001"],
+    "description": "Run 'testforge generate' without prior analysis results",
+    "steps": [
+      {"action": "run", "command": "testforge generate myproject"},
+      {"action": "assert", "output_contains": "No cases generated"}
+    ],
+    "expected": "Warning shown, no cases generated",
+    "tags": ["cli", "generation", "negative"],
+    "priority": "medium"
+  },
+  {
+    "id": "TC-004",
+    "name": "Pipeline runs all stages",
+    "type": "functional",
+    "feature_id": "F-010",
+    "rule_ids": [],
+    "description": "Run full pipeline and verify all stages complete",
+    "steps": [
+      {"action": "run", "command": "testforge pipeline myproject"},
+      {"action": "assert", "output_contains": "Pipeline complete"}
+    ],
+    "expected": "All 5 stages complete successfully",
+    "tags": ["cli", "pipeline", "smoke"],
+    "priority": "high"
+  },
+  {
+    "id": "TC-005",
+    "name": "Report generated as markdown",
+    "type": "functional",
+    "feature_id": "F-006",
+    "rule_ids": [],
+    "description": "Run 'testforge report' and verify markdown file is created",
+    "steps": [
+      {"action": "run", "command": "testforge report myproject"},
+      {"action": "assert", "path": "myproject/output/report.md", "exists": true}
+    ],
+    "expected": "report.md created in output directory",
+    "tags": ["cli", "report", "smoke"],
+    "priority": "medium"
+  }
+]

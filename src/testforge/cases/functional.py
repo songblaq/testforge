@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 import logging
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
@@ -10,6 +9,7 @@ from typing import Any
 
 from testforge.core.config import load_config
 from testforge.core.project import load_analysis
+from testforge.llm.utils import parse_llm_json
 
 logger = logging.getLogger(__name__)
 
@@ -117,7 +117,7 @@ For each feature, generate 2-4 test cases. Each test case should have:
 Include positive, negative, and edge case tests. Return a JSON array only."""
 
     response = adapter.complete(prompt, max_tokens=4096)
-    cases_data = _parse_json_array(response.text)
+    cases_data = parse_llm_json(response.text)
 
     cases: list[dict[str, Any]] = []
     for i, tc in enumerate(cases_data):
@@ -166,27 +166,3 @@ def _generate_skeleton_cases(analysis: Any) -> list[dict[str, Any]]:
         )
         cases.append(case.to_dict())
     return cases
-
-
-def _parse_json_array(text: str) -> list[dict[str, Any]]:
-    """Parse a JSON array from LLM response."""
-    cleaned = text.strip()
-    if cleaned.startswith("```"):
-        lines = cleaned.split("\n")
-        lines = [l for l in lines if not l.strip().startswith("```")]
-        cleaned = "\n".join(lines)
-
-    try:
-        result = json.loads(cleaned)
-        if isinstance(result, list):
-            return result
-    except json.JSONDecodeError:
-        start = cleaned.find("[")
-        end = cleaned.rfind("]") + 1
-        if start >= 0 and end > start:
-            try:
-                return json.loads(cleaned[start:end])
-            except json.JSONDecodeError:
-                pass
-
-    return []

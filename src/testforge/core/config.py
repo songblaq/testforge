@@ -26,13 +26,24 @@ class TestForgeConfig:
 
 
 def load_config(project_dir: Path) -> TestForgeConfig:
-    """Load configuration from a project directory."""
-    config_path = project_dir / ".testforge" / "config.yaml"
-    if not config_path.exists():
-        return TestForgeConfig(project_name=project_dir.name)
+    """Load configuration from a project directory.
 
-    with open(config_path) as f:
-        data = yaml.safe_load(f) or {}
+    Resolution order (later values override earlier):
+    1. Defaults
+    2. ``{project_dir}/testforge.yaml`` (project-root config)
+    3. ``{project_dir}/.testforge/config.yaml`` (local override)
+    """
+    data: dict[str, Any] = {}
+
+    root_config = project_dir / "testforge.yaml"
+    if root_config.exists():
+        with open(root_config) as f:
+            data.update(yaml.safe_load(f) or {})
+
+    local_config = project_dir / ".testforge" / "config.yaml"
+    if local_config.exists():
+        with open(local_config) as f:
+            data.update(yaml.safe_load(f) or {})
 
     return TestForgeConfig(
         project_name=data.get("project_name", project_dir.name),

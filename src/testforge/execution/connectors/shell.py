@@ -20,11 +20,16 @@ class ShellConnector(BaseConnector):
         """No-op for shell connector."""
 
     def execute(self, command: str, **kwargs: Any) -> dict[str, Any]:
-        """Execute a shell command."""
+        """Execute a shell command.
+
+        *command* is expected to be a path to a Python script.  It is split
+        into ``["python", <path>]`` so that ``shell=True`` is never used,
+        preventing command-injection attacks.
+        """
         start = time.monotonic()
         result = subprocess.run(
-            command,
-            shell=True,
+            ["python", str(command)],
+            shell=False,
             capture_output=True,
             text=True,
             cwd=self.cwd,

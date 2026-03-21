@@ -23,10 +23,4 @@ class ImageMatchAssertion(BaseAssertion):
         expected:
             Path to the expected reference image.
         """
-        # Placeholder: would use pixel comparison or perceptual hash
-        return AssertionResult(
-            passed=False,
-            message="Image comparison not yet implemented",
-            expected=str(expected),
-            actual=str(actual),
-        )
+        raise NotImplementedError("Image comparison not yet implemented")
