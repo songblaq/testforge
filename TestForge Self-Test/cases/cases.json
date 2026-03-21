@@ -1,0 +1,1568 @@
+[
+  {
+    "id": "TC-F001-01",
+    "title": "Init creates standard project structure",
+    "description": "Validates that testforge init creates a new project directory with all required subdirectories and config file",
+    "feature_id": "F-001",
+    "preconditions": [
+      "testforge CLI is installed",
+      "Target directory does not exist"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Run testforge init myproject -y",
+        "expected_result": "Command exits with code 0",
+        "input_data": "myproject"
+      },
+      {
+        "order": 2,
+        "action": "Verify directory myproject/ exists",
+        "expected_result": "Directory exists",
+        "input_data": ""
+      },
+      {
+        "order": 3,
+        "action": "Verify subdirectories exist: .testforge/, inputs/, output/, evidence/, scripts/, cases/, analysis/",
+        "expected_result": "All 7 subdirectories exist",
+        "input_data": ""
+      },
+      {
+        "order": 4,
+        "action": "Verify .testforge/config.yaml exists and is valid YAML",
+        "expected_result": "config.yaml exists and parses without error",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "A fully scaffolded project directory with standard structure is created",
+    "priority": "high",
+    "tags": [
+      "smoke",
+      "regression"
+    ]
+  },
+  {
+    "id": "TC-F001-02",
+    "title": "Init fails when directory already exists",
+    "description": "Validates that testforge init does not overwrite an existing project directory",
+    "feature_id": "F-001",
+    "preconditions": [
+      "testforge CLI is installed",
+      "Directory myproject/ already exists with content"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Create directory myproject/ with a dummy file inside",
+        "expected_result": "Directory exists with content",
+        "input_data": ""
+      },
+      {
+        "order": 2,
+        "action": "Run testforge init myproject -y",
+        "expected_result": "Command exits with code 1 and displays error message about existing directory",
+        "input_data": "myproject"
+      },
+      {
+        "order": 3,
+        "action": "Verify original content in myproject/ is unchanged",
+        "expected_result": "Dummy file still present and unmodified",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "Init refuses to overwrite existing directory and exits with error",
+    "priority": "high",
+    "tags": [
+      "negative",
+      "regression"
+    ]
+  },
+  {
+    "id": "TC-F001-03",
+    "title": "Init displays help with --help flag",
+    "description": "Validates R-002: init subcommand shows help text and exits 0",
+    "feature_id": "F-001",
+    "preconditions": [
+      "testforge CLI is installed"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Run testforge init --help",
+        "expected_result": "Help text is displayed describing usage, arguments, and options",
+        "input_data": ""
+      },
+      {
+        "order": 2,
+        "action": "Capture exit code",
+        "expected_result": "Exit code is 0",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "Help text displayed and process exits with code 0",
+    "priority": "medium",
+    "tags": [
+      "smoke",
+      "regression"
+    ]
+  },
+  {
+    "id": "TC-F002-01",
+    "title": "Analyze parses a PDF document and extracts features",
+    "description": "Validates that testforge analyze can ingest a PDF and produce structured analysis output with features, personas, and business rules",
+    "feature_id": "F-002",
+    "preconditions": [
+      "testforge project initialized",
+      "Valid PDF document in inputs/",
+      "LLM API key configured"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Place sample PDF (requirements_spec.pdf) in inputs/",
+        "expected_result": "File exists in inputs/",
+        "input_data": "requirements_spec.pdf"
+      },
+      {
+        "order": 2,
+        "action": "Run testforge analyze -y",
+        "expected_result": "Command exits with code 0",
+        "input_data": ""
+      },
+      {
+        "order": 3,
+        "action": "Verify analysis/ directory contains output files",
+        "expected_result": "Analysis output files are generated",
+        "input_data": ""
+      },
+      {
+        "order": 4,
+        "action": "Inspect analysis output for features, personas, and business_rules sections",
+        "expected_result": "All three sections are present and contain extracted data",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "PDF is parsed and analysis output contains features, personas, and business rules",
+    "priority": "high",
+    "tags": [
+      "smoke",
+      "regression"
+    ]
+  },
+  {
+    "id": "TC-F002-02",
+    "title": "Analyze handles unsupported file format gracefully",
+    "description": "Validates that analyze rejects unsupported file types with a clear error",
+    "feature_id": "F-002",
+    "preconditions": [
+      "testforge project initialized"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Place a .zip file in inputs/",
+        "expected_result": "File exists in inputs/",
+        "input_data": "archive.zip"
+      },
+      {
+        "order": 2,
+        "action": "Run testforge analyze -y",
+        "expected_result": "Command exits with code 1 or warns about unsupported format",
+        "input_data": ""
+      },
+      {
+        "order": 3,
+        "action": "Check stderr/stdout for meaningful error message",
+        "expected_result": "Error message indicates unsupported file format",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "Unsupported format is rejected with informative error, no crash",
+    "priority": "medium",
+    "tags": [
+      "negative",
+      "regression"
+    ]
+  },
+  {
+    "id": "TC-F002-03",
+    "title": "Analyze handles empty inputs directory",
+    "description": "Validates behavior when no input documents are present",
+    "feature_id": "F-002",
+    "preconditions": [
+      "testforge project initialized",
+      "inputs/ directory is empty"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Ensure inputs/ directory is empty",
+        "expected_result": "No files in inputs/",
+        "input_data": ""
+      },
+      {
+        "order": 2,
+        "action": "Run testforge analyze -y",
+        "expected_result": "Command exits with code 1 and displays error about missing inputs",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "Clear error message about no input documents found",
+    "priority": "medium",
+    "tags": [
+      "negative",
+      "edge-case"
+    ]
+  },
+  {
+    "id": "TC-F002-04",
+    "title": "Analyze parses multiple document types in single run",
+    "description": "Validates that analyze processes a mix of PDF, DOCX, and image files together",
+    "feature_id": "F-002",
+    "preconditions": [
+      "testforge project initialized",
+      "LLM API key configured"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Place spec.pdf, requirements.docx, and wireframe.png in inputs/",
+        "expected_result": "All three files exist in inputs/",
+        "input_data": "spec.pdf, requirements.docx, wireframe.png"
+      },
+      {
+        "order": 2,
+        "action": "Run testforge analyze -y",
+        "expected_result": "Command exits with code 0",
+        "input_data": ""
+      },
+      {
+        "order": 3,
+        "action": "Verify analysis output references content from all three documents",
+        "expected_result": "Extracted features/personas reference data from each input source",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "All supported document types are processed and merged into unified analysis",
+    "priority": "high",
+    "tags": [
+      "regression"
+    ]
+  },
+  {
+    "id": "TC-F003-01",
+    "title": "Generate creates test cases from analysis results",
+    "description": "Validates that testforge generate produces functional test cases from prior analysis output",
+    "feature_id": "F-003",
+    "preconditions": [
+      "testforge project initialized",
+      "testforge analyze has been run successfully",
+      "analysis/ contains valid output"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Run testforge generate -y",
+        "expected_result": "Command exits with code 0",
+        "input_data": ""
+      },
+      {
+        "order": 2,
+        "action": "Verify cases/ directory contains generated test case files",
+        "expected_result": "One or more test case files exist in cases/",
+        "input_data": ""
+      },
+      {
+        "order": 3,
+        "action": "Inspect test case files for required fields (id, title, steps, expected_result)",
+        "expected_result": "Each test case contains all required fields",
+        "input_data": ""
+      },
+      {
+        "order": 4,
+        "action": "Verify test cases reference features identified during analysis",
+        "expected_result": "Test cases are traceable to analyzed features",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "Functional test cases are generated with proper structure and traceability",
+    "priority": "high",
+    "tags": [
+      "smoke",
+      "regression"
+    ]
+  },
+  {
+    "id": "TC-F003-02",
+    "title": "Generate fails without prior analysis",
+    "description": "Validates that generate requires analysis output to exist before running",
+    "feature_id": "F-003",
+    "preconditions": [
+      "testforge project initialized",
+      "analysis/ directory is empty or missing"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Ensure analysis/ is empty",
+        "expected_result": "No analysis output exists",
+        "input_data": ""
+      },
+      {
+        "order": 2,
+        "action": "Run testforge generate -y",
+        "expected_result": "Command exits with code 1",
+        "input_data": ""
+      },
+      {
+        "order": 3,
+        "action": "Check error output",
+        "expected_result": "Error indicates analysis must be run first",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "Generate refuses to run without analysis data and provides actionable error",
+    "priority": "high",
+    "tags": [
+      "negative",
+      "regression"
+    ]
+  },
+  {
+    "id": "TC-F003-03",
+    "title": "Generate produces manual checklist output",
+    "description": "Validates that generate creates manual QA checklists alongside automated test cases",
+    "feature_id": "F-003",
+    "preconditions": [
+      "testforge project initialized",
+      "Valid analysis output exists"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Run testforge generate -y",
+        "expected_result": "Command exits with code 0",
+        "input_data": ""
+      },
+      {
+        "order": 2,
+        "action": "Check output for manual checklist files",
+        "expected_result": "Manual checklist file exists with human-readable steps",
+        "input_data": ""
+      },
+      {
+        "order": 3,
+        "action": "Verify checklist items have pass/fail checkboxes or status fields",
+        "expected_result": "Each checklist item is structured for manual verification",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "Manual checklists are generated alongside automated test cases",
+    "priority": "medium",
+    "tags": [
+      "regression"
+    ]
+  },
+  {
+    "id": "TC-F004-01",
+    "title": "Script generates Playwright test from test cases",
+    "description": "Validates that testforge script produces valid Playwright browser test scripts",
+    "feature_id": "F-004",
+    "preconditions": [
+      "testforge project initialized",
+      "cases/ contains generated test cases",
+      "Target URL configured"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Run testforge script -y",
+        "expected_result": "Command exits with code 0",
+        "input_data": ""
+      },
+      {
+        "order": 2,
+        "action": "Verify scripts/ directory contains generated .py or .ts files",
+        "expected_result": "Playwright test script files exist",
+        "input_data": ""
+      },
+      {
+        "order": 3,
+        "action": "Inspect generated scripts for valid Playwright syntax (imports, page interactions, assertions)",
+        "expected_result": "Scripts contain valid Playwright API calls",
+        "input_data": ""
+      },
+      {
+        "order": 4,
+        "action": "Verify scripts reference test case IDs in comments or test names",
+        "expected_result": "Scripts are traceable to source test cases",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "Syntactically valid Playwright scripts are generated from test cases",
+    "priority": "medium",
+    "tags": [
+      "smoke",
+      "regression"
+    ]
+  },
+  {
+    "id": "TC-F004-02",
+    "title": "Script generation fails without test cases",
+    "description": "Validates that script command requires existing test cases",
+    "feature_id": "F-004",
+    "preconditions": [
+      "testforge project initialized",
+      "cases/ directory is empty"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Ensure cases/ is empty",
+        "expected_result": "No test case files exist",
+        "input_data": ""
+      },
+      {
+        "order": 2,
+        "action": "Run testforge script -y",
+        "expected_result": "Command exits with code 1 with error about missing test cases",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "Script generation fails gracefully when no test cases exist",
+    "priority": "medium",
+    "tags": [
+      "negative",
+      "regression"
+    ]
+  },
+  {
+    "id": "TC-F005-01",
+    "title": "Run executes test scripts and collects evidence",
+    "description": "Validates that testforge run executes generated scripts and stores evidence artifacts",
+    "feature_id": "F-005",
+    "preconditions": [
+      "testforge project initialized",
+      "scripts/ contains valid test scripts",
+      "Target application is accessible"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Run testforge run -y",
+        "expected_result": "Command exits with code 0",
+        "input_data": ""
+      },
+      {
+        "order": 2,
+        "action": "Verify evidence/ directory contains execution artifacts (screenshots, logs, results)",
+        "expected_result": "Evidence files are generated",
+        "input_data": ""
+      },
+      {
+        "order": 3,
+        "action": "Verify execution results include pass/fail status per test",
+        "expected_result": "Each executed test has a recorded status",
+        "input_data": ""
+      },
+      {
+        "order": 4,
+        "action": "Verify output/ contains execution summary",
+        "expected_result": "Summary with total/passed/failed counts exists",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "Test scripts execute successfully with evidence and results collected",
+    "priority": "high",
+    "tags": [
+      "smoke",
+      "regression"
+    ]
+  },
+  {
+    "id": "TC-F005-02",
+    "title": "Run reports failure when test script errors out",
+    "description": "Validates that run properly captures and reports script execution failures",
+    "feature_id": "F-005",
+    "preconditions": [
+      "testforge project initialized",
+      "scripts/ contains a script that will fail (e.g., targeting unreachable URL)"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Place a test script targeting http://localhost:99999 (unreachable) in scripts/",
+        "expected_result": "Script file exists",
+        "input_data": "failing_test.py"
+      },
+      {
+        "order": 2,
+        "action": "Run testforge run -y",
+        "expected_result": "Command exits with code 1 or reports failures",
+        "input_data": ""
+      },
+      {
+        "order": 3,
+        "action": "Verify execution results show failed status with error details",
+        "expected_result": "Failure reason is captured in results",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "Failed test execution is captured with error details, not silently ignored",
+    "priority": "high",
+    "tags": [
+      "negative",
+      "regression"
+    ]
+  },
+  {
+    "id": "TC-F005-03",
+    "title": "Run with no scripts directory returns error",
+    "description": "Validates that run handles missing scripts gracefully",
+    "feature_id": "F-005",
+    "preconditions": [
+      "testforge project initialized",
+      "scripts/ directory is empty"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Ensure scripts/ directory is empty",
+        "expected_result": "No script files present",
+        "input_data": ""
+      },
+      {
+        "order": 2,
+        "action": "Run testforge run -y",
+        "expected_result": "Command exits with code 1",
+        "input_data": ""
+      },
+      {
+        "order": 3,
+        "action": "Verify error message indicates no scripts to execute",
+        "expected_result": "Clear error about missing scripts",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "Run fails with informative message when no scripts exist",
+    "priority": "medium",
+    "tags": [
+      "negative",
+      "edge-case"
+    ]
+  },
+  {
+    "id": "TC-F006-01",
+    "title": "Report generates markdown report from results",
+    "description": "Validates that testforge report produces a markdown test report from execution results",
+    "feature_id": "F-006",
+    "preconditions": [
+      "testforge project initialized",
+      "testforge run has been executed with results available"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Run testforge report -y",
+        "expected_result": "Command exits with code 0",
+        "input_data": ""
+      },
+      {
+        "order": 2,
+        "action": "Verify output/ contains a .md report file",
+        "expected_result": "Markdown report file exists",
+        "input_data": ""
+      },
+      {
+        "order": 3,
+        "action": "Inspect report for summary statistics (total, passed, failed)",
+        "expected_result": "Report contains test execution summary",
+        "input_data": ""
+      },
+      {
+        "order": 4,
+        "action": "Verify report includes individual test results with status",
+        "expected_result": "Each test case result is listed with pass/fail",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "Well-structured markdown report is generated with execution summary and details",
+    "priority": "high",
+    "tags": [
+      "smoke",
+      "regression"
+    ]
+  },
+  {
+    "id": "TC-F006-02",
+    "title": "Report generates HTML format when specified",
+    "description": "Validates HTML report output option",
+    "feature_id": "F-006",
+    "preconditions": [
+      "testforge project initialized",
+      "Execution results exist"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Run testforge report --format html -y",
+        "expected_result": "Command exits with code 0",
+        "input_data": "--format html"
+      },
+      {
+        "order": 2,
+        "action": "Verify output/ contains a .html report file",
+        "expected_result": "HTML report file exists",
+        "input_data": ""
+      },
+      {
+        "order": 3,
+        "action": "Open HTML file and verify it renders valid HTML with test results",
+        "expected_result": "HTML is well-formed and displays results",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "HTML report is generated with proper formatting",
+    "priority": "high",
+    "tags": [
+      "regression"
+    ]
+  },
+  {
+    "id": "TC-F006-03",
+    "title": "Report fails without execution results",
+    "description": "Validates that report requires prior test execution data",
+    "feature_id": "F-006",
+    "preconditions": [
+      "testforge project initialized",
+      "No test execution results exist"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Ensure no execution results exist in project",
+        "expected_result": "No results data present",
+        "input_data": ""
+      },
+      {
+        "order": 2,
+        "action": "Run testforge report -y",
+        "expected_result": "Command exits with code 1",
+        "input_data": ""
+      },
+      {
+        "order": 3,
+        "action": "Check error output",
+        "expected_result": "Error indicates no execution results to report on",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "Report generation fails with clear error when no results exist",
+    "priority": "medium",
+    "tags": [
+      "negative",
+      "regression"
+    ]
+  },
+  {
+    "id": "TC-F007-01",
+    "title": "Manual workflow start initializes checklist session",
+    "description": "Validates that testforge manual start begins a new manual QA session with checklist",
+    "feature_id": "F-007",
+    "preconditions": [
+      "testforge project initialized",
+      "Generated manual checklist exists"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Run testforge manual start -y",
+        "expected_result": "Command exits with code 0 and displays session ID",
+        "input_data": ""
+      },
+      {
+        "order": 2,
+        "action": "Verify a manual session is created with all checklist items in pending state",
+        "expected_result": "Session exists with items ready for verification",
+        "input_data": ""
+      },
+      {
+        "order": 3,
+        "action": "Run testforge manual progress",
+        "expected_result": "Shows 0% completion with all items pending",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "Manual QA session is initialized with full checklist",
+    "priority": "medium",
+    "tags": [
+      "smoke",
+      "regression"
+    ]
+  },
+  {
+    "id": "TC-F007-02",
+    "title": "Manual workflow check marks item and finish completes session",
+    "description": "Validates the check and finish subcommands of manual workflow",
+    "feature_id": "F-007",
+    "preconditions": [
+      "Active manual QA session exists with pending items"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Run testforge manual check <item_id> --status pass",
+        "expected_result": "Item marked as passed, exit code 0",
+        "input_data": "first checklist item ID"
+      },
+      {
+        "order": 2,
+        "action": "Run testforge manual progress",
+        "expected_result": "Shows updated completion percentage",
+        "input_data": ""
+      },
+      {
+        "order": 3,
+        "action": "Mark all remaining items as pass/fail",
+        "expected_result": "All items have a status",
+        "input_data": ""
+      },
+      {
+        "order": 4,
+        "action": "Run testforge manual finish",
+        "expected_result": "Session completed, results saved, exit code 0",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "Manual items can be checked and session can be finalized",
+    "priority": "medium",
+    "tags": [
+      "regression"
+    ]
+  },
+  {
+    "id": "TC-F007-03",
+    "title": "Manual finish without completing all items warns user",
+    "description": "Validates behavior when finishing a session with unchecked items",
+    "feature_id": "F-007",
+    "preconditions": [
+      "Active manual QA session with some items still pending"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Mark only 1 of N items, leaving others pending",
+        "expected_result": "Partial completion",
+        "input_data": ""
+      },
+      {
+        "order": 2,
+        "action": "Run testforge manual finish -y",
+        "expected_result": "Session finishes with warning about incomplete items or exit code 1",
+        "input_data": ""
+      },
+      {
+        "order": 3,
+        "action": "Verify results indicate which items were not checked",
+        "expected_result": "Unchecked items are flagged in output",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "Finishing with unchecked items produces a warning or is handled gracefully",
+    "priority": "low",
+    "tags": [
+      "edge-case",
+      "regression"
+    ]
+  },
+  {
+    "id": "TC-F008-01",
+    "title": "TUI launches interactive terminal interface",
+    "description": "Validates that testforge tui starts the Textual-based terminal UI",
+    "feature_id": "F-008",
+    "preconditions": [
+      "testforge CLI is installed",
+      "Terminal supports Textual rendering",
+      "testforge project initialized"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Run testforge tui",
+        "expected_result": "TUI application launches and displays dashboard screen",
+        "input_data": ""
+      },
+      {
+        "order": 2,
+        "action": "Verify dashboard, cases, runner, and manual screens are accessible via navigation",
+        "expected_result": "All four screens are reachable",
+        "input_data": ""
+      },
+      {
+        "order": 3,
+        "action": "Press quit key binding to exit",
+        "expected_result": "TUI exits cleanly with code 0",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "TUI launches with all expected screens and exits cleanly",
+    "priority": "low",
+    "tags": [
+      "smoke"
+    ]
+  },
+  {
+    "id": "TC-F008-02",
+    "title": "TUI handles missing project gracefully",
+    "description": "Validates TUI behavior when launched outside a testforge project",
+    "feature_id": "F-008",
+    "preconditions": [
+      "testforge CLI is installed",
+      "Current directory is NOT a testforge project"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Navigate to a directory without .testforge/",
+        "expected_result": "In non-project directory",
+        "input_data": ""
+      },
+      {
+        "order": 2,
+        "action": "Run testforge tui",
+        "expected_result": "Error message displayed or TUI shows empty state with guidance",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "TUI either refuses to launch with error or handles missing project gracefully",
+    "priority": "low",
+    "tags": [
+      "negative",
+      "edge-case"
+    ]
+  },
+  {
+    "id": "TC-F009-01",
+    "title": "Selftest runs built-in test scripts successfully",
+    "description": "Validates that testforge selftest discovers and executes built-in shell tests",
+    "feature_id": "F-009",
+    "preconditions": [
+      "testforge CLI is installed",
+      "tests/selftest/ contains test scripts"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Run testforge selftest -y",
+        "expected_result": "Command exits with code 0",
+        "input_data": ""
+      },
+      {
+        "order": 2,
+        "action": "Verify output lists each test script with pass/fail status",
+        "expected_result": "Individual test results are reported",
+        "input_data": ""
+      },
+      {
+        "order": 3,
+        "action": "Verify summary shows total/passed/failed counts",
+        "expected_result": "Summary statistics are displayed",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "All selftest scripts execute and results are reported",
+    "priority": "medium",
+    "tags": [
+      "smoke",
+      "regression"
+    ]
+  },
+  {
+    "id": "TC-F009-02",
+    "title": "Selftest reports failure when a test script fails",
+    "description": "Validates that selftest properly surfaces individual test failures",
+    "feature_id": "F-009",
+    "preconditions": [
+      "testforge CLI is installed",
+      "At least one selftest script is designed to fail or is modified to fail"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Modify a selftest script to exit with code 1",
+        "expected_result": "Script will fail on execution",
+        "input_data": ""
+      },
+      {
+        "order": 2,
+        "action": "Run testforge selftest -y",
+        "expected_result": "Command exits with code 1",
+        "input_data": ""
+      },
+      {
+        "order": 3,
+        "action": "Verify output identifies the failing test by name",
+        "expected_result": "Failed test name and error are visible in output",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "Selftest exits with failure code and identifies which tests failed",
+    "priority": "medium",
+    "tags": [
+      "negative",
+      "regression"
+    ]
+  },
+  {
+    "id": "TC-F010-01",
+    "title": "Projects lists all testforge projects in current directory",
+    "description": "Validates that testforge projects discovers and lists project directories",
+    "feature_id": "F-010",
+    "preconditions": [
+      "testforge CLI is installed",
+      "Current directory contains two or more testforge project subdirectories"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Create two project directories with testforge init proj1 -y && testforge init proj2 -y",
+        "expected_result": "Two projects initialized",
+        "input_data": "proj1, proj2"
+      },
+      {
+        "order": 2,
+        "action": "Run testforge projects",
+        "expected_result": "Command exits with code 0",
+        "input_data": ""
+      },
+      {
+        "order": 3,
+        "action": "Verify output lists both proj1 and proj2",
+        "expected_result": "Both project names appear in output",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "All testforge projects in the directory are listed",
+    "priority": "low",
+    "tags": [
+      "smoke",
+      "regression"
+    ]
+  },
+  {
+    "id": "TC-F010-02",
+    "title": "Projects returns empty list when no projects exist",
+    "description": "Validates behavior when no testforge projects are found",
+    "feature_id": "F-010",
+    "preconditions": [
+      "testforge CLI is installed",
+      "Current directory contains no testforge projects"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Navigate to an empty directory",
+        "expected_result": "No .testforge/ subdirectories exist",
+        "input_data": ""
+      },
+      {
+        "order": 2,
+        "action": "Run testforge projects",
+        "expected_result": "Command exits with code 0 and outputs empty list or informational message",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "Empty result is returned gracefully, not an error",
+    "priority": "low",
+    "tags": [
+      "edge-case",
+      "regression"
+    ]
+  },
+  {
+    "id": "TC-R001-01",
+    "title": "CLI returns exit code 0 on successful command",
+    "description": "Validates R-001: successful commands return exit code 0",
+    "feature_id": "F-001",
+    "preconditions": [
+      "testforge CLI is installed"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Run testforge init testproject -y",
+        "expected_result": "Project created successfully",
+        "input_data": "testproject"
+      },
+      {
+        "order": 2,
+        "action": "Capture $? exit code",
+        "expected_result": "Exit code is exactly 0",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "Exit code 0 is returned for successful execution",
+    "priority": "high",
+    "tags": [
+      "smoke",
+      "regression"
+    ]
+  },
+  {
+    "id": "TC-R001-02",
+    "title": "CLI returns exit code 1 on failed command",
+    "description": "Validates R-001: failed commands return exit code 1",
+    "feature_id": "F-001",
+    "preconditions": [
+      "testforge CLI is installed"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Run testforge nonexistentcommand",
+        "expected_result": "Command fails with error",
+        "input_data": "nonexistentcommand"
+      },
+      {
+        "order": 2,
+        "action": "Capture $? exit code",
+        "expected_result": "Exit code is exactly 1 (or non-zero)",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "Exit code 1 is returned for failed execution",
+    "priority": "high",
+    "tags": [
+      "negative",
+      "regression"
+    ]
+  },
+  {
+    "id": "TC-R003-01",
+    "title": "Non-interactive mode skips all prompts with -y flag",
+    "description": "Validates R-003: the -y flag suppresses all interactive confirmations",
+    "feature_id": "F-001",
+    "preconditions": [
+      "testforge CLI is installed"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Run testforge init autoproj -y in a non-interactive shell (no TTY)",
+        "expected_result": "Command completes without hanging for user input",
+        "input_data": "-y"
+      },
+      {
+        "order": 2,
+        "action": "Verify project was created without any prompts",
+        "expected_result": "Project directory exists with standard structure",
+        "input_data": ""
+      },
+      {
+        "order": 3,
+        "action": "Capture exit code",
+        "expected_result": "Exit code is 0",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "All commands complete without interactive prompts when -y is passed",
+    "priority": "high",
+    "tags": [
+      "smoke",
+      "regression"
+    ]
+  },
+  {
+    "id": "UC-001",
+    "title": "Full Pipeline: Web App Requirements to HTML Report",
+    "description": "QA Engineer initializes a project, analyzes a product requirements PDF, generates test cases and Playwright scripts, executes them against a staging environment, and produces an HTML report for stakeholders.",
+    "persona_id": "P-001",
+    "persona_name": "QA Engineer",
+    "preconditions": [
+      "TestForge is installed and accessible via CLI",
+      "An LLM API key is configured in the environment",
+      "A product requirements PDF document is available locally",
+      "A staging web application URL is accessible for testing"
+    ],
+    "scenario_steps": [
+      "Run 'testforge init webapp-qa' to create a new project with standard directory structure",
+      "Copy the product requirements PDF into the inputs/ directory",
+      "Run 'testforge analyze' to parse the PDF and extract features, personas, and business rules",
+      "Review the analysis output in the analysis/ directory to confirm extracted items match expectations",
+      "Run 'testforge generate' to create functional test cases and use-case scenarios from the analysis",
+      "Review generated test cases in the cases/ directory for completeness and accuracy",
+      "Run 'testforge script' to generate Playwright browser test scripts from the test cases",
+      "Verify that scripts appear in the scripts/ directory with proper Playwright syntax",
+      "Run 'testforge run' to execute the generated scripts against the staging environment",
+      "Confirm that evidence (screenshots, logs) is collected in the evidence/ directory",
+      "Run 'testforge report --format html' to generate an HTML test report from execution results",
+      "Open the generated HTML report and verify it contains pass/fail summaries and evidence links"
+    ],
+    "expected_outcome": "A complete HTML test report is generated in output/ containing all test results, pass/fail status, and linked evidence artifacts. The report accurately reflects the execution of tests derived from the original requirements document.",
+    "features_covered": [
+      "F-001",
+      "F-002",
+      "F-003",
+      "F-004",
+      "F-005",
+      "F-006"
+    ],
+    "priority": "high",
+    "tags": [
+      "e2e",
+      "happy-path",
+      "critical-path",
+      "full-pipeline"
+    ]
+  },
+  {
+    "id": "UC-002",
+    "title": "Manual QA Workflow with TUI for Mobile App Testing",
+    "description": "QA Engineer initializes a project, analyzes a PPTX design spec, generates a manual checklist, then uses the TUI and manual workflow commands to track progress through manual testing of a mobile application.",
+    "persona_id": "P-001",
+    "persona_name": "QA Engineer",
+    "preconditions": [
+      "TestForge is installed and accessible via CLI",
+      "An LLM API key is configured in the environment",
+      "A PPTX design specification for a mobile app is available",
+      "The mobile application under test is accessible on a test device or emulator"
+    ],
+    "scenario_steps": [
+      "Run 'testforge init mobile-manual-qa' to create a new project",
+      "Copy the PPTX design specification into the inputs/ directory",
+      "Run 'testforge analyze' to extract features, personas, and UI flows from the PPTX",
+      "Run 'testforge generate' to produce manual checklist items from the analysis",
+      "Run 'testforge manual start' to begin a structured manual testing session",
+      "Launch 'testforge tui' to open the interactive terminal UI",
+      "Navigate to the manual screen in the TUI to view the checklist",
+      "Perform manual testing steps on the mobile app, marking items as pass/fail in the TUI",
+      "Run 'testforge manual progress' to check how many items remain",
+      "Run 'testforge manual check' to verify status of specific checklist items",
+      "Complete all remaining manual test items through the TUI interface",
+      "Run 'testforge manual finish' to close the manual testing session",
+      "Run 'testforge report --format markdown' to generate a markdown report of manual test results"
+    ],
+    "expected_outcome": "All manual checklist items are tracked to completion through the TUI and manual workflow. A markdown report is generated summarizing manual test results with pass/fail statuses for each checklist item derived from the design specification.",
+    "features_covered": [
+      "F-001",
+      "F-002",
+      "F-003",
+      "F-007",
+      "F-008",
+      "F-006"
+    ],
+    "priority": "high",
+    "tags": [
+      "e2e",
+      "happy-path",
+      "manual-testing",
+      "tui"
+    ]
+  },
+  {
+    "id": "UC-003",
+    "title": "Multi-Document Analysis with Mixed Input Types",
+    "description": "QA Engineer analyzes multiple input documents of different formats (PDF, DOCX, images, and a URL) in a single project to produce a consolidated set of test cases covering all sources.",
+    "persona_id": "P-001",
+    "persona_name": "QA Engineer",
+    "preconditions": [
+      "TestForge is installed and accessible via CLI",
+      "An LLM API key is configured in the environment",
+      "Multiple input documents are available: a PDF spec, a DOCX user guide, wireframe images, and a live URL to an existing web app"
+    ],
+    "scenario_steps": [
+      "Run 'testforge init multi-source-project' to create a new project",
+      "Copy the PDF specification, DOCX user guide, and wireframe images into the inputs/ directory",
+      "Run 'testforge analyze' providing the local files and the URL as inputs",
+      "Verify that the analysis/ directory contains extracted features from all document types",
+      "Confirm that personas and business rules are consolidated across all input sources",
+      "Run 'testforge generate' to create test cases covering features from all analyzed documents",
+      "Review generated cases in cases/ to ensure traceability back to each input source",
+      "Run 'testforge script' to generate Playwright scripts for the web-applicable test cases",
+      "Run 'testforge run' to execute the browser tests against the live URL",
+      "Run 'testforge report' to generate a consolidated test report"
+    ],
+    "expected_outcome": "Analysis successfully processes all input formats (PDF, DOCX, images, URL). Generated test cases cover features extracted from every source. The final report reflects execution results for the consolidated test suite.",
+    "features_covered": [
+      "F-001",
+      "F-002",
+      "F-003",
+      "F-004",
+      "F-005",
+      "F-006"
+    ],
+    "priority": "high",
+    "tags": [
+      "e2e",
+      "happy-path",
+      "multi-format",
+      "analysis"
+    ]
+  },
+  {
+    "id": "UC-004",
+    "title": "Multi-Project Management Across Concurrent Testing Efforts",
+    "description": "QA Engineer manages multiple TestForge projects simultaneously, using project listing to navigate between them, running the self-test suite to verify the installation, and executing tests across projects.",
+    "persona_id": "P-001",
+    "persona_name": "QA Engineer",
+    "preconditions": [
+      "TestForge is installed and accessible via CLI",
+      "An LLM API key is configured in the environment",
+      "A working directory exists where multiple projects will be created"
+    ],
+    "scenario_steps": [
+      "Run 'testforge selftest' to verify the installation is functioning correctly before starting work",
+      "Confirm all self-test scripts in tests/selftest/ pass successfully",
+      "Run 'testforge init project-alpha' to create the first project",
+      "Run 'testforge init project-beta' to create the second project",
+      "Run 'testforge projects' from the parent directory to list all TestForge projects",
+      "Verify that both project-alpha and project-beta appear in the project listing",
+      "Add input documents to project-alpha and run 'testforge analyze' followed by 'testforge generate'",
+      "Add different input documents to project-beta and run 'testforge analyze' followed by 'testforge generate'",
+      "Run 'testforge run' in project-alpha to execute its test suite",
+      "Run 'testforge run' in project-beta to execute its test suite",
+      "Run 'testforge projects' again to see updated status of both projects",
+      "Generate reports for both projects using 'testforge report'"
+    ],
+    "expected_outcome": "Self-test suite passes confirming a valid installation. Both projects are independently managed with separate analysis, test cases, and execution results. The projects command correctly discovers and lists all TestForge projects with their current status.",
+    "features_covered": [
+      "F-001",
+      "F-009",
+      "F-010",
+      "F-002",
+      "F-003",
+      "F-005",
+      "F-006"
+    ],
+    "priority": "medium",
+    "tags": [
+      "e2e",
+      "happy-path",
+      "multi-project",
+      "self-test"
+    ]
+  },
+  {
+    "id": "UC-005",
+    "title": "Developer Extends Pipeline with Custom Connectors and Runs Full Cycle",
+    "description": "Developer sets up a TestForge project, analyzes an API specification, generates test cases, creates custom HTTP and shell connectors for non-browser testing, executes tests through those connectors, and validates the complete pipeline.",
+    "persona_id": "P-002",
+    "persona_name": "Developer",
+    "preconditions": [
+      "TestForge is installed and accessible via CLI",
+      "An LLM API key is configured in the environment",
+      "An OpenAPI/Swagger specification document is available for a REST API",
+      "The target REST API is running and accessible",
+      "Developer has familiarity with TestForge's connector and assertion extension points"
+    ],
+    "scenario_steps": [
+      "Run 'testforge init api-testing-project' to create a new project",
+      "Copy the API specification document into the inputs/ directory",
+      "Run 'testforge analyze' to extract API endpoints, request/response schemas, and business rules",
+      "Run 'testforge generate' to create test cases for the API endpoints",
+      "Review the generated test cases and identify those requiring HTTP and shell connectors rather than browser tests",
+      "Implement a custom HTTP connector that sends REST requests and validates response codes and payloads",
+      "Implement a custom shell connector that runs curl-based smoke tests and database seed scripts",
+      "Implement custom assertions for API-specific validation (JSON schema validation, response time thresholds)",
+      "Configure the project's .testforge/config.yaml to register the custom connectors and assertions",
+      "Run 'testforge run' to execute tests using the custom connectors",
+      "Verify that evidence is collected for both HTTP and shell connector executions",
+      "Run 'testforge report --format html' to generate the final report",
+      "Inspect the report to confirm custom connector results are properly represented"
+    ],
+    "expected_outcome": "Custom HTTP and shell connectors execute successfully alongside standard connectors. Custom assertions validate API-specific behavior. The final HTML report includes results from all connector types with proper evidence collection and pass/fail attribution.",
+    "features_covered": [
+      "F-001",
+      "F-002",
+      "F-003",
+      "F-005",
+      "F-006"
+    ],
+    "priority": "high",
+    "tags": [
+      "e2e",
+      "happy-path",
+      "extensibility",
+      "custom-connectors",
+      "api-testing"
+    ]
+  },
+  {
+    "id": "UC-006",
+    "title": "Developer Integrates TestForge into CI/CD with Self-Test Validation",
+    "description": "Developer configures TestForge for non-interactive CI/CD pipeline execution, runs self-tests to validate the environment, executes the full analysis-generate-run-report pipeline in headless mode, and verifies all outputs are produced.",
+    "persona_id": "P-002",
+    "persona_name": "Developer",
+    "preconditions": [
+      "TestForge is installed in a CI/CD environment (e.g., GitHub Actions runner)",
+      "An LLM API key is configured as a CI environment variable",
+      "A pre-existing TestForge project with input documents is checked into the repository",
+      "CI/CD pipeline script has access to shell execution"
+    ],
+    "scenario_steps": [
+      "Run 'testforge selftest' as a CI pre-check to verify the installation is healthy in the CI environment",
+      "Assert that all self-test scripts pass before proceeding with the pipeline",
+      "Run 'testforge init ci-test-run' or navigate to the pre-existing project directory",
+      "Run 'testforge analyze' in non-interactive mode to process the input documents",
+      "Verify that analysis output files are created in the analysis/ directory",
+      "Run 'testforge generate' in non-interactive mode to produce test cases",
+      "Verify that test case files are created in the cases/ directory",
+      "Run 'testforge script' to generate Playwright scripts for browser-based tests",
+      "Run 'testforge run' in headless mode to execute all generated test scripts",
+      "Verify that evidence artifacts (screenshots, logs) are captured in evidence/",
+      "Run 'testforge report --format markdown' to generate a CI-friendly markdown report",
+      "Parse the report output to extract pass/fail counts for CI status reporting",
+      "Fail the CI pipeline if any critical tests failed based on the report"
+    ],
+    "expected_outcome": "The full TestForge pipeline executes successfully in a non-interactive CI/CD environment. Self-tests validate the environment. All pipeline stages produce expected outputs. The markdown report provides machine-parseable results suitable for CI status gates.",
+    "features_covered": [
+      "F-009",
+      "F-001",
+      "F-002",
+      "F-003",
+      "F-004",
+      "F-005",
+      "F-006"
+    ],
+    "priority": "high",
+    "tags": [
+      "e2e",
+      "happy-path",
+      "ci-cd",
+      "non-interactive",
+      "automation"
+    ]
+  },
+  {
+    "id": "UC-007",
+    "title": "TUI-Driven Dashboard Monitoring During Test Execution",
+    "description": "QA Engineer uses the TUI interface as the primary interaction method to monitor test execution in real-time, review test cases, trigger runs, and track manual QA progress from the dashboard.",
+    "persona_id": "P-001",
+    "persona_name": "QA Engineer",
+    "preconditions": [
+      "TestForge is installed and accessible via CLI",
+      "An LLM API key is configured in the environment",
+      "A TestForge project already exists with completed analysis and generated test cases and scripts",
+      "Terminal supports Textual-based TUI rendering"
+    ],
+    "scenario_steps": [
+      "Launch 'testforge tui' to open the interactive terminal UI",
+      "Navigate to the dashboard screen and verify it shows the project summary and status",
+      "Switch to the cases screen to browse all generated test cases",
+      "Review individual test case details including steps, expected results, and priority",
+      "Switch to the runner screen and initiate a test execution run from within the TUI",
+      "Monitor the execution progress on the runner screen as tests execute in real-time",
+      "Observe test pass/fail indicators updating as each test completes",
+      "Switch to the manual screen to view any manual checklist items",
+      "Start a manual QA session from the TUI and mark several items as completed",
+      "Return to the dashboard screen to see the updated overall project status",
+      "Verify the dashboard reflects both automated execution results and manual progress"
+    ],
+    "expected_outcome": "The TUI provides a fully functional interface for monitoring and managing all aspects of the testing workflow. Dashboard accurately reflects project state. Test execution can be triggered and monitored in real-time. Manual QA progress is tracked seamlessly within the same interface.",
+    "features_covered": [
+      "F-008",
+      "F-005",
+      "F-007"
+    ],
+    "priority": "medium",
+    "tags": [
+      "e2e",
+      "happy-path",
+      "tui",
+      "monitoring",
+      "interactive"
+    ]
+  },
+  {
+    "id": "UC-008",
+    "title": "Iterative Test Refinement: Analyze, Generate, Execute, Fix, Re-run",
+    "description": "QA Engineer goes through multiple iterations of the test pipeline, re-analyzing updated documents, regenerating test cases after requirements change, and re-executing to verify fixes.",
+    "persona_id": "P-001",
+    "persona_name": "QA Engineer",
+    "preconditions": [
+      "TestForge is installed and accessible via CLI",
+      "An LLM API key is configured in the environment",
+      "An existing TestForge project with a completed first-pass analysis, generated cases, and initial execution results exists",
+      "An updated version of the requirements document is available reflecting recent changes"
+    ],
+    "scenario_steps": [
+      "Navigate to the existing project directory",
+      "Run 'testforge run' to execute the existing test suite and confirm current baseline results",
+      "Run 'testforge report' to generate a baseline report showing initial pass/fail status",
+      "Replace the input document in inputs/ with the updated version reflecting new requirements",
+      "Run 'testforge analyze' again to re-process the updated document",
+      "Compare new analysis output with the previous analysis to identify changed features and rules",
+      "Run 'testforge generate' to regenerate test cases incorporating the updated requirements",
+      "Run 'testforge script' to regenerate Playwright scripts for new and modified test cases",
+      "Run 'testforge run' to execute the updated test suite",
+      "Review evidence/ for any new failures caused by requirements changes",
+      "Run 'testforge report' to generate an updated report",
+      "Compare the new report with the baseline to identify regression or new coverage gaps"
+    ],
+    "expected_outcome": "The iterative workflow produces updated test artifacts at each stage. Re-analysis captures changed requirements. Regenerated test cases reflect the updates. The comparison between baseline and updated reports clearly shows the impact of requirements changes on test results.",
+    "features_covered": [
+      "F-002",
+      "F-003",
+      "F-004",
+      "F-005",
+      "F-006"
+    ],
+    "priority": "medium",
+    "tags": [
+      "e2e",
+      "iterative",
+      "regression",
+      "requirements-change"
+    ]
+  },
+  {
+    "id": "CL-001",
+    "title": "Manual check: Project Init",
+    "description": "Verify Project Init manually: testforge init creates a new project directory with standard structure (.testforge/config.yaml, inputs/, output/, evidence/, scripts/, cases/, analysis/)",
+    "category": "functionality",
+    "feature_id": "F-001",
+    "check_steps": [
+      "Navigate to the Project Init area",
+      "Verify all UI elements are displayed correctly",
+      "Perform the primary action and observe results",
+      "Check error handling with invalid input"
+    ],
+    "pass_criteria": "Project Init behaves as documented",
+    "priority": "high"
+  },
+  {
+    "id": "CL-002",
+    "title": "Manual check: Document Analysis",
+    "description": "Verify Document Analysis manually: testforge analyze parses input documents (PDF, PPTX, DOCX, images, URLs) and extracts features, personas, and business rules using LLM",
+    "category": "functionality",
+    "feature_id": "F-002",
+    "check_steps": [
+      "Navigate to the Document Analysis area",
+      "Verify all UI elements are displayed correctly",
+      "Perform the primary action and observe results",
+      "Check error handling with invalid input"
+    ],
+    "pass_criteria": "Document Analysis behaves as documented",
+    "priority": "high"
+  },
+  {
+    "id": "CL-003",
+    "title": "Manual check: Test Case Generation",
+    "description": "Verify Test Case Generation manually: testforge generate creates functional test cases, use-case scenarios, and manual checklists from analysis results",
+    "category": "functionality",
+    "feature_id": "F-003",
+    "check_steps": [
+      "Navigate to the Test Case Generation area",
+      "Verify all UI elements are displayed correctly",
+      "Perform the primary action and observe results",
+      "Check error handling with invalid input"
+    ],
+    "pass_criteria": "Test Case Generation behaves as documented",
+    "priority": "high"
+  },
+  {
+    "id": "CL-004",
+    "title": "Manual check: Script Generation",
+    "description": "Verify Script Generation manually: testforge script generates Playwright browser test scripts from test cases",
+    "category": "functionality",
+    "feature_id": "F-004",
+    "check_steps": [
+      "Navigate to the Script Generation area",
+      "Verify all UI elements are displayed correctly",
+      "Perform the primary action and observe results",
+      "Check error handling with invalid input"
+    ],
+    "pass_criteria": "Script Generation behaves as documented",
+    "priority": "medium"
+  },
+  {
+    "id": "CL-005",
+    "title": "Manual check: Test Execution",
+    "description": "Verify Test Execution manually: testforge run executes generated test scripts via shell/browser/HTTP connectors and collects evidence",
+    "category": "functionality",
+    "feature_id": "F-005",
+    "check_steps": [
+      "Navigate to the Test Execution area",
+      "Verify all UI elements are displayed correctly",
+      "Perform the primary action and observe results",
+      "Check error handling with invalid input"
+    ],
+    "pass_criteria": "Test Execution behaves as documented",
+    "priority": "high"
+  },
+  {
+    "id": "CL-006",
+    "title": "Manual check: Report Generation",
+    "description": "Verify Report Generation manually: testforge report generates markdown or HTML test reports from execution results",
+    "category": "functionality",
+    "feature_id": "F-006",
+    "check_steps": [
+      "Navigate to the Report Generation area",
+      "Verify all UI elements are displayed correctly",
+      "Perform the primary action and observe results",
+      "Check error handling with invalid input"
+    ],
+    "pass_criteria": "Report Generation behaves as documented",
+    "priority": "high"
+  },
+  {
+    "id": "CL-007",
+    "title": "Manual check: Manual QA Workflow",
+    "description": "Verify Manual QA Workflow manually: testforge manual start/check/progress/finish provides a structured checklist workflow for human testers",
+    "category": "functionality",
+    "feature_id": "F-007",
+    "check_steps": [
+      "Navigate to the Manual QA Workflow area",
+      "Verify all UI elements are displayed correctly",
+      "Perform the primary action and observe results",
+      "Check error handling with invalid input"
+    ],
+    "pass_criteria": "Manual QA Workflow behaves as documented",
+    "priority": "medium"
+  },
+  {
+    "id": "CL-008",
+    "title": "Manual check: TUI Interface",
+    "description": "Verify TUI Interface manually: testforge tui launches an interactive Textual-based terminal UI with dashboard, cases, runner, and manual screens",
+    "category": "functionality",
+    "feature_id": "F-008",
+    "check_steps": [
+      "Navigate to the TUI Interface area",
+      "Verify all UI elements are displayed correctly",
+      "Perform the primary action and observe results",
+      "Check error handling with invalid input"
+    ],
+    "pass_criteria": "TUI Interface behaves as documented",
+    "priority": "low"
+  },
+  {
+    "id": "CL-009",
+    "title": "Manual check: Self-Test Suite",
+    "description": "Verify Self-Test Suite manually: testforge selftest runs built-in shell test scripts from tests/selftest/ to verify the installation",
+    "category": "functionality",
+    "feature_id": "F-009",
+    "check_steps": [
+      "Navigate to the Self-Test Suite area",
+      "Verify all UI elements are displayed correctly",
+      "Perform the primary action and observe results",
+      "Check error handling with invalid input"
+    ],
+    "pass_criteria": "Self-Test Suite behaves as documented",
+    "priority": "medium"
+  },
+  {
+    "id": "CL-010",
+    "title": "Manual check: Multi-Project Management",
+    "description": "Verify Multi-Project Management manually: testforge projects lists all TestForge projects found in the current directory",
+    "category": "functionality",
+    "feature_id": "F-010",
+    "check_steps": [
+      "Navigate to the Multi-Project Management area",
+      "Verify all UI elements are displayed correctly",
+      "Perform the primary action and observe results",
+      "Check error handling with invalid input"
+    ],
+    "pass_criteria": "Multi-Project Management behaves as documented",
+    "priority": "low"
+  }
+]

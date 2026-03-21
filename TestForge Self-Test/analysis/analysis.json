@@ -1,0 +1,155 @@
+{
+  "features": [
+    {
+      "id": "F-001",
+      "name": "Project Init",
+      "description": "testforge init creates a new project directory with standard structure (.testforge/config.yaml, inputs/, output/, evidence/, scripts/, cases/, analysis/)",
+      "category": "core",
+      "priority": "high",
+      "screens": [],
+      "tags": ["cli", "setup"],
+      "source": "README.md"
+    },
+    {
+      "id": "F-002",
+      "name": "Document Analysis",
+      "description": "testforge analyze parses input documents (PDF, PPTX, DOCX, images, URLs) and extracts features, personas, and business rules using LLM",
+      "category": "core",
+      "priority": "high",
+      "screens": [],
+      "tags": ["cli", "llm"],
+      "source": "README.md"
+    },
+    {
+      "id": "F-003",
+      "name": "Test Case Generation",
+      "description": "testforge generate creates functional test cases, use-case scenarios, and manual checklists from analysis results",
+      "category": "core",
+      "priority": "high",
+      "screens": [],
+      "tags": ["cli", "generation"],
+      "source": "README.md"
+    },
+    {
+      "id": "F-004",
+      "name": "Script Generation",
+      "description": "testforge script generates Playwright browser test scripts from test cases",
+      "category": "core",
+      "priority": "medium",
+      "screens": [],
+      "tags": ["cli", "playwright"],
+      "source": "README.md"
+    },
+    {
+      "id": "F-005",
+      "name": "Test Execution",
+      "description": "testforge run executes generated test scripts via shell/browser/HTTP connectors and collects evidence",
+      "category": "core",
+      "priority": "high",
+      "screens": [],
+      "tags": ["cli", "execution"],
+      "source": "README.md"
+    },
+    {
+      "id": "F-006",
+      "name": "Report Generation",
+      "description": "testforge report generates markdown or HTML test reports from execution results",
+      "category": "core",
+      "priority": "high",
+      "screens": [],
+      "tags": ["cli", "report"],
+      "source": "README.md"
+    },
+    {
+      "id": "F-007",
+      "name": "Manual QA Workflow",
+      "description": "testforge manual start/check/progress/finish provides a structured checklist workflow for human testers",
+      "category": "core",
+      "priority": "medium",
+      "screens": [],
+      "tags": ["cli", "manual"],
+      "source": "README.md"
+    },
+    {
+      "id": "F-008",
+      "name": "TUI Interface",
+      "description": "testforge tui launches an interactive Textual-based terminal UI with dashboard, cases, runner, and manual screens",
+      "category": "ui",
+      "priority": "low",
+      "screens": ["dashboard", "cases", "runner", "manual"],
+      "tags": ["tui", "textual"],
+      "source": "README.md"
+    },
+    {
+      "id": "F-009",
+      "name": "Self-Test Suite",
+      "description": "testforge selftest runs built-in shell test scripts from tests/selftest/ to verify the installation",
+      "category": "quality",
+      "priority": "medium",
+      "screens": [],
+      "tags": ["cli", "selftest"],
+      "source": "README.md"
+    },
+    {
+      "id": "F-010",
+      "name": "Multi-Project Management",
+      "description": "testforge projects lists all TestForge projects found in the current directory",
+      "category": "core",
+      "priority": "low",
+      "screens": [],
+      "tags": ["cli", "management"],
+      "source": "README.md"
+    }
+  ],
+  "screens": [],
+  "personas": [
+    {
+      "id": "P-001",
+      "name": "QA Engineer",
+      "description": "Primary user who runs the full pipeline: analyze, generate, execute, and report on test results",
+      "goals": ["Automate test case generation", "Track manual QA progress", "Generate shareable reports"],
+      "pain_points": ["Manual test case writing is slow", "Hard to maintain test coverage"],
+      "tech_level": "intermediate"
+    },
+    {
+      "id": "P-002",
+      "name": "Developer",
+      "description": "User who extends TestForge with custom connectors, assertions, or integrations",
+      "goals": ["Add custom test connectors", "Integrate with CI/CD", "Run selftest to verify installation"],
+      "pain_points": ["Complex setup", "Unclear extension points"],
+      "tech_level": "advanced"
+    }
+  ],
+  "rules": [
+    {
+      "id": "R-001",
+      "name": "CLI Exit Codes",
+      "description": "CLI must exit 0 on success, non-zero on failure",
+      "condition": "Any CLI command execution",
+      "expected_behavior": "Exit code 0 for success, 1 for failure",
+      "source": "cli-reference.md"
+    },
+    {
+      "id": "R-002",
+      "name": "Help Available",
+      "description": "All commands must show --help with usage information",
+      "condition": "Any command invoked with --help",
+      "expected_behavior": "Help text is displayed and exit 0",
+      "source": "cli-reference.md"
+    },
+    {
+      "id": "R-003",
+      "name": "Non-Interactive Mode",
+      "description": "--non-interactive (-y) flag must skip all confirmation prompts",
+      "condition": "CLI invoked with -y flag",
+      "expected_behavior": "No interactive prompts, auto-approve all confirmations",
+      "source": "cli-reference.md"
+    }
+  ],
+  "raw_sources": [
+    {"source": "README.md"},
+    {"source": "docs/getting-started.md"},
+    {"source": "docs/cli-reference.md"},
+    {"source": "docs/configuration.md"}
+  ]
+}

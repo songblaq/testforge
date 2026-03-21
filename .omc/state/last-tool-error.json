@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"find /Users/lucablaq/_/projects/testforge -type f -name \\\"*.py\\\" | head -20\"}",
+  "error": "Exit code 127\n(eval):1: command not found: find\n(eval):1: command not found: head",
+  "timestamp": "2026-03-21T15:24:52.974Z",
+  "retry_count": 1
+}

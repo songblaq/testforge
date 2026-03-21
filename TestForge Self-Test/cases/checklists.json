@@ -1,0 +1,49 @@
+[
+  {
+    "id": "CL-UX-001",
+    "name": "CLI UX Verification",
+    "category": "ui_ux",
+    "items": [
+      {"id": "CL-UX-001-01", "check": "testforge --help shows all commands with descriptions", "priority": "MUST"},
+      {"id": "CL-UX-001-02", "check": "testforge init --help shows clear usage with arguments and options", "priority": "MUST"},
+      {"id": "CL-UX-001-03", "check": "Error messages are human-readable (no raw tracebacks for user errors)", "priority": "SHOULD"},
+      {"id": "CL-UX-001-04", "check": "Progress output from analyze/generate is informative", "priority": "SHOULD"},
+      {"id": "CL-UX-001-05", "check": "--non-interactive (-y) flag skips all confirmation prompts", "priority": "MUST"}
+    ]
+  },
+  {
+    "id": "CL-FUNC-001",
+    "name": "Feature Completeness Verification",
+    "category": "functionality",
+    "items": [
+      {"id": "CL-FUNC-001-01", "check": "analyze produces structured output in analysis/analysis.json", "priority": "MUST"},
+      {"id": "CL-FUNC-001-02", "check": "generate creates cases for all analyzed features", "priority": "MUST"},
+      {"id": "CL-FUNC-001-03", "check": "report includes all test results with pass/fail status", "priority": "MUST"},
+      {"id": "CL-FUNC-001-04", "check": "selftest discovers and runs scripts from tests/selftest/", "priority": "SHOULD"},
+      {"id": "CL-FUNC-001-05", "check": "manual start/check/progress/finish lifecycle works end-to-end", "priority": "MUST"},
+      {"id": "CL-FUNC-001-06", "check": "projects lists all directories with .testforge/config.yaml", "priority": "SHOULD"}
+    ]
+  },
+  {
+    "id": "CL-ERR-001",
+    "name": "Error Handling Verification",
+    "category": "error_handling",
+    "items": [
+      {"id": "CL-ERR-001-01", "check": "analyze with non-existent project path shows clear error", "priority": "MUST"},
+      {"id": "CL-ERR-001-02", "check": "generate without prior analysis shows helpful message", "priority": "MUST"},
+      {"id": "CL-ERR-001-03", "check": "manual check without active session shows 'run start first' error", "priority": "MUST"},
+      {"id": "CL-ERR-001-04", "check": "LLM unavailable falls back to skeleton generation gracefully", "priority": "MUST"}
+    ]
+  },
+  {
+    "id": "CL-EDGE-001",
+    "name": "Edge Cases Verification",
+    "category": "edge_cases",
+    "items": [
+      {"id": "CL-EDGE-001-01", "check": "init with existing directory does not overwrite config", "priority": "SHOULD"},
+      {"id": "CL-EDGE-001-02", "check": "generate --type with invalid type shows error", "priority": "SHOULD"},
+      {"id": "CL-EDGE-001-03", "check": "report on project with no runs produces valid (empty) report", "priority": "SHOULD"},
+      {"id": "CL-EDGE-001-04", "check": "projects in empty directory shows 'No projects found'", "priority": "SHOULD"}
+    ]
+  }
+]
