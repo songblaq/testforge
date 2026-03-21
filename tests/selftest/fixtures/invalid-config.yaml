@@ -1,0 +1,5 @@
+# Intentionally invalid: missing required fields, bad types
+project_name: 12345
+version: null
+llm_provider: [not, a, string]
+extra: "should be a dict"

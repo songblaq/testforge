@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from testforge.assertions.base import AssertionResult, BaseAssertion
+from testforge.assertions.base import AssertionPlugin, AssertionResult, BaseAssertion
 
 
 class FileExistsAssertion(BaseAssertion):
@@ -43,4 +43,32 @@ class FileSizeAssertion(BaseAssertion):
             message=f"File size {size} bytes {'in' if passed else 'out of'} range [{min_size}, {max_size}]",
             expected=expected,
             actual=size,
+        )
+
+
+class FileAssertionPlugin(AssertionPlugin):
+    """Plugin that handles file_exists and file_size assertion types."""
+
+    @staticmethod
+    def handles() -> list[str]:
+        return ["file_exists", "file_size"]
+
+    def evaluate(
+        self,
+        assertion_type: str,
+        params: dict[str, Any],
+        context: dict[str, Any],
+    ) -> AssertionResult:
+        actual = context.get("path", params.get("actual", ""))
+        expected = params.get("expected")
+
+        if assertion_type == "file_exists":
+            return FileExistsAssertion().check(actual, expected)
+
+        if assertion_type == "file_size":
+            return FileSizeAssertion().check(actual, expected)
+
+        return AssertionResult(
+            passed=False,
+            message=f"FileAssertionPlugin: unknown type '{assertion_type}'",
         )

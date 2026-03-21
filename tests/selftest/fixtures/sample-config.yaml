@@ -1,0 +1,10 @@
+project_name: selftest-project
+version: "0.1.0"
+llm_provider: anthropic
+llm_model: ""
+input_dir: inputs
+output_dir: output
+evidence_dir: evidence
+cases_dir: cases
+analysis_dir: analysis
+extra: {}
