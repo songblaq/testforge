@@ -1,0 +1,55 @@
+"""FastAPI application factory -- registers routers and serves static files."""
+
+from __future__ import annotations
+
+from pathlib import Path
+
+from fastapi import FastAPI
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+
+from testforge import __version__
+
+STATIC_DIR = Path(__file__).parent / "static"
+
+
+def create_app() -> FastAPI:
+    """Build the FastAPI app with all routers and static serving."""
+    app = FastAPI(
+        title="TestForge",
+        version=__version__,
+        description="TestForge Web GUI -- manage projects, cases, and reports.",
+    )
+
+    # --- API routers ---
+    from testforge.web.routers.projects import router as projects_router
+    from testforge.web.routers.analysis import router as analysis_router
+    from testforge.web.routers.cases import router as cases_router
+    from testforge.web.routers.execution import router as execution_router
+    from testforge.web.routers.reports import router as reports_router
+    from testforge.web.routers.manual import router as manual_router
+
+    app.include_router(projects_router)
+    app.include_router(analysis_router)
+    app.include_router(cases_router)
+    app.include_router(execution_router)
+    app.include_router(reports_router)
+    app.include_router(manual_router)
+
+    # --- Health endpoint ---
+    @app.get("/api/health")
+    async def health():
+        return {"status": "ok", "version": __version__}
+
+    # --- Static files ---
+    if STATIC_DIR.exists():
+        app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+
+        @app.get("/")
+        async def index():
+            index_path = STATIC_DIR / "index.html"
+            if index_path.exists():
+                return FileResponse(str(index_path))
+            return {"message": "TestForge Web GUI -- static files not found"}
+
+    return app

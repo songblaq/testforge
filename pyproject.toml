@@ -38,7 +38,8 @@ anthropic = ["anthropic>=0.40"]
 openai = ["openai>=1.50"]
 browser = ["playwright>=1.40"]
 tui = ["textual>=0.80"]
-all = ["testforge[anthropic,openai,browser,tui]"]
+web = ["fastapi>=0.110", "uvicorn>=0.30"]
+all = ["testforge[anthropic,openai,browser,tui,web]"]
 dev = [
     "pytest>=8.0",
     "pytest-cov>=4.0",

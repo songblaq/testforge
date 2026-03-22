@@ -307,6 +307,26 @@ def manual_finish(project: str) -> None:
 
 
 @cli.command()
+@click.option("--port", "-p", default=8000, help="Server port.")
+@click.option("--host", "-h", default="127.0.0.1", help="Server host.")
+def web(port: int, host: str) -> None:
+    """Launch TestForge Web GUI."""
+    try:
+        import uvicorn
+        from testforge.web.app import create_app
+    except ImportError:
+        console.print(
+            "[red]The Web GUI requires 'fastapi' and 'uvicorn'.[/red]\n"
+            "Install them with:  pip install 'testforge[web]'"
+        )
+        raise SystemExit(1)
+
+    app = create_app()
+    console.print(f"[green]TestForge Web GUI[/green] starting at http://{host}:{port}")
+    uvicorn.run(app, host=host, port=port)
+
+
+@cli.command()
 @click.argument("project", type=click.Path(), required=False, default=None)
 def tui(project: str | None) -> None:
     """Launch the interactive TUI interface."""
