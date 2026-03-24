@@ -9,7 +9,11 @@ from typing import Any
 logger = logging.getLogger(__name__)
 
 
-def generate_scripts(project_dir: Path, framework: str = "playwright") -> list[dict[str, Any]]:
+def generate_scripts(
+    project_dir: Path,
+    framework: str = "playwright",
+    no_llm: bool = False,
+) -> list[dict[str, Any]]:
     """Generate automation scripts for a project.
 
     Parameters
@@ -31,7 +35,7 @@ def generate_scripts(project_dir: Path, framework: str = "playwright") -> list[d
     if framework not in generators:
         raise ValueError(f"Unsupported framework: {framework}")
 
-    scripts = generators[framework](project_dir)
+    scripts = generators[framework](project_dir, no_llm=no_llm)
 
     # Write generated scripts to the scripts/ directory
     if scripts:
@@ -49,8 +53,8 @@ def generate_scripts(project_dir: Path, framework: str = "playwright") -> list[d
     return scripts
 
 
-def _generate_playwright(project_dir: Path) -> list[dict[str, Any]]:
+def _generate_playwright(project_dir: Path, no_llm: bool = False) -> list[dict[str, Any]]:
     """Generate Playwright test scripts."""
     from testforge.scripts.playwright import generate_playwright_scripts
 
-    return generate_playwright_scripts(project_dir)
+    return generate_playwright_scripts(project_dir, no_llm=no_llm)

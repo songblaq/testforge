@@ -16,7 +16,7 @@ from testforge.llm.utils import parse_llm_json
 logger = logging.getLogger(__name__)
 
 
-def generate_playwright_scripts(project_dir: Path) -> list[dict[str, Any]]:
+def generate_playwright_scripts(project_dir: Path, no_llm: bool = False) -> list[dict[str, Any]]:
     """Generate Playwright test scripts from test cases.
 
     Parameters
@@ -37,6 +37,9 @@ def generate_playwright_scripts(project_dir: Path) -> list[dict[str, Any]]:
 
     config = load_config(project_dir)
     base_url = config.extra.get("base_url", "http://localhost:3000")
+
+    if no_llm:
+        return _generate_skeleton_scripts(cases, base_url)
 
     # Try LLM-powered generation
     from testforge.llm import create_adapter

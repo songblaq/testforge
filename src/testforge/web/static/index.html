@@ -9,199 +9,353 @@
 <body>
 
 <header class="app-header">
-  <h1>TestForge <span>Web GUI</span></h1>
-  <nav class="tab-bar">
-    <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
-    <button class="tab-btn" data-tab="analysis">Analysis</button>
-    <button class="tab-btn" data-tab="cases">Cases</button>
-    <button class="tab-btn" data-tab="execution">Execution</button>
-    <button class="tab-btn" data-tab="report">Report</button>
-  </nav>
-</header>
-
-<main class="app-main">
-  <!-- Dashboard -->
-  <section id="tab-dashboard" class="tab-panel active">
-    <div class="card">
-      <div class="card-header">
-        <h2>Projects</h2>
-        <button class="btn btn-primary" onclick="showCreateProject()">+ New Project</button>
-      </div>
-      <div id="project-list" class="card-grid">
-        <div class="empty-state">
-          <h3>No projects loaded</h3>
-          <p>Enter a directory path below and click "Scan" to find projects.</p>
+  <div class="header-left">
+    <h1 class="logo">TestForge</h1>
+  </div>
+  <div class="header-center">
+    <div class="project-selector" id="project-selector">
+      <button class="project-dropdown-btn" id="project-dropdown-btn">
+        <span id="selected-project-name" data-i18n="project.select">Select project...</span>
+        <span class="chevron">&#9660;</span>
+      </button>
+      <div class="project-dropdown" id="project-dropdown" style="display:none;">
+        <div class="dropdown-search">
+          <input type="text" id="project-search" placeholder="Search projects...">
         </div>
+        <div id="project-dropdown-list"></div>
       </div>
     </div>
+  </div>
+  <div class="header-right">
+    <select id="lang-select" class="lang-select">
+      <option value="ko">한국어</option>
+      <option value="vi">Tiếng Việt</option>
+      <option value="en">English</option>
+    </select>
+    <button class="btn btn-primary btn-sm" id="btn-new-project" data-i18n="project.new">+ New Project</button>
+  </div>
+</header>
+
+<!-- Context Bar (hidden when no project selected) -->
+<div class="context-bar" id="context-bar" style="display:none;">
+  <span class="ctx-name" id="ctx-name"></span>
+  <span class="ctx-sep">|</span>
+  <span class="ctx-stat ctx-clickable" id="ctx-pipeline" data-tab="overview">0/6 stages</span>
+  <span class="ctx-sep">|</span>
+  <span class="ctx-stat ctx-clickable" id="ctx-inputs" data-tab="inputs">0 docs</span>
+  <span class="ctx-sep">|</span>
+  <span class="ctx-stat ctx-clickable" id="ctx-features" data-tab="analysis">0 features</span>
+  <span class="ctx-sep">|</span>
+  <span class="ctx-stat ctx-clickable" id="ctx-cases" data-tab="cases">0 cases</span>
+  <span class="ctx-sep">|</span>
+  <span class="ctx-stat ctx-clickable" id="ctx-coverage" data-tab="report">-</span>
+</div>
+
+<!-- Tab Bar (hidden when no project selected) -->
+<nav class="tab-bar" id="tab-bar" style="display:none;">
+  <button class="tab-btn active" data-tab="overview" data-i18n="tab.overview">Overview</button>
+  <button class="tab-btn" data-tab="inputs" data-i18n="tab.inputs">Inputs</button>
+  <button class="tab-btn" data-tab="analysis" data-i18n="tab.analysis">Analysis</button>
+  <button class="tab-btn" data-tab="cases" data-i18n="tab.cases">Cases</button>
+  <button class="tab-btn" data-tab="scripts" data-i18n="tab.scripts">Scripts</button>
+  <button class="tab-btn" data-tab="execution" data-i18n="tab.execution">Execution</button>
+  <button class="tab-btn" data-tab="manual" data-i18n="tab.manual">Manual QA</button>
+  <button class="tab-btn" data-tab="report" data-i18n="tab.report">Report</button>
+</nav>
+
+<main class="app-main">
+  <!-- Project List (shown when no project selected) -->
+  <section id="project-list-view">
     <div class="card">
       <div class="card-header">
-        <h2>Scan Directory</h2>
+        <h2 data-i18n="projects.title">Projects</h2>
       </div>
-      <div class="form-row">
+      <div class="form-row" style="margin-bottom:16px;">
         <div class="form-group">
-          <label>Directory Path</label>
-          <input type="text" id="scan-dir" value="." placeholder="/path/to/projects">
+          <input type="text" id="scan-dir" placeholder="Directory path to scan">
         </div>
-        <div class="form-group" style="flex:0; display:flex; align-items:flex-end;">
-          <button class="btn btn-secondary" onclick="loadProjects()">Scan</button>
+        <div class="form-group" style="flex:0;display:flex;align-items:flex-end;">
+          <button class="btn btn-secondary" id="btn-scan" data-i18n="projects.scan">Scan</button>
         </div>
       </div>
+      <div id="project-grid" class="card-grid"></div>
     </div>
   </section>
 
-  <!-- Analysis -->
+  <!-- OVERVIEW TAB -->
+  <section id="tab-overview" class="tab-panel">
+    <div class="card">
+      <div class="card-header">
+        <h2 data-i18n="overview.title">Pipeline Overview</h2>
+      </div>
+      <div id="pipeline-stepper" class="pipeline-stepper"></div>
+      <div id="overview-next-cta" class="overview-next-cta" style="display:none;"></div>
+    </div>
+    <div class="card" id="overview-stats-card" style="display:none;">
+      <div class="card-header">
+        <h2 data-i18n="overview.quickstats">Quick Stats</h2>
+      </div>
+      <div id="overview-stats" class="stats-row"></div>
+    </div>
+  </section>
+
+  <!-- INPUTS TAB -->
+  <section id="tab-inputs" class="tab-panel">
+    <div class="card">
+      <div class="card-header">
+        <h2 data-i18n="inputs.title">Input Documents</h2>
+        <label class="btn btn-primary" id="btn-upload-label">
+          <span data-i18n="inputs.upload">+ Upload</span>
+          <input type="file" id="file-upload" multiple style="display:none;" accept=".md,.txt,.pdf,.docx,.pptx,.xlsx,.yaml,.json,.png,.jpg,.jpeg">
+        </label>
+      </div>
+      <div class="drop-zone" id="drop-zone">
+        <div class="drop-zone-text">
+          <p class="drop-icon">&#128196;</p>
+          <p data-i18n="inputs.drop">Drop files here or click Upload</p>
+          <p class="drop-hint" data-i18n="inputs.formats">Supports: .md, .txt, .pdf, .docx, .pptx, .xlsx, .yaml, .json, images</p>
+        </div>
+      </div>
+      <table id="inputs-table" class="data-table" style="display:none;">
+        <thead><tr><th data-i18n="th.type">Type</th><th data-i18n="th.name">Name</th><th data-i18n="th.size">Size</th><th data-i18n="th.actions">Actions</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="action-bar" id="inputs-action" style="display:none;">
+        <button class="btn btn-accent" id="btn-run-analysis-from-inputs" data-i18n="inputs.analyze">&rarr; Run Analysis with these documents</button>
+      </div>
+      <div class="tab-bottom-cta" id="inputs-next-cta" style="display:none;"></div>
+    </div>
+  </section>
+
+  <!-- ANALYSIS TAB -->
   <section id="tab-analysis" class="tab-panel">
     <div class="card">
       <div class="card-header">
-        <h2>Analysis Review</h2>
-        <button class="btn btn-primary" onclick="runAnalysis()" id="btn-analyze">Run Analysis</button>
+        <h2 data-i18n="analysis.title">Analysis Results</h2>
+        <button class="btn btn-primary" id="btn-analyze" data-i18n="analysis.run">Run Analysis</button>
       </div>
-      <div id="analysis-status" class="empty-state">
-        <h3>No project selected</h3>
-        <p>Select a project from the Dashboard first.</p>
+      <div id="analysis-guard" class="guard-message" style="display:none;">
+        <p data-i18n="analysis.guard">Upload documents in the Inputs tab first before running analysis.</p>
+        <button class="btn btn-secondary btn-sm guard-cta-btn" data-guard-tab="inputs" data-i18n="guard.goto_inputs">Go to Inputs</button>
+      </div>
+      <div id="analysis-empty" class="empty-state">
+        <h3 data-i18n="analysis.empty">No analysis results</h3>
+        <p data-i18n="analysis.empty.desc">Run analysis to extract features, personas, and business rules from your documents.</p>
       </div>
       <div id="analysis-content" style="display:none;">
-        <h3 style="margin:12px 0 8px;">Features</h3>
-        <table class="data-table" id="features-table">
-          <thead><tr><th>ID</th><th>Name</th><th>Category</th><th>Priority</th><th>Description</th></tr></thead>
+        <div id="analysis-summary-cards" class="stats-row" style="margin-bottom:20px;"></div>
+        <h3 data-i18n="analysis.features">Features</h3>
+        <table id="features-table" class="data-table">
+          <thead><tr><th data-i18n="th.id">ID</th><th data-i18n="th.name">Name</th><th data-i18n="th.category">Category</th><th data-i18n="th.priority">Priority</th><th data-i18n="th.description">Description</th></tr></thead>
           <tbody></tbody>
         </table>
-        <h3 style="margin:16px 0 8px;">Personas</h3>
-        <table class="data-table" id="personas-table">
-          <thead><tr><th>ID</th><th>Name</th><th>Tech Level</th><th>Description</th></tr></thead>
+        <h3 data-i18n="analysis.personas">Personas</h3>
+        <table id="personas-table" class="data-table">
+          <thead><tr><th data-i18n="th.id">ID</th><th data-i18n="th.name">Name</th><th data-i18n="th.tech_level">Tech Level</th><th data-i18n="th.description">Description</th></tr></thead>
           <tbody></tbody>
         </table>
-        <h3 style="margin:16px 0 8px;">Business Rules</h3>
-        <table class="data-table" id="rules-table">
-          <thead><tr><th>ID</th><th>Name</th><th>Condition</th><th>Expected</th></tr></thead>
+        <h3 data-i18n="analysis.rules">Business Rules</h3>
+        <table id="rules-table" class="data-table">
+          <thead><tr><th data-i18n="th.id">ID</th><th data-i18n="th.name">Name</th><th data-i18n="th.condition">Condition</th><th data-i18n="th.expected">Expected</th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
+      <div class="tab-bottom-cta" id="analysis-next-cta" style="display:none;"></div>
     </div>
   </section>
 
-  <!-- Cases -->
+  <!-- CASES TAB -->
   <section id="tab-cases" class="tab-panel">
     <div class="card">
       <div class="card-header">
-        <h2>Test Cases</h2>
-        <div style="display:flex;gap:8px;">
-          <select id="case-type-select" style="padding:6px 12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:14px;">
-            <option value="all">All Types</option>
-            <option value="functional">Functional</option>
-            <option value="usecase">Use Case</option>
-            <option value="checklist">Checklist</option>
+        <h2 data-i18n="cases.title">Test Cases</h2>
+        <div class="header-actions">
+          <select id="case-type-select" class="select-sm">
+            <option value="all" data-i18n="cases.all">All Types</option>
+            <option value="functional" data-i18n="cases.functional">Functional</option>
+            <option value="usecase" data-i18n="cases.usecase">Use Case</option>
+            <option value="checklist" data-i18n="cases.checklist">Checklist</option>
+            <option value="crud" data-i18n="cases.crud">CRUD</option>
           </select>
-          <button class="btn btn-primary" onclick="generateCases()">Generate</button>
+          <select id="case-tag-select" class="select-sm">
+            <option value="all" data-i18n="cases.all_tags">All Tags</option>
+            <option value="positive" data-i18n="cases.positive">Positive</option>
+            <option value="negative" data-i18n="cases.negative">Negative</option>
+            <option value="edge" data-i18n="cases.edge">Edge</option>
+            <option value="smoke" data-i18n="cases.smoke">Smoke</option>
+            <option value="regression" data-i18n="cases.regression">Regression</option>
+          </select>
+          <button class="btn btn-primary" id="btn-generate" data-i18n="cases.generate">Generate Cases</button>
         </div>
       </div>
-      <div class="toolbar">
-        <input type="text" id="case-filter" placeholder="Filter cases..." oninput="filterCases()">
+      <div id="cases-guard" class="guard-message" style="display:none;">
+        <p data-i18n="cases.guard">Run analysis first in the Analysis tab before generating test cases.</p>
+        <button class="btn btn-secondary btn-sm guard-cta-btn" data-guard-tab="analysis" data-i18n="guard.goto_analysis">Go to Analysis</button>
       </div>
-      <div id="cases-status" class="empty-state">
-        <h3>No cases yet</h3>
-        <p>Select a project and generate test cases.</p>
+      <div id="cases-empty" class="empty-state">
+        <h3 data-i18n="cases.empty">No test cases</h3>
+        <p data-i18n="cases.empty.desc">Generate test cases after running analysis.</p>
       </div>
-      <table class="data-table" id="cases-table" style="display:none;">
-        <thead><tr><th>ID</th><th>Title</th><th>Type</th><th>Priority</th><th>Feature</th><th>Status</th></tr></thead>
-        <tbody></tbody>
-      </table>
+      <div id="cases-content" style="display:none;">
+        <div class="filter-row">
+          <input type="text" id="case-filter" data-i18n-placeholder="cases.filter" placeholder="Filter cases..." class="filter-input">
+        </div>
+        <table id="cases-table" class="data-table">
+          <thead><tr><th data-i18n="th.id">ID</th><th data-i18n="th.title">Title</th><th data-i18n="th.type">Type</th><th data-i18n="th.tag">Tag</th><th data-i18n="th.priority">Priority</th><th data-i18n="th.feature">Feature</th><th data-i18n="th.status">Status</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="tab-bottom-cta" id="cases-next-cta" style="display:none;"></div>
     </div>
   </section>
 
-  <!-- Execution -->
+  <!-- SCRIPTS TAB -->
+  <section id="tab-scripts" class="tab-panel">
+    <div class="card">
+      <div class="card-header">
+        <h2 data-i18n="scripts.title">Test Scripts</h2>
+        <button class="btn btn-primary" id="btn-gen-scripts" data-i18n="scripts.generate">Generate Scripts</button>
+      </div>
+      <div id="scripts-guard" class="guard-message" style="display:none;">
+        <p data-i18n="scripts.guard">Generate test cases first in the Cases tab before generating scripts.</p>
+        <button class="btn btn-secondary btn-sm guard-cta-btn" data-guard-tab="cases" data-i18n="guard.goto_cases">Go to Cases</button>
+      </div>
+      <div id="scripts-empty" class="empty-state">
+        <h3 data-i18n="scripts.empty">No scripts generated</h3>
+        <p data-i18n="scripts.empty.desc">Generate Playwright test scripts from your test cases.</p>
+      </div>
+      <div id="scripts-content" style="display:none;">
+        <div id="scripts-summary-cards" class="stats-row" style="margin-bottom:16px;"></div>
+        <table id="scripts-table" class="data-table">
+          <thead><tr><th data-i18n="th.file">File</th><th data-i18n="th.lines">Lines</th><th data-i18n="th.case_id">Case</th><th data-i18n="th.size">Size</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="tab-bottom-cta" id="scripts-next-cta" style="display:none;"></div>
+    </div>
+  </section>
+
+  <!-- EXECUTION TAB -->
   <section id="tab-execution" class="tab-panel">
     <div class="card">
       <div class="card-header">
-        <h2>Test Execution</h2>
-        <button class="btn btn-primary" onclick="runExecution()" id="btn-run">Run Tests</button>
+        <h2 data-i18n="exec.title">Test Execution</h2>
+        <button class="btn btn-primary" id="btn-run" data-i18n="exec.run">Run Tests</button>
+      </div>
+      <div id="execution-guard" class="guard-message" style="display:none;">
+        <p data-i18n="exec.guard">Generate scripts first in the Scripts tab before running tests.</p>
+        <button class="btn btn-secondary btn-sm guard-cta-btn" data-guard-tab="scripts" data-i18n="guard.goto_scripts">Go to Scripts</button>
+      </div>
+      <div id="execution-empty" class="empty-state">
+        <h3 data-i18n="exec.empty">No test runs yet</h3>
+        <p data-i18n="exec.empty.desc">Execute test scripts and see results here.</p>
       </div>
       <div id="execution-summary" style="display:none;">
         <div class="stats-row">
-          <div class="stat-item"><div class="stat-value" id="exec-total" style="color:var(--text);">0</div><div class="stat-label">Total</div></div>
-          <div class="stat-item"><div class="stat-value" id="exec-passed" style="color:var(--green);">0</div><div class="stat-label">Passed</div></div>
-          <div class="stat-item"><div class="stat-value" id="exec-failed" style="color:var(--red);">0</div><div class="stat-label">Failed</div></div>
+          <div class="stat-card"><div class="stat-value" id="exec-total">0</div><div class="stat-label" data-i18n="exec.total">Total</div></div>
+          <div class="stat-card stat-pass"><div class="stat-value" id="exec-passed">0</div><div class="stat-label" data-i18n="exec.passed">Passed</div></div>
+          <div class="stat-card stat-fail"><div class="stat-value" id="exec-failed">0</div><div class="stat-label" data-i18n="exec.failed">Failed</div></div>
         </div>
         <div class="progress-bar"><div class="progress-fill" id="exec-progress"></div></div>
+        <table id="execution-table" class="data-table">
+          <thead><tr><th data-i18n="th.case">Case</th><th data-i18n="th.status">Status</th><th data-i18n="th.duration">Duration</th><th data-i18n="th.output">Output</th></tr></thead>
+          <tbody></tbody>
+        </table>
       </div>
-      <div id="execution-status" class="empty-state">
-        <h3>No test runs yet</h3>
-        <p>Select a project and run tests.</p>
-      </div>
-      <table class="data-table" id="execution-table" style="display:none;">
-        <thead><tr><th>Case ID</th><th>Status</th><th>Duration</th><th>Output</th></tr></thead>
-        <tbody></tbody>
-      </table>
+      <div class="tab-bottom-cta" id="execution-next-cta" style="display:none;"></div>
     </div>
   </section>
 
-  <!-- Report -->
+  <!-- MANUAL QA TAB -->
+  <section id="tab-manual" class="tab-panel">
+    <div class="card">
+      <div class="card-header">
+        <h2 data-i18n="manual.title">Manual QA Checklist</h2>
+        <div class="header-actions">
+          <button class="btn btn-primary" id="btn-manual-start" data-i18n="manual.start">Start Session</button>
+          <button class="btn btn-accent" id="btn-manual-finish" style="display:none;" data-i18n="manual.finish">Finish Session</button>
+        </div>
+      </div>
+      <div id="manual-guard" class="guard-message" style="display:none;">
+        <p data-i18n="manual.guard">Generate test cases or run analysis first before starting a manual QA session.</p>
+        <button class="btn btn-secondary btn-sm guard-cta-btn" data-guard-tab="cases" data-i18n="guard.goto_cases">Go to Cases</button>
+      </div>
+      <div id="manual-empty" class="empty-state">
+        <h3 data-i18n="manual.empty">No active session</h3>
+        <p data-i18n="manual.empty.desc">Start a manual QA session to work through the checklist.</p>
+      </div>
+      <div id="manual-content" style="display:none;">
+        <div class="progress-bar"><div class="progress-fill" id="manual-progress"></div></div>
+        <div class="manual-stats" id="manual-stats-text">
+          <span id="manual-checked">0</span> / <span id="manual-total">0</span> items checked
+        </div>
+        <div id="manual-items"></div>
+      </div>
+      <div class="tab-bottom-cta" id="manual-next-cta" style="display:none;"></div>
+    </div>
+  </section>
+
+  <!-- REPORT TAB -->
   <section id="tab-report" class="tab-panel">
     <div class="card">
       <div class="card-header">
-        <h2>Report Viewer</h2>
-        <div style="display:flex;gap:8px;">
-          <select id="report-fmt" style="padding:6px 12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:14px;">
+        <h2 data-i18n="report.title">Test Report</h2>
+        <div class="header-actions">
+          <select id="report-fmt" class="select-sm">
             <option value="markdown">Markdown</option>
             <option value="html">HTML</option>
           </select>
-          <button class="btn btn-primary" onclick="loadReport()">Generate Report</button>
+          <button class="btn btn-primary" id="btn-load-report" data-i18n="report.load">Load Report</button>
+          <button class="btn btn-secondary btn-sm" id="btn-download-report" data-i18n="report.download" style="display:none;">Download</button>
         </div>
       </div>
-      <div id="coverage-section" style="display:none; margin-bottom:16px;">
-        <h3 style="margin-bottom:8px;">Coverage</h3>
+      <div id="report-guard" class="guard-message" style="display:none;">
+        <p data-i18n="report.guard">Run tests first in the Execution tab before viewing the report.</p>
+        <button class="btn btn-secondary btn-sm guard-cta-btn" data-guard-tab="execution" data-i18n="guard.goto_execution">Go to Execution</button>
+      </div>
+      <div id="report-empty" class="empty-state">
+        <h3 data-i18n="report.empty">No report loaded</h3>
+        <p data-i18n="report.empty.desc">Generate a report after running tests.</p>
+      </div>
+      <div id="report-executive-summary" class="stats-row" style="display:none;"></div>
+      <div id="report-content" style="display:none;">
+        <div id="report-viewer" class="report-viewer"></div>
+      </div>
+      <div id="coverage-section" style="display:none;">
+        <h3 data-i18n="report.coverage">Coverage</h3>
         <div class="stats-row">
-          <div class="stat-item"><div class="stat-value" id="cov-features" style="color:var(--accent-light);">-</div><div class="stat-label">Feature Coverage</div></div>
-          <div class="stat-item"><div class="stat-value" id="cov-rules" style="color:var(--accent-light);">-</div><div class="stat-label">Rule Coverage</div></div>
+          <div class="stat-card"><div class="stat-value" id="cov-features">-</div><div class="stat-label" data-i18n="report.feature_cov">Feature Coverage</div></div>
+          <div class="stat-card"><div class="stat-value" id="cov-rules">-</div><div class="stat-label" data-i18n="report.rule_cov">Rule Coverage</div></div>
         </div>
-      </div>
-      <div id="report-status" class="empty-state">
-        <h3>No report generated</h3>
-        <p>Select a project and generate a report.</p>
-      </div>
-      <div id="report-viewer" style="display:none;">
-        <div class="report-content" id="report-content"></div>
       </div>
     </div>
   </section>
+  <!-- Detail Panel (shared across tabs) -->
+  <div class="detail-panel" id="detail-panel">
+    <div class="detail-header">
+      <h3 id="detail-title"></h3>
+      <button class="detail-close" id="detail-close">&times;</button>
+    </div>
+    <div class="detail-body" id="detail-body"></div>
+  </div>
 </main>
 
 <!-- Create Project Modal -->
-<div id="create-modal" class="modal-overlay" style="display:none;">
+<div class="modal-overlay" id="create-modal" style="display:none;">
   <div class="modal">
-    <h3>Create New Project</h3>
-    <div class="form-group">
-      <label>Project Name</label>
-      <input type="text" id="new-project-name" placeholder="my-project">
+    <div class="modal-header"><h2 data-i18n="modal.title">New Project</h2><button class="modal-close" id="modal-close">&times;</button></div>
+    <div class="form-group"><label data-i18n="modal.name">Project Name</label><input type="text" id="new-project-name" placeholder="my-project"></div>
+    <div class="form-group"><label data-i18n="modal.dir">Directory</label><input type="text" id="new-project-dir" placeholder="." value="."></div>
+    <div class="form-group"><label data-i18n="modal.provider">LLM Provider</label>
+      <select id="new-project-provider"><option value="anthropic">Anthropic</option><option value="openai">OpenAI</option><option value="ollama">Ollama</option><option value="cli">CLI</option></select>
     </div>
-    <div class="form-group">
-      <label>Directory</label>
-      <input type="text" id="new-project-dir" placeholder="." value=".">
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label>LLM Provider</label>
-        <select id="new-project-provider">
-          <option value="anthropic">Anthropic</option>
-          <option value="openai">OpenAI</option>
-          <option value="cli">CLI</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Model (optional)</label>
-        <input type="text" id="new-project-model" placeholder="">
-      </div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="hideCreateProject()">Cancel</button>
-      <button class="btn btn-primary" onclick="createProject()">Create</button>
-    </div>
+    <div class="form-group"><label data-i18n="modal.model">Model (optional)</label><input type="text" id="new-project-model" placeholder="default"></div>
+    <div class="modal-footer"><button class="btn btn-secondary" id="modal-cancel" data-i18n="modal.cancel">Cancel</button><button class="btn btn-primary" id="modal-create" data-i18n="modal.create">Create</button></div>
   </div>
 </div>
 
-<div class="toast-container" id="toast-container"></div>
-
+<div id="toast-container"></div>
+<script src="/static/i18n.js"></script>
 <script src="/static/app.js"></script>
 </body>
 </html>

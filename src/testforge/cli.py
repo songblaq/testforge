@@ -12,6 +12,19 @@ from testforge import __version__
 console = Console()
 
 
+def _find_selftest_dir() -> Path | None:
+    """Locate the bundled self-test directory for source and packaged installs."""
+    cli_file = Path(__file__).resolve()
+    candidates = [
+        cli_file.parents[2] / "tests" / "selftest",
+        cli_file.parent / "tests" / "selftest",
+    ]
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+    return None
+
+
 @click.group()
 @click.version_option(version=__version__, prog_name="testforge")
 @click.option(
@@ -113,6 +126,7 @@ def generate(ctx: click.Context, project: str, case_type: str, use_cases: bool, 
     from testforge.cases.generator import generate_cases
 
     non_interactive: bool = ctx.obj.get("non_interactive", False) if ctx.obj else False
+    no_llm: bool = ctx.obj.get("no_llm", False) if ctx.obj else False
 
     # --use-cases / --checklists flags override the --type option
     if use_cases and checklists:
@@ -127,7 +141,7 @@ def generate(ctx: click.Context, project: str, case_type: str, use_cases: bool, 
     if non_interactive:
         console.print("[dim]--non-interactive: auto-approving generation without prompts.[/dim]")
 
-    cases = generate_cases(Path(project), effective_type)
+    cases = generate_cases(Path(project), effective_type, no_llm=no_llm)
     if not cases:
         console.print("[yellow]No cases generated. Run 'testforge analyze' first.[/yellow]")
         return
@@ -137,11 +151,13 @@ def generate(ctx: click.Context, project: str, case_type: str, use_cases: bool, 
 @cli.command()
 @click.argument("project", type=click.Path(exists=True))
 @click.option("--framework", "-f", default="playwright", help="Script framework: playwright.")
-def script(project: str, framework: str) -> None:
+@click.pass_context
+def script(ctx: click.Context, project: str, framework: str) -> None:
     """Generate automation scripts from test cases."""
     from testforge.scripts.generator import generate_scripts
 
-    scripts = generate_scripts(Path(project), framework)
+    no_llm: bool = ctx.obj.get("no_llm", False) if ctx.obj else False
+    scripts = generate_scripts(Path(project), framework, no_llm=no_llm)
     console.print(f"[green]Generated:[/green] {len(scripts)} scripts ({framework})")
 
 
@@ -212,14 +228,17 @@ def coverage(project: str) -> None:
 @click.argument("project", type=click.Path(exists=True))
 @click.option("--stages", "-s", multiple=True, help="Pipeline stages to run.")
 @click.option("--input", "-i", "inputs", multiple=True, help="Input files for analysis.")
-def pipeline(project: str, stages: tuple[str, ...], inputs: tuple[str, ...]) -> None:
+@click.pass_context
+def pipeline(ctx: click.Context, project: str, stages: tuple[str, ...], inputs: tuple[str, ...]) -> None:
     """Run the full TestForge pipeline end to end."""
     from testforge.core.pipeline import run_pipeline
 
+    no_llm: bool = ctx.obj.get("no_llm", False) if ctx.obj else False
     result = run_pipeline(
         Path(project),
         stages=list(stages) if stages else None,
         inputs=list(inputs) if inputs else None,
+        no_llm=no_llm,
     )
 
     if result.success:
@@ -227,6 +246,67 @@ def pipeline(project: str, stages: tuple[str, ...], inputs: tuple[str, ...]) -> 
     else:
         console.print(f"[red]Pipeline failed:[/red] {'; '.join(result.errors)}")
         console.print(f"  Completed stages: {', '.join(result.stages_completed)}")
+
+
+@cli.command()
+@click.argument("project", type=click.Path(exists=True))
+@click.option("--max-iter", default=3, type=int, help="Maximum research iterations.")
+@click.option("--threshold", default=0.95, type=float, help="Target pass-rate threshold.")
+@click.option(
+    "--strategy",
+    default="fix-failed",
+    type=click.Choice(["fix-failed", "expand-coverage", "both"]),
+    help="Research improvement strategy.",
+)
+@click.option(
+    "--ledger-dir",
+    type=click.Path(),
+    default=None,
+    help="Optional external directory for testforge-results.tsv.",
+)
+@click.option(
+    "--plaza-runtime",
+    default="",
+    help="Optional runtime id for Plaza logging, e.g. codex or claude-code.",
+)
+@click.option("--input", "-i", "inputs", multiple=True, help="Input files for the initial analysis.")
+@click.pass_context
+def research(
+    ctx: click.Context,
+    project: str,
+    max_iter: int,
+    threshold: float,
+    strategy: str,
+    ledger_dir: str | None,
+    plaza_runtime: str,
+    inputs: tuple[str, ...],
+) -> None:
+    """Run the AutoResearch loop for a TestForge project."""
+    from testforge.research.loop import run_research
+    from testforge.research.loop import ResearchNoOpError
+
+    no_llm: bool = ctx.obj.get("no_llm", False) if ctx.obj else False
+    try:
+        summary = run_research(
+            Path(project),
+            max_iterations=max_iter,
+            threshold=threshold,
+            strategy=strategy,
+            inputs=list(inputs) if inputs else None,
+            ledger_dir=Path(ledger_dir) if ledger_dir else None,
+            plaza_runtime=plaza_runtime or None,
+            no_llm=no_llm,
+        )
+    except ResearchNoOpError as exc:
+        console.print(f"[red]Research no-op:[/red] {exc}")
+        raise SystemExit(1)
+
+    console.print(
+        f"[green]Research complete:[/green] "
+        f"iterations={len(summary.iterations)} "
+        f"final_pass_rate={summary.final_pass_rate:.3f} "
+        f"converged={summary.converged}"
+    )
 
 
 @cli.group()
@@ -243,11 +323,13 @@ def manual(ctx: click.Context) -> None:
 
 @manual.command("start")
 @click.argument("project", type=click.Path(exists=True))
-def manual_start(project: str) -> None:
+@click.pass_context
+def manual_start(ctx: click.Context, project: str) -> None:
     """Start a manual test checklist session."""
     from testforge.cases.checklist import start_session
 
-    session = start_session(Path(project))
+    no_llm: bool = ctx.obj.get("no_llm", False) if ctx.obj else False
+    session = start_session(Path(project), no_llm=no_llm)
     console.print(f"[green]Session started:[/green] {session.session_id}")
     console.print(f"  Items: {len(session.items)}")
     console.print(f"  State saved to: {project}/.testforge/manual/active-session.json")
@@ -360,13 +442,8 @@ def selftest(verbose: bool) -> None:
     """Run built-in self-test suite against the installed TestForge."""
     import subprocess
 
-    # Locate the selftest scripts directory relative to this file
-    selftest_dir = Path(__file__).parent.parent.parent.parent / "tests" / "selftest"
-    if not selftest_dir.exists():
-        # Fallback: look relative to package install root
-        selftest_dir = Path(__file__).parent / "tests" / "selftest"
-
-    if not selftest_dir.exists():
+    selftest_dir = _find_selftest_dir()
+    if selftest_dir is None:
         console.print("[yellow]No selftest directory found. Expected: tests/selftest/[/yellow]")
         raise SystemExit(0)
 

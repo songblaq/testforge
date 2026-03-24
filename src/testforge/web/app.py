@@ -28,6 +28,9 @@ def create_app() -> FastAPI:
     from testforge.web.routers.execution import router as execution_router
     from testforge.web.routers.reports import router as reports_router
     from testforge.web.routers.manual import router as manual_router
+    from testforge.web.routers.scripts import router as scripts_router
+    from testforge.web.routers.inputs import router as inputs_router
+    from testforge.web.routers.inputs import delete_router as inputs_delete_router
 
     app.include_router(projects_router)
     app.include_router(analysis_router)
@@ -35,11 +38,19 @@ def create_app() -> FastAPI:
     app.include_router(execution_router)
     app.include_router(reports_router)
     app.include_router(manual_router)
+    app.include_router(scripts_router)
+    app.include_router(inputs_router)
+    app.include_router(inputs_delete_router)
 
-    # --- Health endpoint ---
+    # --- Health + Config endpoints ---
     @app.get("/api/health")
     async def health():
         return {"status": "ok", "version": __version__}
+
+    @app.get("/api/config")
+    async def config():
+        import os
+        return {"cwd": os.getcwd(), "version": __version__}
 
     # --- Static files ---
     if STATIC_DIR.exists():

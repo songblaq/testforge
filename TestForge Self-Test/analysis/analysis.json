@@ -2,103 +2,123 @@
   "features": [
     {
       "id": "F-001",
-      "name": "Project Init",
-      "description": "testforge init creates a new project directory with standard structure (.testforge/config.yaml, inputs/, output/, evidence/, scripts/, cases/, analysis/)",
-      "category": "core",
+      "name": "Multi-format Input",
+      "description": "Parse PDF, PPT, Word, Excel, images, URLs, GitHub repos",
+      "category": "input",
       "priority": "high",
       "screens": [],
-      "tags": ["cli", "setup"],
-      "source": "README.md"
+      "tags": [],
+      "source": ""
     },
     {
       "id": "F-002",
-      "name": "Document Analysis",
-      "description": "testforge analyze parses input documents (PDF, PPTX, DOCX, images, URLs) and extracts features, personas, and business rules using LLM",
-      "category": "core",
+      "name": "LLM Analysis",
+      "description": "Feature extraction, persona derivation, business-rule identification",
+      "category": "analysis",
       "priority": "high",
       "screens": [],
-      "tags": ["cli", "llm"],
-      "source": "README.md"
+      "tags": [],
+      "source": ""
     },
     {
       "id": "F-003",
       "name": "Test Case Generation",
-      "description": "testforge generate creates functional test cases, use-case scenarios, and manual checklists from analysis results",
-      "category": "core",
+      "description": "Functional tests, use-case scenarios, manual checklists with CRUD flows",
+      "category": "generation",
       "priority": "high",
       "screens": [],
-      "tags": ["cli", "generation"],
-      "source": "README.md"
+      "tags": [],
+      "source": ""
     },
     {
       "id": "F-004",
       "name": "Script Generation",
-      "description": "testforge script generates Playwright browser test scripts from test cases",
-      "category": "core",
-      "priority": "medium",
+      "description": "Playwright browser tests with LLM + skeleton fallback",
+      "category": "scripts",
+      "priority": "high",
       "screens": [],
-      "tags": ["cli", "playwright"],
-      "source": "README.md"
+      "tags": [],
+      "source": ""
     },
     {
       "id": "F-005",
-      "name": "Test Execution",
-      "description": "testforge run executes generated test scripts via shell/browser/HTTP connectors and collects evidence",
-      "category": "core",
-      "priority": "high",
+      "name": "Dual-Track QA",
+      "description": "Automated execution + manual checklist workflow",
+      "category": "execution",
+      "priority": "medium",
       "screens": [],
-      "tags": ["cli", "execution"],
-      "source": "README.md"
+      "tags": [],
+      "source": ""
     },
     {
       "id": "F-006",
-      "name": "Report Generation",
-      "description": "testforge report generates markdown or HTML test reports from execution results",
-      "category": "core",
-      "priority": "high",
+      "name": "Evidence Collection",
+      "description": "Screenshots, logs, network HAR traces per test run",
+      "category": "execution",
+      "priority": "medium",
       "screens": [],
-      "tags": ["cli", "report"],
-      "source": "README.md"
+      "tags": [],
+      "source": ""
     },
     {
       "id": "F-007",
-      "name": "Manual QA Workflow",
-      "description": "testforge manual start/check/progress/finish provides a structured checklist workflow for human testers",
-      "category": "core",
+      "name": "Report Generation",
+      "description": "Markdown and HTML reports with evidence attachments",
+      "category": "reporting",
       "priority": "medium",
       "screens": [],
-      "tags": ["cli", "manual"],
-      "source": "README.md"
+      "tags": [],
+      "source": ""
     },
     {
       "id": "F-008",
-      "name": "TUI Interface",
-      "description": "testforge tui launches an interactive Textual-based terminal UI with dashboard, cases, runner, and manual screens",
-      "category": "ui",
-      "priority": "low",
-      "screens": ["dashboard", "cases", "runner", "manual"],
-      "tags": ["tui", "textual"],
-      "source": "README.md"
+      "name": "CLI Interface",
+      "description": "Click-based CLI with 13+ commands",
+      "category": "interface",
+      "priority": "high",
+      "screens": [],
+      "tags": [],
+      "source": ""
     },
     {
       "id": "F-009",
-      "name": "Self-Test Suite",
-      "description": "testforge selftest runs built-in shell test scripts from tests/selftest/ to verify the installation",
-      "category": "quality",
-      "priority": "medium",
+      "name": "Web GUI",
+      "description": "FastAPI + vanilla JS SPA with 7 tabs, detail panel, project dropdown, context bar, i18n",
+      "category": "interface",
+      "priority": "high",
       "screens": [],
-      "tags": ["cli", "selftest"],
-      "source": "README.md"
+      "tags": [],
+      "source": ""
     },
     {
       "id": "F-010",
       "name": "Multi-Project Management",
-      "description": "testforge projects lists all TestForge projects found in the current directory",
-      "category": "core",
-      "priority": "low",
+      "description": "List and manage multiple TestForge projects with independent data",
+      "category": "project",
+      "priority": "medium",
       "screens": [],
-      "tags": ["cli", "management"],
-      "source": "README.md"
+      "tags": [],
+      "source": ""
+    },
+    {
+      "id": "F-011",
+      "name": "Multiple LLM Providers",
+      "description": "Anthropic, OpenAI, CLI tools, Ollama support",
+      "category": "llm",
+      "priority": "high",
+      "screens": [],
+      "tags": [],
+      "source": ""
+    },
+    {
+      "id": "F-012",
+      "name": "Internationalization",
+      "description": "EN/KO toggle with 147+ translation keys, localStorage persistence",
+      "category": "interface",
+      "priority": "medium",
+      "screens": [],
+      "tags": [],
+      "source": ""
     }
   ],
   "screens": [],
@@ -106,50 +126,65 @@
     {
       "id": "P-001",
       "name": "QA Engineer",
-      "description": "Primary user who runs the full pipeline: analyze, generate, execute, and report on test results",
-      "goals": ["Automate test case generation", "Track manual QA progress", "Generate shareable reports"],
-      "pain_points": ["Manual test case writing is slow", "Hard to maintain test coverage"],
-      "tech_level": "intermediate"
+      "description": "Professional QA testing projects",
+      "goals": [],
+      "pain_points": [],
+      "tech_level": "advanced"
     },
     {
       "id": "P-002",
       "name": "Developer",
-      "description": "User who extends TestForge with custom connectors, assertions, or integrations",
-      "goals": ["Add custom test connectors", "Integrate with CI/CD", "Run selftest to verify installation"],
-      "pain_points": ["Complex setup", "Unclear extension points"],
-      "tech_level": "advanced"
+      "description": "Dev wanting automated test generation",
+      "goals": [],
+      "pain_points": [],
+      "tech_level": "intermediate"
+    },
+    {
+      "id": "P-003",
+      "name": "Project Manager",
+      "description": "Non-technical user reviewing test reports",
+      "goals": [],
+      "pain_points": [],
+      "tech_level": "beginner"
     }
   ],
   "rules": [
     {
       "id": "R-001",
-      "name": "CLI Exit Codes",
-      "description": "CLI must exit 0 on success, non-zero on failure",
-      "condition": "Any CLI command execution",
-      "expected_behavior": "Exit code 0 for success, 1 for failure",
-      "source": "cli-reference.md"
+      "name": "LLM Fallback",
+      "description": "Fall back to skeleton when LLM unavailable",
+      "condition": "LLM adapter fails or --no-llm",
+      "expected_behavior": "Skeleton output generated",
+      "source": ""
     },
     {
       "id": "R-002",
-      "name": "Help Available",
-      "description": "All commands must show --help with usage information",
-      "condition": "Any command invoked with --help",
-      "expected_behavior": "Help text is displayed and exit 0",
-      "source": "cli-reference.md"
+      "name": "Pipeline Persistence",
+      "description": "Each stage persists output to disk",
+      "condition": "Any stage completes",
+      "expected_behavior": "JSON/files written to project directory",
+      "source": ""
     },
     {
       "id": "R-003",
-      "name": "Non-Interactive Mode",
-      "description": "--non-interactive (-y) flag must skip all confirmation prompts",
-      "condition": "CLI invoked with -y flag",
-      "expected_behavior": "No interactive prompts, auto-approve all confirmations",
-      "source": "cli-reference.md"
+      "name": "Input Validation",
+      "description": "Reject unsupported file types gracefully",
+      "condition": "Unknown file extension",
+      "expected_behavior": "Warning logged, skip file",
+      "source": ""
+    },
+    {
+      "id": "R-004",
+      "name": "CRUD Completeness",
+      "description": "All data entities support list, detail view, edit, and delete",
+      "condition": "Any data entity in GUI",
+      "expected_behavior": "User can view full details and modify data",
+      "source": ""
     }
   ],
   "raw_sources": [
-    {"source": "README.md"},
-    {"source": "docs/getting-started.md"},
-    {"source": "docs/cli-reference.md"},
-    {"source": "docs/configuration.md"}
+    {
+      "source": "TestForge Self-Test/inputs/README.md"
+    }
   ]
 }

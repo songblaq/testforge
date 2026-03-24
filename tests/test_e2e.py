@@ -204,12 +204,18 @@ class TestAnalysisPipeline:
         assert "features" in features[0]
 
     def test_run_analysis_offline_fallback(self, e2e_project: Path) -> None:
-        """When LLM adapter unavailable, returns empty feature list (offline path)."""
+        """When LLM adapter unavailable, persists heuristic offline analysis."""
         with patch("testforge.llm.create_adapter", side_effect=ImportError("no llm")):
             from testforge.analysis.analyzer import run_analysis
             features = run_analysis(e2e_project, [str(SAMPLE_SPEC)])
 
         assert isinstance(features, list)
+        assert features
+        assert features[0]["features"]
+
+        analysis = load_analysis(e2e_project)
+        assert analysis is not None
+        assert len(analysis.features) >= 1
 
     def test_run_analysis_no_inputs(self, e2e_project: Path) -> None:
         from testforge.analysis.analyzer import run_analysis

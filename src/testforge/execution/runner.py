@@ -253,6 +253,8 @@ def run_tests(
     list[dict]:
         Test execution results.
     """
+    project_dir = project_dir.resolve()
+
     # Discover test scripts under project_dir/scripts/
     scripts_dir = project_dir / "scripts"
     if not scripts_dir.exists():

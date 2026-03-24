@@ -208,7 +208,7 @@ def test_generate_usecase_tests_with_analysis_skeleton(tmp_project: Path) -> Non
     analysis = _make_analysis()
     save_analysis(tmp_project, analysis)
 
-    with patch("testforge.llm.create_adapter", side_effect=ValueError("no llm")):
+    with patch("testforge.cases.usecases.create_adapter", side_effect=ValueError("no llm")):
         results = generate_usecase_tests(tmp_project)
 
     assert len(results) >= 1
@@ -241,7 +241,7 @@ def test_generate_usecase_tests_with_llm(tmp_project: Path) -> None:
     mock_adapter = MagicMock()
     mock_adapter.complete.return_value = LLMResponse(text=json.dumps(llm_scenarios))
 
-    with patch("testforge.llm.create_adapter", return_value=mock_adapter):
+    with patch("testforge.cases.usecases.create_adapter", return_value=mock_adapter):
         results = generate_usecase_tests(tmp_project)
 
     assert len(results) == 1
@@ -256,7 +256,7 @@ def test_generate_usecase_tests_llm_failure_falls_back(tmp_project: Path) -> Non
     mock_adapter = MagicMock()
     mock_adapter.complete.side_effect = RuntimeError("connection error")
 
-    with patch("testforge.llm.create_adapter", return_value=mock_adapter):
+    with patch("testforge.cases.usecases.create_adapter", return_value=mock_adapter):
         results = generate_usecase_tests(tmp_project)
 
     assert len(results) >= 1

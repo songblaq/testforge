@@ -1,0 +1,55 @@
+{
+  "title": "Dev Nyx Enhancement + TestForge GUI Fix + Dev Skills",
+  "created": "2026-03-23T00:00:00Z",
+  "stories": [
+    {
+      "id": "US-001",
+      "title": "Create development skills in ARIA common skills",
+      "priority": 1,
+      "passes": true,
+      "acceptanceCriteria": [
+        "blaq-vanilla-spa skill exists at ~/.aria/skills/blaq-vanilla-spa/SKILL.md with vanilla JS SPA best practices",
+        "blaq-ui-ux-review skill exists at ~/.aria/skills/blaq-ui-ux-review/SKILL.md with UX heuristics and checklist",
+        "blaq-css-design skill exists at ~/.aria/skills/blaq-css-design/SKILL.md with modern CSS patterns (variables, grid, flexbox, responsive)",
+        "blaq-qa-testing skill exists at ~/.aria/skills/blaq-qa-testing/SKILL.md with QA workflow and testing patterns",
+        "Each skill has SKILL.md with triggers, instructions, and references"
+      ]
+    },
+    {
+      "id": "US-002",
+      "title": "Update dev Nyx agent with new skills + cross-runtime access",
+      "priority": 2,
+      "passes": true,
+      "acceptanceCriteria": [
+        "~/.aria/agents/dev/AGENT.md skill mapping table includes all 4 new skills",
+        "~/.aria/agents/dev/AGENT.md has cross-runtime section explaining skill access from OpenClaw/Claude Code",
+        "~/.aria/knowledge/dev-skills.md created with skill inventory for other runtimes to reference"
+      ]
+    },
+    {
+      "id": "US-003",
+      "title": "Fix TestForge GUI browser bugs",
+      "priority": 3,
+      "passes": true,
+      "acceptanceCriteria": [
+        "Event listener duplication fixed (container listeners only attached once)",
+        "simpleMarkdown XSS risk mitigated (esc() applied before bold/italic transforms)",
+        "AbortController timeout added to api() function",
+        "All 183+ tests still pass",
+        "TestClient E2E verification passes"
+      ]
+    },
+    {
+      "id": "US-004",
+      "title": "TestForge dogfooding with new GUI + Plaza communication",
+      "priority": 4,
+      "passes": true,
+      "acceptanceCriteria": [
+        "testforge analyze + generate runs successfully on TestForge Self-Test with new GUI code",
+        "testforge analyze + generate runs on AgentHive QA project",
+        "Both projects show valid data via web API",
+        "Server running on port 8321 with new code"
+      ]
+    }
+  ]
+}

@@ -13,7 +13,7 @@ router = APIRouter(prefix="/api/projects", tags=["analysis"])
 
 class AnalysisRequest(BaseModel):
     inputs: list[str] = []
-    no_llm: bool = True
+    no_llm: bool = False
 
 
 @router.post("/{project_path:path}/analysis")
@@ -21,10 +21,9 @@ async def run_analysis(project_path: str, body: AnalysisRequest):
     """Run analysis on a project."""
     from testforge.analysis.analyzer import run_analysis as _analyze
     from testforge.core.config import load_config
+    from testforge.web.deps import resolve_project
 
-    p = Path(project_path)
-    if not p.exists():
-        raise HTTPException(status_code=404, detail=f"Project not found: {project_path}")
+    p = resolve_project(project_path)
 
     inputs = body.inputs
     if not inputs:
@@ -47,10 +46,9 @@ async def run_analysis(project_path: str, body: AnalysisRequest):
 async def get_analysis(project_path: str):
     """Get analysis results for a project."""
     from testforge.core.project import load_analysis
+    from testforge.web.deps import resolve_project
 
-    p = Path(project_path)
-    if not p.exists():
-        raise HTTPException(status_code=404, detail=f"Project not found: {project_path}")
+    p = resolve_project(project_path)
 
     analysis = load_analysis(p)
     if analysis is None:
@@ -63,10 +61,9 @@ async def get_analysis(project_path: str):
 async def update_analysis(project_path: str, body: dict[str, Any]):
     """Update analysis results (edit features, personas, rules)."""
     from testforge.core.project import AnalysisResult, save_analysis
+    from testforge.web.deps import resolve_project
 
-    p = Path(project_path)
-    if not p.exists():
-        raise HTTPException(status_code=404, detail=f"Project not found: {project_path}")
+    p = resolve_project(project_path)
 
     result = AnalysisResult.from_dict(body)
     save_analysis(p, result)

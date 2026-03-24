@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import json
 import logging
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -31,6 +33,7 @@ def run_pipeline(
     *,
     stages: list[str] | None = None,
     inputs: list[str] | None = None,
+    no_llm: bool = False,
     case_type: str = "all",
     script_framework: str = "playwright",
     tags: list[str] | None = None,
@@ -85,6 +88,7 @@ def run_pipeline(
                 project_dir,
                 config=config,
                 inputs=inputs or [],
+                no_llm=no_llm,
                 case_type=case_type,
                 script_framework=script_framework,
                 tags=tags or [],
@@ -107,7 +111,8 @@ def _run_analyze(project_dir: Path, **kwargs: Any) -> dict[str, Any]:
     from testforge.analysis.analyzer import run_analysis
 
     inputs = kwargs.get("inputs", [])
-    features = run_analysis(project_dir, inputs)
+    no_llm = kwargs.get("no_llm", False)
+    features = run_analysis(project_dir, inputs, no_llm=no_llm)
     return {"features_extracted": len(features)}
 
 
@@ -116,7 +121,8 @@ def _run_generate(project_dir: Path, **kwargs: Any) -> dict[str, Any]:
     from testforge.cases.generator import generate_cases
 
     case_type = kwargs.get("case_type", "all")
-    cases = generate_cases(project_dir, case_type)
+    no_llm = kwargs.get("no_llm", False)
+    cases = generate_cases(project_dir, case_type, no_llm=no_llm)
     return {"cases_generated": len(cases)}
 
 
@@ -125,7 +131,8 @@ def _run_script(project_dir: Path, **kwargs: Any) -> dict[str, Any]:
     from testforge.scripts.generator import generate_scripts
 
     framework = kwargs.get("script_framework", "playwright")
-    scripts = generate_scripts(project_dir, framework)
+    no_llm = kwargs.get("no_llm", False)
+    scripts = generate_scripts(project_dir, framework, no_llm=no_llm)
     return {"scripts_generated": len(scripts)}
 
 
@@ -133,10 +140,25 @@ def _run_execute(project_dir: Path, **kwargs: Any) -> dict[str, Any]:
     """Execute the test run stage."""
     from testforge.execution.runner import run_tests
 
+    config = kwargs["config"]
     tags = kwargs.get("tags", [])
     parallel = kwargs.get("parallel", 1)
     results = run_tests(project_dir, tags, parallel)
     passed = sum(1 for r in results if r.get("status") == "passed")
+
+    results_path = project_dir / config.output_dir / "results.json"
+    results_path.parent.mkdir(parents=True, exist_ok=True)
+    results_data = {
+        "started_at": datetime.now(timezone.utc).isoformat(),
+        "results": results,
+        "summary": {"total": len(results), "passed": passed, "failed": len(results) - passed},
+    }
+    results_path.write_text(json.dumps(results_data, indent=2, ensure_ascii=False))
+
+    ts = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+    history_path = project_dir / config.output_dir / f"results-{ts}.json"
+    history_path.write_text(json.dumps(results_data, indent=2, ensure_ascii=False))
+
     return {"total": len(results), "passed": passed, "failed": len(results) - passed}
 
 

@@ -1,0 +1,1688 @@
+[
+  {
+    "id": "TC-F001-01",
+    "title": "Verify Hub Initialization",
+    "description": "Validate that Hub Initialization works as described: agenthive init creates hub at ~/.agenthive/",
+    "feature_id": "F-001",
+    "preconditions": [
+      "System is accessible",
+      "User is authenticated"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Navigate to Hub Initialization feature",
+        "expected_result": "Feature is displayed",
+        "input_data": ""
+      },
+      {
+        "order": 2,
+        "action": "Perform primary action",
+        "expected_result": "Expected behavior observed",
+        "input_data": ""
+      },
+      {
+        "order": 3,
+        "action": "Verify result",
+        "expected_result": "Result matches specification",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "Hub Initialization functions correctly as specified",
+    "priority": "high",
+    "tags": [
+      "functional",
+      "skeleton"
+    ],
+    "rule_ids": [
+      "R-001",
+      "R-002",
+      "R-003"
+    ]
+  },
+  {
+    "id": "TC-F002-01",
+    "title": "Verify Project Registration",
+    "description": "Validate that Project Registration works as described: Register projects with agenthive project add",
+    "feature_id": "F-002",
+    "preconditions": [
+      "System is accessible",
+      "User is authenticated"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Navigate to Project Registration feature",
+        "expected_result": "Feature is displayed",
+        "input_data": ""
+      },
+      {
+        "order": 2,
+        "action": "Perform primary action",
+        "expected_result": "Expected behavior observed",
+        "input_data": ""
+      },
+      {
+        "order": 3,
+        "action": "Verify result",
+        "expected_result": "Result matches specification",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "Project Registration functions correctly as specified",
+    "priority": "high",
+    "tags": [
+      "functional",
+      "skeleton"
+    ],
+    "rule_ids": [
+      "R-001",
+      "R-002",
+      "R-003"
+    ]
+  },
+  {
+    "id": "TC-F003-01",
+    "title": "Verify Task Management",
+    "description": "Validate that Task Management works as described: Create, assign, list, update tasks via CLI and files",
+    "feature_id": "F-003",
+    "preconditions": [
+      "System is accessible",
+      "User is authenticated"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Navigate to Task Management feature",
+        "expected_result": "Feature is displayed",
+        "input_data": ""
+      },
+      {
+        "order": 2,
+        "action": "Perform primary action",
+        "expected_result": "Expected behavior observed",
+        "input_data": ""
+      },
+      {
+        "order": 3,
+        "action": "Verify result",
+        "expected_result": "Result matches specification",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "Task Management functions correctly as specified",
+    "priority": "high",
+    "tags": [
+      "functional",
+      "skeleton"
+    ],
+    "rule_ids": [
+      "R-001",
+      "R-002",
+      "R-003"
+    ]
+  },
+  {
+    "id": "TC-F004-01",
+    "title": "Verify Agent Communication",
+    "description": "Validate that Agent Communication works as described: Structured channels for agent-to-agent messaging",
+    "feature_id": "F-004",
+    "preconditions": [
+      "System is accessible",
+      "User is authenticated"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Navigate to Agent Communication feature",
+        "expected_result": "Feature is displayed",
+        "input_data": ""
+      },
+      {
+        "order": 2,
+        "action": "Perform primary action",
+        "expected_result": "Expected behavior observed",
+        "input_data": ""
+      },
+      {
+        "order": 3,
+        "action": "Verify result",
+        "expected_result": "Result matches specification",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "Agent Communication functions correctly as specified",
+    "priority": "high",
+    "tags": [
+      "functional",
+      "skeleton"
+    ],
+    "rule_ids": [
+      "R-001",
+      "R-002",
+      "R-003"
+    ]
+  },
+  {
+    "id": "TC-F005-01",
+    "title": "Verify Atomic Locking",
+    "description": "Validate that Atomic Locking works as described: O_CREAT|O_EXCL + rename prevents concurrent modification",
+    "feature_id": "F-005",
+    "preconditions": [
+      "System is accessible",
+      "User is authenticated"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Navigate to Atomic Locking feature",
+        "expected_result": "Feature is displayed",
+        "input_data": ""
+      },
+      {
+        "order": 2,
+        "action": "Perform primary action",
+        "expected_result": "Expected behavior observed",
+        "input_data": ""
+      },
+      {
+        "order": 3,
+        "action": "Verify result",
+        "expected_result": "Result matches specification",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "Atomic Locking functions correctly as specified",
+    "priority": "high",
+    "tags": [
+      "functional",
+      "skeleton"
+    ],
+    "rule_ids": [
+      "R-003"
+    ]
+  },
+  {
+    "id": "TC-F006-01",
+    "title": "Verify Agent Profiles",
+    "description": "Validate that Agent Profiles works as described: Register agents with capabilities and tool access",
+    "feature_id": "F-006",
+    "preconditions": [
+      "System is accessible",
+      "User is authenticated"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Navigate to Agent Profiles feature",
+        "expected_result": "Feature is displayed",
+        "input_data": ""
+      },
+      {
+        "order": 2,
+        "action": "Perform primary action",
+        "expected_result": "Expected behavior observed",
+        "input_data": ""
+      },
+      {
+        "order": 3,
+        "action": "Verify result",
+        "expected_result": "Result matches specification",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "Agent Profiles functions correctly as specified",
+    "priority": "medium",
+    "tags": [
+      "functional",
+      "skeleton"
+    ],
+    "rule_ids": [
+      "R-001",
+      "R-002",
+      "R-003"
+    ]
+  },
+  {
+    "id": "TC-F007-01",
+    "title": "Verify Convention Injection",
+    "description": "Validate that Convention Injection works as described: Define coding standards once, inject into all tools",
+    "feature_id": "F-007",
+    "preconditions": [
+      "System is accessible",
+      "User is authenticated"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Navigate to Convention Injection feature",
+        "expected_result": "Feature is displayed",
+        "input_data": ""
+      },
+      {
+        "order": 2,
+        "action": "Perform primary action",
+        "expected_result": "Expected behavior observed",
+        "input_data": ""
+      },
+      {
+        "order": 3,
+        "action": "Verify result",
+        "expected_result": "Result matches specification",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "Convention Injection functions correctly as specified",
+    "priority": "medium",
+    "tags": [
+      "functional",
+      "skeleton"
+    ],
+    "rule_ids": [
+      "R-001",
+      "R-002",
+      "R-003"
+    ]
+  },
+  {
+    "id": "TC-F008-01",
+    "title": "Verify GitHub Sync",
+    "description": "Validate that GitHub Sync works as described: Bidirectional sync between hive tasks and GitHub issues",
+    "feature_id": "F-008",
+    "preconditions": [
+      "System is accessible",
+      "User is authenticated"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Navigate to GitHub Sync feature",
+        "expected_result": "Feature is displayed",
+        "input_data": ""
+      },
+      {
+        "order": 2,
+        "action": "Perform primary action",
+        "expected_result": "Expected behavior observed",
+        "input_data": ""
+      },
+      {
+        "order": 3,
+        "action": "Verify result",
+        "expected_result": "Result matches specification",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "GitHub Sync functions correctly as specified",
+    "priority": "medium",
+    "tags": [
+      "functional",
+      "skeleton"
+    ],
+    "rule_ids": [
+      "R-001",
+      "R-002",
+      "R-003"
+    ]
+  },
+  {
+    "id": "TC-F009-01",
+    "title": "Verify Dashboard",
+    "description": "Validate that Dashboard works as described: Interactive terminal dashboard with 8 tabs",
+    "feature_id": "F-009",
+    "preconditions": [
+      "System is accessible",
+      "User is authenticated"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Navigate to Dashboard feature",
+        "expected_result": "Feature is displayed",
+        "input_data": ""
+      },
+      {
+        "order": 2,
+        "action": "Perform primary action",
+        "expected_result": "Expected behavior observed",
+        "input_data": ""
+      },
+      {
+        "order": 3,
+        "action": "Verify result",
+        "expected_result": "Result matches specification",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "Dashboard functions correctly as specified",
+    "priority": "low",
+    "tags": [
+      "functional",
+      "skeleton"
+    ],
+    "rule_ids": [
+      "R-001",
+      "R-002",
+      "R-003"
+    ]
+  },
+  {
+    "id": "TC-F010-01",
+    "title": "Verify REST API",
+    "description": "Validate that REST API works as described: 13 REST API endpoints for programmatic access",
+    "feature_id": "F-010",
+    "preconditions": [
+      "System is accessible",
+      "User is authenticated"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Navigate to REST API feature",
+        "expected_result": "Feature is displayed",
+        "input_data": ""
+      },
+      {
+        "order": 2,
+        "action": "Perform primary action",
+        "expected_result": "Expected behavior observed",
+        "input_data": ""
+      },
+      {
+        "order": 3,
+        "action": "Verify result",
+        "expected_result": "Result matches specification",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "REST API functions correctly as specified",
+    "priority": "medium",
+    "tags": [
+      "functional",
+      "skeleton"
+    ],
+    "rule_ids": [
+      "R-001",
+      "R-002",
+      "R-003"
+    ]
+  },
+  {
+    "id": "UC-001",
+    "title": "AI Agent -- primary workflow",
+    "description": "End-to-end scenario for AI Agent",
+    "persona_id": "P-001",
+    "persona_name": "AI Agent",
+    "preconditions": [
+      "User is authenticated",
+      "System is in default state"
+    ],
+    "scenario_steps": [
+      "As AI Agent, navigate to the application",
+      "Interact with Hub Initialization",
+      "Interact with Project Registration",
+      "Interact with Task Management",
+      "Verify final state matches expectations"
+    ],
+    "expected_outcome": "All interactions complete successfully",
+    "features_covered": [
+      "F-001",
+      "F-002",
+      "F-003"
+    ],
+    "priority": "medium",
+    "tags": [
+      "e2e",
+      "skeleton"
+    ]
+  },
+  {
+    "id": "UC-002",
+    "title": "Developer -- primary workflow",
+    "description": "End-to-end scenario for Developer",
+    "persona_id": "P-002",
+    "persona_name": "Developer",
+    "preconditions": [
+      "User is authenticated",
+      "System is in default state"
+    ],
+    "scenario_steps": [
+      "As Developer, navigate to the application",
+      "Interact with Hub Initialization",
+      "Interact with Project Registration",
+      "Interact with Task Management",
+      "Verify final state matches expectations"
+    ],
+    "expected_outcome": "All interactions complete successfully",
+    "features_covered": [
+      "F-001",
+      "F-002",
+      "F-003"
+    ],
+    "priority": "medium",
+    "tags": [
+      "e2e",
+      "skeleton"
+    ]
+  },
+  {
+    "id": "UC-CRUD-001-list-view",
+    "title": "View Hub Initialization list",
+    "description": "CRUD flow validation for Hub Initialization",
+    "persona_id": "P-001",
+    "persona_name": "AI Agent",
+    "preconditions": [
+      "Hub Initialization has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to Hub Initialization section",
+      "Verify list/table is displayed with items",
+      "Verify each item shows key information (ID, name, status)",
+      "Verify empty state message when no items exist"
+    ],
+    "expected_outcome": "List displays all items with sufficient information to identify each one",
+    "features_covered": [
+      "F-001"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "list",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-001-detail-view",
+    "title": "View Hub Initialization detail",
+    "description": "CRUD flow validation for Hub Initialization",
+    "persona_id": "P-001",
+    "persona_name": "AI Agent",
+    "preconditions": [
+      "Hub Initialization has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to Hub Initialization list",
+      "Click on a specific item",
+      "Verify detail view shows ALL fields (not just summary)",
+      "Verify user can see full description, attributes, metadata",
+      "Verify back/close navigation to return to list"
+    ],
+    "expected_outcome": "Detail view shows complete information about the selected item",
+    "features_covered": [
+      "F-001"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "detail",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-001-edit-flow",
+    "title": "Edit Hub Initialization item",
+    "description": "CRUD flow validation for Hub Initialization",
+    "persona_id": "P-001",
+    "persona_name": "AI Agent",
+    "preconditions": [
+      "Hub Initialization has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to Hub Initialization detail view",
+      "Click edit button or inline edit field",
+      "Modify one or more fields",
+      "Save changes",
+      "Verify updated data is reflected in list and detail views"
+    ],
+    "expected_outcome": "User can modify item data and changes persist",
+    "features_covered": [
+      "F-001"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "edit",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-001-delete-flow",
+    "title": "Delete Hub Initialization item",
+    "description": "CRUD flow validation for Hub Initialization",
+    "persona_id": "P-001",
+    "persona_name": "AI Agent",
+    "preconditions": [
+      "Hub Initialization has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to Hub Initialization list or detail view",
+      "Click delete button",
+      "Confirm deletion in dialog",
+      "Verify item is removed from list",
+      "Verify proper feedback (toast or message)"
+    ],
+    "expected_outcome": "Item is deleted with confirmation step and user feedback",
+    "features_covered": [
+      "F-001"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "delete",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-002-list-view",
+    "title": "View Project Registration list",
+    "description": "CRUD flow validation for Project Registration",
+    "persona_id": "P-001",
+    "persona_name": "AI Agent",
+    "preconditions": [
+      "Project Registration has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to Project Registration section",
+      "Verify list/table is displayed with items",
+      "Verify each item shows key information (ID, name, status)",
+      "Verify empty state message when no items exist"
+    ],
+    "expected_outcome": "List displays all items with sufficient information to identify each one",
+    "features_covered": [
+      "F-002"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "list",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-002-detail-view",
+    "title": "View Project Registration detail",
+    "description": "CRUD flow validation for Project Registration",
+    "persona_id": "P-001",
+    "persona_name": "AI Agent",
+    "preconditions": [
+      "Project Registration has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to Project Registration list",
+      "Click on a specific item",
+      "Verify detail view shows ALL fields (not just summary)",
+      "Verify user can see full description, attributes, metadata",
+      "Verify back/close navigation to return to list"
+    ],
+    "expected_outcome": "Detail view shows complete information about the selected item",
+    "features_covered": [
+      "F-002"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "detail",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-002-edit-flow",
+    "title": "Edit Project Registration item",
+    "description": "CRUD flow validation for Project Registration",
+    "persona_id": "P-001",
+    "persona_name": "AI Agent",
+    "preconditions": [
+      "Project Registration has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to Project Registration detail view",
+      "Click edit button or inline edit field",
+      "Modify one or more fields",
+      "Save changes",
+      "Verify updated data is reflected in list and detail views"
+    ],
+    "expected_outcome": "User can modify item data and changes persist",
+    "features_covered": [
+      "F-002"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "edit",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-002-delete-flow",
+    "title": "Delete Project Registration item",
+    "description": "CRUD flow validation for Project Registration",
+    "persona_id": "P-001",
+    "persona_name": "AI Agent",
+    "preconditions": [
+      "Project Registration has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to Project Registration list or detail view",
+      "Click delete button",
+      "Confirm deletion in dialog",
+      "Verify item is removed from list",
+      "Verify proper feedback (toast or message)"
+    ],
+    "expected_outcome": "Item is deleted with confirmation step and user feedback",
+    "features_covered": [
+      "F-002"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "delete",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-003-list-view",
+    "title": "View Task Management list",
+    "description": "CRUD flow validation for Task Management",
+    "persona_id": "P-001",
+    "persona_name": "AI Agent",
+    "preconditions": [
+      "Task Management has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to Task Management section",
+      "Verify list/table is displayed with items",
+      "Verify each item shows key information (ID, name, status)",
+      "Verify empty state message when no items exist"
+    ],
+    "expected_outcome": "List displays all items with sufficient information to identify each one",
+    "features_covered": [
+      "F-003"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "list",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-003-detail-view",
+    "title": "View Task Management detail",
+    "description": "CRUD flow validation for Task Management",
+    "persona_id": "P-001",
+    "persona_name": "AI Agent",
+    "preconditions": [
+      "Task Management has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to Task Management list",
+      "Click on a specific item",
+      "Verify detail view shows ALL fields (not just summary)",
+      "Verify user can see full description, attributes, metadata",
+      "Verify back/close navigation to return to list"
+    ],
+    "expected_outcome": "Detail view shows complete information about the selected item",
+    "features_covered": [
+      "F-003"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "detail",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-003-edit-flow",
+    "title": "Edit Task Management item",
+    "description": "CRUD flow validation for Task Management",
+    "persona_id": "P-001",
+    "persona_name": "AI Agent",
+    "preconditions": [
+      "Task Management has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to Task Management detail view",
+      "Click edit button or inline edit field",
+      "Modify one or more fields",
+      "Save changes",
+      "Verify updated data is reflected in list and detail views"
+    ],
+    "expected_outcome": "User can modify item data and changes persist",
+    "features_covered": [
+      "F-003"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "edit",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-003-delete-flow",
+    "title": "Delete Task Management item",
+    "description": "CRUD flow validation for Task Management",
+    "persona_id": "P-001",
+    "persona_name": "AI Agent",
+    "preconditions": [
+      "Task Management has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to Task Management list or detail view",
+      "Click delete button",
+      "Confirm deletion in dialog",
+      "Verify item is removed from list",
+      "Verify proper feedback (toast or message)"
+    ],
+    "expected_outcome": "Item is deleted with confirmation step and user feedback",
+    "features_covered": [
+      "F-003"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "delete",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-004-list-view",
+    "title": "View Agent Communication list",
+    "description": "CRUD flow validation for Agent Communication",
+    "persona_id": "P-001",
+    "persona_name": "AI Agent",
+    "preconditions": [
+      "Agent Communication has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to Agent Communication section",
+      "Verify list/table is displayed with items",
+      "Verify each item shows key information (ID, name, status)",
+      "Verify empty state message when no items exist"
+    ],
+    "expected_outcome": "List displays all items with sufficient information to identify each one",
+    "features_covered": [
+      "F-004"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "list",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-004-detail-view",
+    "title": "View Agent Communication detail",
+    "description": "CRUD flow validation for Agent Communication",
+    "persona_id": "P-001",
+    "persona_name": "AI Agent",
+    "preconditions": [
+      "Agent Communication has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to Agent Communication list",
+      "Click on a specific item",
+      "Verify detail view shows ALL fields (not just summary)",
+      "Verify user can see full description, attributes, metadata",
+      "Verify back/close navigation to return to list"
+    ],
+    "expected_outcome": "Detail view shows complete information about the selected item",
+    "features_covered": [
+      "F-004"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "detail",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-004-edit-flow",
+    "title": "Edit Agent Communication item",
+    "description": "CRUD flow validation for Agent Communication",
+    "persona_id": "P-001",
+    "persona_name": "AI Agent",
+    "preconditions": [
+      "Agent Communication has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to Agent Communication detail view",
+      "Click edit button or inline edit field",
+      "Modify one or more fields",
+      "Save changes",
+      "Verify updated data is reflected in list and detail views"
+    ],
+    "expected_outcome": "User can modify item data and changes persist",
+    "features_covered": [
+      "F-004"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "edit",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-004-delete-flow",
+    "title": "Delete Agent Communication item",
+    "description": "CRUD flow validation for Agent Communication",
+    "persona_id": "P-001",
+    "persona_name": "AI Agent",
+    "preconditions": [
+      "Agent Communication has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to Agent Communication list or detail view",
+      "Click delete button",
+      "Confirm deletion in dialog",
+      "Verify item is removed from list",
+      "Verify proper feedback (toast or message)"
+    ],
+    "expected_outcome": "Item is deleted with confirmation step and user feedback",
+    "features_covered": [
+      "F-004"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "delete",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-005-list-view",
+    "title": "View Atomic Locking list",
+    "description": "CRUD flow validation for Atomic Locking",
+    "persona_id": "P-001",
+    "persona_name": "AI Agent",
+    "preconditions": [
+      "Atomic Locking has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to Atomic Locking section",
+      "Verify list/table is displayed with items",
+      "Verify each item shows key information (ID, name, status)",
+      "Verify empty state message when no items exist"
+    ],
+    "expected_outcome": "List displays all items with sufficient information to identify each one",
+    "features_covered": [
+      "F-005"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "list",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-005-detail-view",
+    "title": "View Atomic Locking detail",
+    "description": "CRUD flow validation for Atomic Locking",
+    "persona_id": "P-001",
+    "persona_name": "AI Agent",
+    "preconditions": [
+      "Atomic Locking has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to Atomic Locking list",
+      "Click on a specific item",
+      "Verify detail view shows ALL fields (not just summary)",
+      "Verify user can see full description, attributes, metadata",
+      "Verify back/close navigation to return to list"
+    ],
+    "expected_outcome": "Detail view shows complete information about the selected item",
+    "features_covered": [
+      "F-005"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "detail",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-005-edit-flow",
+    "title": "Edit Atomic Locking item",
+    "description": "CRUD flow validation for Atomic Locking",
+    "persona_id": "P-001",
+    "persona_name": "AI Agent",
+    "preconditions": [
+      "Atomic Locking has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to Atomic Locking detail view",
+      "Click edit button or inline edit field",
+      "Modify one or more fields",
+      "Save changes",
+      "Verify updated data is reflected in list and detail views"
+    ],
+    "expected_outcome": "User can modify item data and changes persist",
+    "features_covered": [
+      "F-005"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "edit",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-005-delete-flow",
+    "title": "Delete Atomic Locking item",
+    "description": "CRUD flow validation for Atomic Locking",
+    "persona_id": "P-001",
+    "persona_name": "AI Agent",
+    "preconditions": [
+      "Atomic Locking has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to Atomic Locking list or detail view",
+      "Click delete button",
+      "Confirm deletion in dialog",
+      "Verify item is removed from list",
+      "Verify proper feedback (toast or message)"
+    ],
+    "expected_outcome": "Item is deleted with confirmation step and user feedback",
+    "features_covered": [
+      "F-005"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "delete",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-006-list-view",
+    "title": "View Agent Profiles list",
+    "description": "CRUD flow validation for Agent Profiles",
+    "persona_id": "P-001",
+    "persona_name": "AI Agent",
+    "preconditions": [
+      "Agent Profiles has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to Agent Profiles section",
+      "Verify list/table is displayed with items",
+      "Verify each item shows key information (ID, name, status)",
+      "Verify empty state message when no items exist"
+    ],
+    "expected_outcome": "List displays all items with sufficient information to identify each one",
+    "features_covered": [
+      "F-006"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "list",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-006-detail-view",
+    "title": "View Agent Profiles detail",
+    "description": "CRUD flow validation for Agent Profiles",
+    "persona_id": "P-001",
+    "persona_name": "AI Agent",
+    "preconditions": [
+      "Agent Profiles has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to Agent Profiles list",
+      "Click on a specific item",
+      "Verify detail view shows ALL fields (not just summary)",
+      "Verify user can see full description, attributes, metadata",
+      "Verify back/close navigation to return to list"
+    ],
+    "expected_outcome": "Detail view shows complete information about the selected item",
+    "features_covered": [
+      "F-006"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "detail",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-006-edit-flow",
+    "title": "Edit Agent Profiles item",
+    "description": "CRUD flow validation for Agent Profiles",
+    "persona_id": "P-001",
+    "persona_name": "AI Agent",
+    "preconditions": [
+      "Agent Profiles has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to Agent Profiles detail view",
+      "Click edit button or inline edit field",
+      "Modify one or more fields",
+      "Save changes",
+      "Verify updated data is reflected in list and detail views"
+    ],
+    "expected_outcome": "User can modify item data and changes persist",
+    "features_covered": [
+      "F-006"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "edit",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-006-delete-flow",
+    "title": "Delete Agent Profiles item",
+    "description": "CRUD flow validation for Agent Profiles",
+    "persona_id": "P-001",
+    "persona_name": "AI Agent",
+    "preconditions": [
+      "Agent Profiles has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to Agent Profiles list or detail view",
+      "Click delete button",
+      "Confirm deletion in dialog",
+      "Verify item is removed from list",
+      "Verify proper feedback (toast or message)"
+    ],
+    "expected_outcome": "Item is deleted with confirmation step and user feedback",
+    "features_covered": [
+      "F-006"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "delete",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-007-list-view",
+    "title": "View Convention Injection list",
+    "description": "CRUD flow validation for Convention Injection",
+    "persona_id": "P-001",
+    "persona_name": "AI Agent",
+    "preconditions": [
+      "Convention Injection has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to Convention Injection section",
+      "Verify list/table is displayed with items",
+      "Verify each item shows key information (ID, name, status)",
+      "Verify empty state message when no items exist"
+    ],
+    "expected_outcome": "List displays all items with sufficient information to identify each one",
+    "features_covered": [
+      "F-007"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "list",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-007-detail-view",
+    "title": "View Convention Injection detail",
+    "description": "CRUD flow validation for Convention Injection",
+    "persona_id": "P-001",
+    "persona_name": "AI Agent",
+    "preconditions": [
+      "Convention Injection has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to Convention Injection list",
+      "Click on a specific item",
+      "Verify detail view shows ALL fields (not just summary)",
+      "Verify user can see full description, attributes, metadata",
+      "Verify back/close navigation to return to list"
+    ],
+    "expected_outcome": "Detail view shows complete information about the selected item",
+    "features_covered": [
+      "F-007"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "detail",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-007-edit-flow",
+    "title": "Edit Convention Injection item",
+    "description": "CRUD flow validation for Convention Injection",
+    "persona_id": "P-001",
+    "persona_name": "AI Agent",
+    "preconditions": [
+      "Convention Injection has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to Convention Injection detail view",
+      "Click edit button or inline edit field",
+      "Modify one or more fields",
+      "Save changes",
+      "Verify updated data is reflected in list and detail views"
+    ],
+    "expected_outcome": "User can modify item data and changes persist",
+    "features_covered": [
+      "F-007"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "edit",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-007-delete-flow",
+    "title": "Delete Convention Injection item",
+    "description": "CRUD flow validation for Convention Injection",
+    "persona_id": "P-001",
+    "persona_name": "AI Agent",
+    "preconditions": [
+      "Convention Injection has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to Convention Injection list or detail view",
+      "Click delete button",
+      "Confirm deletion in dialog",
+      "Verify item is removed from list",
+      "Verify proper feedback (toast or message)"
+    ],
+    "expected_outcome": "Item is deleted with confirmation step and user feedback",
+    "features_covered": [
+      "F-007"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "delete",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-008-list-view",
+    "title": "View GitHub Sync list",
+    "description": "CRUD flow validation for GitHub Sync",
+    "persona_id": "P-001",
+    "persona_name": "AI Agent",
+    "preconditions": [
+      "GitHub Sync has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to GitHub Sync section",
+      "Verify list/table is displayed with items",
+      "Verify each item shows key information (ID, name, status)",
+      "Verify empty state message when no items exist"
+    ],
+    "expected_outcome": "List displays all items with sufficient information to identify each one",
+    "features_covered": [
+      "F-008"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "list",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-008-detail-view",
+    "title": "View GitHub Sync detail",
+    "description": "CRUD flow validation for GitHub Sync",
+    "persona_id": "P-001",
+    "persona_name": "AI Agent",
+    "preconditions": [
+      "GitHub Sync has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to GitHub Sync list",
+      "Click on a specific item",
+      "Verify detail view shows ALL fields (not just summary)",
+      "Verify user can see full description, attributes, metadata",
+      "Verify back/close navigation to return to list"
+    ],
+    "expected_outcome": "Detail view shows complete information about the selected item",
+    "features_covered": [
+      "F-008"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "detail",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-008-edit-flow",
+    "title": "Edit GitHub Sync item",
+    "description": "CRUD flow validation for GitHub Sync",
+    "persona_id": "P-001",
+    "persona_name": "AI Agent",
+    "preconditions": [
+      "GitHub Sync has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to GitHub Sync detail view",
+      "Click edit button or inline edit field",
+      "Modify one or more fields",
+      "Save changes",
+      "Verify updated data is reflected in list and detail views"
+    ],
+    "expected_outcome": "User can modify item data and changes persist",
+    "features_covered": [
+      "F-008"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "edit",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-008-delete-flow",
+    "title": "Delete GitHub Sync item",
+    "description": "CRUD flow validation for GitHub Sync",
+    "persona_id": "P-001",
+    "persona_name": "AI Agent",
+    "preconditions": [
+      "GitHub Sync has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to GitHub Sync list or detail view",
+      "Click delete button",
+      "Confirm deletion in dialog",
+      "Verify item is removed from list",
+      "Verify proper feedback (toast or message)"
+    ],
+    "expected_outcome": "Item is deleted with confirmation step and user feedback",
+    "features_covered": [
+      "F-008"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "delete",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-009-list-view",
+    "title": "View Dashboard list",
+    "description": "CRUD flow validation for Dashboard",
+    "persona_id": "P-001",
+    "persona_name": "AI Agent",
+    "preconditions": [
+      "Dashboard has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to Dashboard section",
+      "Verify list/table is displayed with items",
+      "Verify each item shows key information (ID, name, status)",
+      "Verify empty state message when no items exist"
+    ],
+    "expected_outcome": "List displays all items with sufficient information to identify each one",
+    "features_covered": [
+      "F-009"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "list",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-009-detail-view",
+    "title": "View Dashboard detail",
+    "description": "CRUD flow validation for Dashboard",
+    "persona_id": "P-001",
+    "persona_name": "AI Agent",
+    "preconditions": [
+      "Dashboard has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to Dashboard list",
+      "Click on a specific item",
+      "Verify detail view shows ALL fields (not just summary)",
+      "Verify user can see full description, attributes, metadata",
+      "Verify back/close navigation to return to list"
+    ],
+    "expected_outcome": "Detail view shows complete information about the selected item",
+    "features_covered": [
+      "F-009"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "detail",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-009-edit-flow",
+    "title": "Edit Dashboard item",
+    "description": "CRUD flow validation for Dashboard",
+    "persona_id": "P-001",
+    "persona_name": "AI Agent",
+    "preconditions": [
+      "Dashboard has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to Dashboard detail view",
+      "Click edit button or inline edit field",
+      "Modify one or more fields",
+      "Save changes",
+      "Verify updated data is reflected in list and detail views"
+    ],
+    "expected_outcome": "User can modify item data and changes persist",
+    "features_covered": [
+      "F-009"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "edit",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-009-delete-flow",
+    "title": "Delete Dashboard item",
+    "description": "CRUD flow validation for Dashboard",
+    "persona_id": "P-001",
+    "persona_name": "AI Agent",
+    "preconditions": [
+      "Dashboard has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to Dashboard list or detail view",
+      "Click delete button",
+      "Confirm deletion in dialog",
+      "Verify item is removed from list",
+      "Verify proper feedback (toast or message)"
+    ],
+    "expected_outcome": "Item is deleted with confirmation step and user feedback",
+    "features_covered": [
+      "F-009"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "delete",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-010-list-view",
+    "title": "View REST API list",
+    "description": "CRUD flow validation for REST API",
+    "persona_id": "P-001",
+    "persona_name": "AI Agent",
+    "preconditions": [
+      "REST API has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to REST API section",
+      "Verify list/table is displayed with items",
+      "Verify each item shows key information (ID, name, status)",
+      "Verify empty state message when no items exist"
+    ],
+    "expected_outcome": "List displays all items with sufficient information to identify each one",
+    "features_covered": [
+      "F-010"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "list",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-010-detail-view",
+    "title": "View REST API detail",
+    "description": "CRUD flow validation for REST API",
+    "persona_id": "P-001",
+    "persona_name": "AI Agent",
+    "preconditions": [
+      "REST API has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to REST API list",
+      "Click on a specific item",
+      "Verify detail view shows ALL fields (not just summary)",
+      "Verify user can see full description, attributes, metadata",
+      "Verify back/close navigation to return to list"
+    ],
+    "expected_outcome": "Detail view shows complete information about the selected item",
+    "features_covered": [
+      "F-010"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "detail",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-010-edit-flow",
+    "title": "Edit REST API item",
+    "description": "CRUD flow validation for REST API",
+    "persona_id": "P-001",
+    "persona_name": "AI Agent",
+    "preconditions": [
+      "REST API has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to REST API detail view",
+      "Click edit button or inline edit field",
+      "Modify one or more fields",
+      "Save changes",
+      "Verify updated data is reflected in list and detail views"
+    ],
+    "expected_outcome": "User can modify item data and changes persist",
+    "features_covered": [
+      "F-010"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "edit",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-010-delete-flow",
+    "title": "Delete REST API item",
+    "description": "CRUD flow validation for REST API",
+    "persona_id": "P-001",
+    "persona_name": "AI Agent",
+    "preconditions": [
+      "REST API has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to REST API list or detail view",
+      "Click delete button",
+      "Confirm deletion in dialog",
+      "Verify item is removed from list",
+      "Verify proper feedback (toast or message)"
+    ],
+    "expected_outcome": "Item is deleted with confirmation step and user feedback",
+    "features_covered": [
+      "F-010"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "delete",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "CL-001",
+    "title": "Manual check: Hub Initialization",
+    "description": "Verify Hub Initialization manually: agenthive init creates hub at ~/.agenthive/",
+    "category": "functionality",
+    "feature_id": "F-001",
+    "check_steps": [
+      "Navigate to the Hub Initialization area",
+      "Verify all UI elements are displayed correctly",
+      "Perform the primary action and observe results",
+      "Check error handling with invalid input"
+    ],
+    "pass_criteria": "Hub Initialization behaves as documented",
+    "priority": "high"
+  },
+  {
+    "id": "CL-002",
+    "title": "Manual check: Project Registration",
+    "description": "Verify Project Registration manually: Register projects with agenthive project add",
+    "category": "functionality",
+    "feature_id": "F-002",
+    "check_steps": [
+      "Navigate to the Project Registration area",
+      "Verify all UI elements are displayed correctly",
+      "Perform the primary action and observe results",
+      "Check error handling with invalid input"
+    ],
+    "pass_criteria": "Project Registration behaves as documented",
+    "priority": "high"
+  },
+  {
+    "id": "CL-003",
+    "title": "Manual check: Task Management",
+    "description": "Verify Task Management manually: Create, assign, list, update tasks via CLI and files",
+    "category": "functionality",
+    "feature_id": "F-003",
+    "check_steps": [
+      "Navigate to the Task Management area",
+      "Verify all UI elements are displayed correctly",
+      "Perform the primary action and observe results",
+      "Check error handling with invalid input"
+    ],
+    "pass_criteria": "Task Management behaves as documented",
+    "priority": "high"
+  },
+  {
+    "id": "CL-004",
+    "title": "Manual check: Agent Communication",
+    "description": "Verify Agent Communication manually: Structured channels for agent-to-agent messaging",
+    "category": "functionality",
+    "feature_id": "F-004",
+    "check_steps": [
+      "Navigate to the Agent Communication area",
+      "Verify all UI elements are displayed correctly",
+      "Perform the primary action and observe results",
+      "Check error handling with invalid input"
+    ],
+    "pass_criteria": "Agent Communication behaves as documented",
+    "priority": "high"
+  },
+  {
+    "id": "CL-005",
+    "title": "Manual check: Atomic Locking",
+    "description": "Verify Atomic Locking manually: O_CREAT|O_EXCL + rename prevents concurrent modification",
+    "category": "functionality",
+    "feature_id": "F-005",
+    "check_steps": [
+      "Navigate to the Atomic Locking area",
+      "Verify all UI elements are displayed correctly",
+      "Perform the primary action and observe results",
+      "Check error handling with invalid input"
+    ],
+    "pass_criteria": "Atomic Locking behaves as documented",
+    "priority": "high"
+  },
+  {
+    "id": "CL-006",
+    "title": "Manual check: Agent Profiles",
+    "description": "Verify Agent Profiles manually: Register agents with capabilities and tool access",
+    "category": "functionality",
+    "feature_id": "F-006",
+    "check_steps": [
+      "Navigate to the Agent Profiles area",
+      "Verify all UI elements are displayed correctly",
+      "Perform the primary action and observe results",
+      "Check error handling with invalid input"
+    ],
+    "pass_criteria": "Agent Profiles behaves as documented",
+    "priority": "medium"
+  },
+  {
+    "id": "CL-007",
+    "title": "Manual check: Convention Injection",
+    "description": "Verify Convention Injection manually: Define coding standards once, inject into all tools",
+    "category": "functionality",
+    "feature_id": "F-007",
+    "check_steps": [
+      "Navigate to the Convention Injection area",
+      "Verify all UI elements are displayed correctly",
+      "Perform the primary action and observe results",
+      "Check error handling with invalid input"
+    ],
+    "pass_criteria": "Convention Injection behaves as documented",
+    "priority": "medium"
+  },
+  {
+    "id": "CL-008",
+    "title": "Manual check: GitHub Sync",
+    "description": "Verify GitHub Sync manually: Bidirectional sync between hive tasks and GitHub issues",
+    "category": "functionality",
+    "feature_id": "F-008",
+    "check_steps": [
+      "Navigate to the GitHub Sync area",
+      "Verify all UI elements are displayed correctly",
+      "Perform the primary action and observe results",
+      "Check error handling with invalid input"
+    ],
+    "pass_criteria": "GitHub Sync behaves as documented",
+    "priority": "medium"
+  },
+  {
+    "id": "CL-009",
+    "title": "Manual check: Dashboard",
+    "description": "Verify Dashboard manually: Interactive terminal dashboard with 8 tabs",
+    "category": "functionality",
+    "feature_id": "F-009",
+    "check_steps": [
+      "Navigate to the Dashboard area",
+      "Verify all UI elements are displayed correctly",
+      "Perform the primary action and observe results",
+      "Check error handling with invalid input"
+    ],
+    "pass_criteria": "Dashboard behaves as documented",
+    "priority": "low"
+  },
+  {
+    "id": "CL-010",
+    "title": "Manual check: REST API",
+    "description": "Verify REST API manually: 13 REST API endpoints for programmatic access",
+    "category": "functionality",
+    "feature_id": "F-010",
+    "check_steps": [
+      "Navigate to the REST API area",
+      "Verify all UI elements are displayed correctly",
+      "Perform the primary action and observe results",
+      "Check error handling with invalid input"
+    ],
+    "pass_criteria": "REST API behaves as documented",
+    "priority": "medium"
+  }
+]

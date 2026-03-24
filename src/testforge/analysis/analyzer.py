@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
+import re
 from typing import Any
 
 from testforge.core.config import load_config
@@ -55,7 +56,9 @@ def run_analysis(
 
     # Skip LLM entirely when --no-llm is set
     if no_llm:
-        return _offline_analysis(parsed_docs)
+        analysis_result = _offline_analysis(parsed_docs)
+        save_analysis(project_dir, analysis_result)
+        return _analysis_to_doc_summaries(analysis_result, parsed_docs)
 
     # Build combined text for LLM analysis
     combined_text = _build_combined_text(parsed_docs)
@@ -78,7 +81,9 @@ def run_analysis(
             "Set ANTHROPIC_API_KEY / OPENAI_API_KEY or use --no-llm to suppress this warning.",
             err=True,
         )
-        return _offline_analysis(parsed_docs)
+        analysis_result = _offline_analysis(parsed_docs)
+        save_analysis(project_dir, analysis_result)
+        return _analysis_to_doc_summaries(analysis_result, parsed_docs)
 
     # Run LLM-powered analysis
     try:
@@ -90,13 +95,24 @@ def run_analysis(
             f"[Warning] LLM analysis failed ({exc}). Falling back to offline extraction.",
             err=True,
         )
-        return _offline_analysis(parsed_docs)
+        analysis_result = _offline_analysis(parsed_docs)
+        save_analysis(project_dir, analysis_result)
+        return _analysis_to_doc_summaries(analysis_result, parsed_docs)
 
     # Persist results
     save_analysis(project_dir, analysis_result)
 
     # Return flat feature list for CLI compatibility
+    return _analysis_to_doc_summaries(analysis_result, parsed_docs)
+
+
+def _analysis_to_doc_summaries(
+    analysis_result: AnalysisResult,
+    parsed_docs: list[Any],
+) -> list[dict[str, Any]]:
+    """Flatten an analysis result into per-document CLI summaries."""
     from testforge.input.parser import ParsedDocument
+
     return [
         {
             "source": doc.source_path if isinstance(doc, ParsedDocument) else doc.get("source", ""),
@@ -239,16 +255,105 @@ Respond with valid JSON only, no markdown fences."""
 
 
 
-def _offline_analysis(parsed_docs: list[Any]) -> list[dict[str, Any]]:
-    """Fallback: produce minimal analysis without LLM when adapter is unavailable."""
+def _offline_analysis(parsed_docs: list[Any]) -> AnalysisResult:
+    """Fallback: produce minimal persisted analysis without LLM."""
+    from testforge.core.project import AnalysisResult, BusinessRule, Feature
     from testforge.input.parser import ParsedDocument
-    results: list[dict[str, Any]] = []
+
+    features: list[Feature] = []
+    rules: list[BusinessRule] = []
+    raw_sources: list[dict[str, Any]] = []
+
     for doc in parsed_docs:
-        results.append({
-            "source": doc.source_path if isinstance(doc, ParsedDocument) else doc.get("source", ""),
-            "type": doc.source_type if isinstance(doc, ParsedDocument) else doc.get("type", ""),
-            "features": [],
-            "personas": [],
-            "rules": [],
-        })
-    return results
+        if isinstance(doc, ParsedDocument):
+            source_path = doc.source_path
+            source_type = doc.source_type
+            headings = doc.headings
+            text = doc.text
+        else:
+            source_path = doc.get("source", "")
+            source_type = doc.get("type", "")
+            headings = doc.get("headings", [])
+            text = doc.get("text", "") or doc.get("content", "")
+
+        raw_sources.append({"source": source_path, "type": source_type})
+
+        feature_names = _extract_offline_feature_names(headings, text, source_path)
+        for name in feature_names:
+            features.append(
+                Feature(
+                    id=f"F-{len(features) + 1:03d}",
+                    name=name,
+                    description=_summarize_heading_context(text, name),
+                    category=source_type,
+                    priority="medium",
+                    tags=["offline", source_type] if source_type else ["offline"],
+                    source=source_path,
+                )
+            )
+
+        for rule_text in _extract_offline_rules(text):
+            rules.append(
+                BusinessRule(
+                    id=f"R-{len(rules) + 1:03d}",
+                    name=rule_text[:80],
+                    description=rule_text,
+                    condition="documented constraint",
+                    expected_behavior=rule_text,
+                    source=source_path,
+                )
+            )
+
+    return AnalysisResult(
+        features=features,
+        rules=rules,
+        raw_sources=raw_sources,
+    )
+
+
+def _extract_offline_feature_names(headings: list[str], text: str, source_path: str) -> list[str]:
+    """Derive a small set of feature names from headings or visible text."""
+    cleaned = [h.strip() for h in headings if h.strip()]
+    if cleaned:
+        return cleaned[:12]
+
+    candidates: list[str] = []
+    for line in text.splitlines():
+        stripped = line.strip().lstrip("-*0123456789. ").strip()
+        if 4 <= len(stripped) <= 80 and not stripped.startswith(("```", "|")):
+            candidates.append(stripped)
+        if len(candidates) >= 5:
+            break
+
+    if candidates:
+        return candidates
+
+    return [Path(source_path).stem.replace("-", " ").replace("_", " ").strip() or "Offline feature"]
+
+
+def _summarize_heading_context(text: str, heading: str) -> str:
+    """Return a short description for an offline-derived feature."""
+    lines = [line.strip() for line in text.splitlines() if line.strip()]
+    for idx, line in enumerate(lines):
+        if heading.lower() in line.lower():
+            for follow in lines[idx + 1:]:
+                if follow and not follow.startswith("#"):
+                    return follow[:200]
+    return f"Offline-derived feature for {heading}"
+
+
+def _extract_offline_rules(text: str) -> list[str]:
+    """Extract rule-like sentences from plain text using simple keyword heuristics."""
+    matches: list[str] = []
+    seen: set[str] = set()
+    keyword_re = re.compile(r"\b(must|should|required|cannot|must not|do not|error|invalid)\b", re.IGNORECASE)
+    for raw_line in text.splitlines():
+        line = raw_line.strip().lstrip("-* ").strip()
+        if len(line) < 12 or len(line) > 200:
+            continue
+        if keyword_re.search(line) and line not in seen:
+            matches.append(line)
+            seen.add(line)
+        if len(matches) >= 10:
+            break
+    return matches

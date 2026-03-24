@@ -217,6 +217,16 @@ def test_update_cases(web_client, sample_project):
     assert resp.json()["count"] == 1
 
 
+def test_generate_cases_offline_flag(web_client, sample_project):
+    """POST /cases forwards no_llm for offline generation."""
+    resp = web_client.post(
+        f"/api/projects/{sample_project}/cases",
+        json={"case_type": "functional", "no_llm": True},
+    )
+    assert resp.status_code == 200
+    assert resp.json()["count"] >= 1
+
+
 # ---------------------------------------------------------------------------
 # Execution
 # ---------------------------------------------------------------------------
@@ -283,7 +293,10 @@ def test_get_coverage(web_client, sample_project):
 def test_manual_workflow(web_client, sample_project):
     """Full manual checklist workflow: start, check, progress, finish."""
     # Start session
-    resp = web_client.post(f"/api/projects/{sample_project}/manual/start")
+    resp = web_client.post(
+        f"/api/projects/{sample_project}/manual/start",
+        json={"no_llm": True},
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert "session_id" in data
@@ -312,6 +325,16 @@ def test_manual_workflow(web_client, sample_project):
     resp = web_client.post(f"/api/projects/{sample_project}/manual/finish")
     assert resp.status_code == 200
     assert "report_path" in resp.json()
+
+
+def test_generate_scripts_offline_flag(web_client, sample_project):
+    """POST /scripts forwards no_llm for offline skeleton generation."""
+    resp = web_client.post(
+        f"/api/projects/{sample_project}/scripts",
+        json={"no_llm": True},
+    )
+    assert resp.status_code == 200
+    assert resp.json()["count"] >= 1
 
 
 def test_manual_progress_no_session(web_client, tmp_path):

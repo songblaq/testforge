@@ -228,6 +228,13 @@ def test_start_session_has_no_results_yet(tmp_project: Path) -> None:
     assert session.results == {}
 
 
+def test_start_session_no_llm_bypasses_adapter(tmp_project: Path) -> None:
+    _seed_analysis(tmp_project)
+    with patch("testforge.cases.checklist.create_adapter", side_effect=AssertionError("adapter should not be called")):
+        session = start_session(tmp_project, no_llm=True)
+    assert len(session.items) > 0
+
+
 # ---------------------------------------------------------------------------
 # Session workflow: check_item
 # ---------------------------------------------------------------------------

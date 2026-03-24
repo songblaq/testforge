@@ -40,7 +40,7 @@ class UseCaseScenario:
         return asdict(self)
 
 
-def generate_usecase_tests(project_dir: Path) -> list[dict[str, Any]]:
+def generate_usecase_tests(project_dir: Path, no_llm: bool = False) -> list[dict[str, Any]]:
     """Generate use case test scenarios from personas and features.
 
     Parameters
@@ -60,6 +60,11 @@ def generate_usecase_tests(project_dir: Path) -> list[dict[str, Any]]:
         logger.info("No analysis results; skipping use case generation")
         return []
 
+    if no_llm:
+        results = _generate_skeleton_usecases(analysis)
+        results.extend(_generate_crud_usecases(analysis))
+        return results
+
     adapter_kwargs: dict[str, Any] = {}
     if config.llm_model:
         adapter_kwargs["model"] = config.llm_model
@@ -68,13 +73,17 @@ def generate_usecase_tests(project_dir: Path) -> list[dict[str, Any]]:
         adapter = create_adapter(config.llm_provider, **adapter_kwargs)
     except (ValueError, ImportError) as exc:
         logger.warning("LLM unavailable (%s), generating skeleton use cases", exc)
-        return _generate_skeleton_usecases(analysis)
+        results = _generate_skeleton_usecases(analysis)
+        results.extend(_generate_crud_usecases(analysis))
+        return results
 
     try:
         return _llm_generate_usecases(adapter, analysis)
     except Exception as exc:
         logger.warning("LLM generation failed (%s), generating skeleton use cases", exc)
-        return _generate_skeleton_usecases(analysis)
+        results = _generate_skeleton_usecases(analysis)
+        results.extend(_generate_crud_usecases(analysis))
+        return results
 
 
 def _llm_generate_usecases(adapter: Any, analysis: Any) -> list[dict[str, Any]]:
@@ -98,6 +107,13 @@ PERSONAS:
 
 Generate realistic end-to-end use case scenarios. Each persona should have at least one scenario.
 Each scenario should cover a realistic user journey through multiple features.
+
+Also include CRUD flow scenarios for each feature:
+- List view: Can the user see a list of items with sufficient detail?
+- Detail view: Can the user click an item and see ALL its information?
+- Edit flow: Can the user modify item data?
+- Delete flow: Can the user delete an item with confirmation?
+Tag these scenarios with "crud" and "design-phase".
 
 Return a JSON array where each element has:
 - "id": unique ID (e.g. "UC-001")
@@ -135,6 +151,83 @@ Return a JSON array only."""
         scenarios.append(uc.to_dict())
 
     return scenarios
+
+
+def _generate_crud_usecases(analysis: Any) -> list[dict[str, Any]]:
+    """Generate CRUD flow use cases for each feature — design-phase validation."""
+    crud_cases = []
+    crud_patterns = [
+        {
+            "suffix": "list-view",
+            "title_template": "View {feature} list",
+            "steps": [
+                "Navigate to {feature} section",
+                "Verify list/table is displayed with items",
+                "Verify each item shows key information (ID, name, status)",
+                "Verify empty state message when no items exist",
+            ],
+            "expected": "List displays all items with sufficient information to identify each one",
+            "tags": ["crud", "list", "design-phase"],
+        },
+        {
+            "suffix": "detail-view",
+            "title_template": "View {feature} detail",
+            "steps": [
+                "Navigate to {feature} list",
+                "Click on a specific item",
+                "Verify detail view shows ALL fields (not just summary)",
+                "Verify user can see full description, attributes, metadata",
+                "Verify back/close navigation to return to list",
+            ],
+            "expected": "Detail view shows complete information about the selected item",
+            "tags": ["crud", "detail", "design-phase"],
+        },
+        {
+            "suffix": "edit-flow",
+            "title_template": "Edit {feature} item",
+            "steps": [
+                "Navigate to {feature} detail view",
+                "Click edit button or inline edit field",
+                "Modify one or more fields",
+                "Save changes",
+                "Verify updated data is reflected in list and detail views",
+            ],
+            "expected": "User can modify item data and changes persist",
+            "tags": ["crud", "edit", "design-phase"],
+        },
+        {
+            "suffix": "delete-flow",
+            "title_template": "Delete {feature} item",
+            "steps": [
+                "Navigate to {feature} list or detail view",
+                "Click delete button",
+                "Confirm deletion in dialog",
+                "Verify item is removed from list",
+                "Verify proper feedback (toast or message)",
+            ],
+            "expected": "Item is deleted with confirmation step and user feedback",
+            "tags": ["crud", "delete", "design-phase"],
+        },
+    ]
+
+    for i, feature in enumerate(analysis.features):
+        for pattern in crud_patterns:
+            case_id = f"UC-CRUD-{i+1:03d}-{pattern['suffix']}"
+            crud_cases.append({
+                "id": case_id,
+                "title": pattern["title_template"].format(feature=feature.name),
+                "description": f"CRUD flow validation for {feature.name}",
+                "persona_id": analysis.personas[0].id if analysis.personas else "",
+                "persona_name": analysis.personas[0].name if analysis.personas else "Default User",
+                "preconditions": [f"{feature.name} has existing data"],
+                "scenario_steps": [s.format(feature=feature.name) for s in pattern["steps"]],
+                "expected_outcome": pattern["expected"],
+                "features_covered": [feature.id],
+                "priority": "high",
+                "tags": pattern["tags"],
+            })
+
+    return crud_cases
 
 
 def _generate_skeleton_usecases(analysis: Any) -> list[dict[str, Any]]:

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from click.testing import CliRunner
 
+import testforge.cli as cli_module
 from testforge.cli import cli
 
 
@@ -49,6 +50,14 @@ def test_selftest_command_exists() -> None:
     assert "self-test" in result.output.lower() or "selftest" in result.output.lower()
 
 
+def test_selftest_dir_is_discoverable() -> None:
+    """The repo self-test corpus is discoverable from the CLI module."""
+    selftest_dir = cli_module._find_selftest_dir()
+    assert selftest_dir is not None
+    assert selftest_dir.name == "selftest"
+    assert (selftest_dir / "run_all.sh").exists()
+
+
 def test_non_interactive_flag() -> None:
     """--non-interactive / -y flag is recognised at the group level."""
     runner = CliRunner()
@@ -57,3 +66,25 @@ def test_non_interactive_flag() -> None:
 
     result_short = runner.invoke(cli, ["-y", "--help"])
     assert result_short.exit_code == 0
+
+
+def test_pipeline_no_llm_flag_is_forwarded(monkeypatch) -> None:
+    """CLI pipeline forwards the global --no-llm flag to the orchestrator."""
+    seen: dict[str, bool] = {}
+
+    class DummyResult:
+        success = True
+        stages_completed = ["analyze"]
+        errors: list[str] = []
+
+    def fake_run_pipeline(*_args, **kwargs):
+        seen["no_llm"] = bool(kwargs.get("no_llm"))
+        return DummyResult()
+
+    monkeypatch.setattr("testforge.core.pipeline.run_pipeline", fake_run_pipeline)
+
+    runner = CliRunner()
+    result = runner.invoke(cli, ["--no-llm", "pipeline", "."])
+
+    assert result.exit_code == 0
+    assert seen["no_llm"] is True

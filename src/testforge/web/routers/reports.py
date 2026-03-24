@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
 from fastapi import APIRouter, HTTPException, Query
+
+from testforge.web.deps import resolve_project
 
 router = APIRouter(prefix="/api/projects", tags=["reports"])
 
@@ -14,9 +14,7 @@ async def get_report(project_path: str, fmt: str = Query("markdown", description
     """Generate and return a test report."""
     from testforge.report.generator import generate_report
 
-    p = Path(project_path)
-    if not p.exists():
-        raise HTTPException(status_code=404, detail=f"Project not found: {project_path}")
+    p = resolve_project(project_path)
 
     if fmt not in ("markdown", "html"):
         raise HTTPException(status_code=400, detail=f"Unsupported format: {fmt}")
@@ -36,9 +34,7 @@ async def get_coverage(project_path: str):
     from testforge.core.config import load_config
     from testforge.coverage.tracker import compute_coverage
 
-    p = Path(project_path)
-    if not p.exists():
-        raise HTTPException(status_code=404, detail=f"Project not found: {project_path}")
+    p = resolve_project(project_path)
 
     config = load_config(p)
     analysis_path = p / config.analysis_dir / "analysis.json"

@@ -120,6 +120,16 @@ $ testforge pipeline my-webapp --input my-webapp/inputs/requirements.pdf
 # Pipeline complete: analyze, generate, script, run, report
 ```
 
+For deterministic local dogfooding or environments without API keys, use the global offline flag:
+
+```bash
+$ testforge --no-llm pipeline my-webapp --input my-webapp/inputs/requirements.pdf
+# Pipeline complete: analyze, generate, script, run, report
+```
+
+`--no-llm` skips external model calls and uses offline heuristics/skeleton generation for
+`analyze`, `generate`, `script`, `pipeline`, and `research`.
+
 ## CLI Reference
 
 See [docs/cli-reference.md](docs/cli-reference.md) for the full command reference.

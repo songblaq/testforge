@@ -1,0 +1,12 @@
+{
+  "iteration": 1,
+  "pass_rate": 0.0,
+  "total": 0,
+  "passed": 0,
+  "failed": 0,
+  "skipped": 0,
+  "improved_cases": [],
+  "timestamp": "2026-03-23T00:07:06.328325",
+  "decision": "no-op",
+  "best_pass_rate_so_far": 0.0
+}

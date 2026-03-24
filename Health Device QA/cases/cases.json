@@ -1,0 +1,1939 @@
+[
+  {
+    "id": "TC-F001-01",
+    "title": "Verify Firmware Source: main.cpp",
+    "description": "Validate that Firmware Source: main.cpp works as described: ```cpp",
+    "feature_id": "F-001",
+    "preconditions": [
+      "System is accessible",
+      "User is authenticated"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Navigate to Firmware Source: main.cpp feature",
+        "expected_result": "Feature is displayed",
+        "input_data": ""
+      },
+      {
+        "order": 2,
+        "action": "Perform primary action",
+        "expected_result": "Expected behavior observed",
+        "input_data": ""
+      },
+      {
+        "order": 3,
+        "action": "Verify result",
+        "expected_result": "Result matches specification",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "Firmware Source: main.cpp functions correctly as specified",
+    "priority": "medium",
+    "tags": [
+      "functional",
+      "skeleton"
+    ],
+    "rule_ids": []
+  },
+  {
+    "id": "TC-F002-01",
+    "title": "Verify include <M5StickCPlus2.h>",
+    "description": "Validate that include <M5StickCPlus2.h> works as described: enum State { IDLE, WAIT_PEAK, WAIT_VALLEY, REST };",
+    "feature_id": "F-002",
+    "preconditions": [
+      "System is accessible",
+      "User is authenticated"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Navigate to include <M5StickCPlus2.h> feature",
+        "expected_result": "Feature is displayed",
+        "input_data": ""
+      },
+      {
+        "order": 2,
+        "action": "Perform primary action",
+        "expected_result": "Expected behavior observed",
+        "input_data": ""
+      },
+      {
+        "order": 3,
+        "action": "Verify result",
+        "expected_result": "Result matches specification",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "include <M5StickCPlus2.h> functions correctly as specified",
+    "priority": "medium",
+    "tags": [
+      "functional",
+      "skeleton"
+    ],
+    "rule_ids": []
+  },
+  {
+    "id": "TC-F003-01",
+    "title": "Verify include <Wire.h>",
+    "description": "Validate that include <Wire.h> works as described: enum State { IDLE, WAIT_PEAK, WAIT_VALLEY, REST };",
+    "feature_id": "F-003",
+    "preconditions": [
+      "System is accessible",
+      "User is authenticated"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Navigate to include <Wire.h> feature",
+        "expected_result": "Feature is displayed",
+        "input_data": ""
+      },
+      {
+        "order": 2,
+        "action": "Perform primary action",
+        "expected_result": "Expected behavior observed",
+        "input_data": ""
+      },
+      {
+        "order": 3,
+        "action": "Verify result",
+        "expected_result": "Result matches specification",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "include <Wire.h> functions correctly as specified",
+    "priority": "medium",
+    "tags": [
+      "functional",
+      "skeleton"
+    ],
+    "rule_ids": []
+  },
+  {
+    "id": "TC-F004-01",
+    "title": "Verify include <math.h>",
+    "description": "Validate that include <math.h> works as described: enum State { IDLE, WAIT_PEAK, WAIT_VALLEY, REST };",
+    "feature_id": "F-004",
+    "preconditions": [
+      "System is accessible",
+      "User is authenticated"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Navigate to include <math.h> feature",
+        "expected_result": "Feature is displayed",
+        "input_data": ""
+      },
+      {
+        "order": 2,
+        "action": "Perform primary action",
+        "expected_result": "Expected behavior observed",
+        "input_data": ""
+      },
+      {
+        "order": 3,
+        "action": "Verify result",
+        "expected_result": "Result matches specification",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "include <math.h> functions correctly as specified",
+    "priority": "medium",
+    "tags": [
+      "functional",
+      "skeleton"
+    ],
+    "rule_ids": []
+  },
+  {
+    "id": "TC-F005-01",
+    "title": "Verify define MPU6886_ADDR       0x68",
+    "description": "Validate that define MPU6886_ADDR       0x68 works as described: enum State { IDLE, WAIT_PEAK, WAIT_VALLEY, REST };",
+    "feature_id": "F-005",
+    "preconditions": [
+      "System is accessible",
+      "User is authenticated"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Navigate to define MPU6886_ADDR       0x68 feature",
+        "expected_result": "Feature is displayed",
+        "input_data": ""
+      },
+      {
+        "order": 2,
+        "action": "Perform primary action",
+        "expected_result": "Expected behavior observed",
+        "input_data": ""
+      },
+      {
+        "order": 3,
+        "action": "Verify result",
+        "expected_result": "Result matches specification",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "define MPU6886_ADDR       0x68 functions correctly as specified",
+    "priority": "medium",
+    "tags": [
+      "functional",
+      "skeleton"
+    ],
+    "rule_ids": []
+  },
+  {
+    "id": "TC-F006-01",
+    "title": "Verify define MPU6886_PWR_MGMT_1 0x6B",
+    "description": "Validate that define MPU6886_PWR_MGMT_1 0x6B works as described: enum State { IDLE, WAIT_PEAK, WAIT_VALLEY, REST };",
+    "feature_id": "F-006",
+    "preconditions": [
+      "System is accessible",
+      "User is authenticated"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Navigate to define MPU6886_PWR_MGMT_1 0x6B feature",
+        "expected_result": "Feature is displayed",
+        "input_data": ""
+      },
+      {
+        "order": 2,
+        "action": "Perform primary action",
+        "expected_result": "Expected behavior observed",
+        "input_data": ""
+      },
+      {
+        "order": 3,
+        "action": "Verify result",
+        "expected_result": "Result matches specification",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "define MPU6886_PWR_MGMT_1 0x6B functions correctly as specified",
+    "priority": "medium",
+    "tags": [
+      "functional",
+      "skeleton"
+    ],
+    "rule_ids": []
+  },
+  {
+    "id": "TC-F007-01",
+    "title": "Verify define MPU6886_ACCEL_CONFIG 0x1C",
+    "description": "Validate that define MPU6886_ACCEL_CONFIG 0x1C works as described: enum State { IDLE, WAIT_PEAK, WAIT_VALLEY, REST };",
+    "feature_id": "F-007",
+    "preconditions": [
+      "System is accessible",
+      "User is authenticated"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Navigate to define MPU6886_ACCEL_CONFIG 0x1C feature",
+        "expected_result": "Feature is displayed",
+        "input_data": ""
+      },
+      {
+        "order": 2,
+        "action": "Perform primary action",
+        "expected_result": "Expected behavior observed",
+        "input_data": ""
+      },
+      {
+        "order": 3,
+        "action": "Verify result",
+        "expected_result": "Result matches specification",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "define MPU6886_ACCEL_CONFIG 0x1C functions correctly as specified",
+    "priority": "medium",
+    "tags": [
+      "functional",
+      "skeleton"
+    ],
+    "rule_ids": []
+  },
+  {
+    "id": "TC-F008-01",
+    "title": "Verify define MPU6886_ACCEL_XOUT_H 0x3B",
+    "description": "Validate that define MPU6886_ACCEL_XOUT_H 0x3B works as described: enum State { IDLE, WAIT_PEAK, WAIT_VALLEY, REST };",
+    "feature_id": "F-008",
+    "preconditions": [
+      "System is accessible",
+      "User is authenticated"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Navigate to define MPU6886_ACCEL_XOUT_H 0x3B feature",
+        "expected_result": "Feature is displayed",
+        "input_data": ""
+      },
+      {
+        "order": 2,
+        "action": "Perform primary action",
+        "expected_result": "Expected behavior observed",
+        "input_data": ""
+      },
+      {
+        "order": 3,
+        "action": "Verify result",
+        "expected_result": "Result matches specification",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "define MPU6886_ACCEL_XOUT_H 0x3B functions correctly as specified",
+    "priority": "medium",
+    "tags": [
+      "functional",
+      "skeleton"
+    ],
+    "rule_ids": []
+  },
+  {
+    "id": "TC-F009-01",
+    "title": "Verify define SAMPLE_MS      20",
+    "description": "Validate that define SAMPLE_MS      20 works as described: enum State { IDLE, WAIT_PEAK, WAIT_VALLEY, REST };",
+    "feature_id": "F-009",
+    "preconditions": [
+      "System is accessible",
+      "User is authenticated"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Navigate to define SAMPLE_MS      20 feature",
+        "expected_result": "Feature is displayed",
+        "input_data": ""
+      },
+      {
+        "order": 2,
+        "action": "Perform primary action",
+        "expected_result": "Expected behavior observed",
+        "input_data": ""
+      },
+      {
+        "order": 3,
+        "action": "Verify result",
+        "expected_result": "Result matches specification",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "define SAMPLE_MS      20 functions correctly as specified",
+    "priority": "medium",
+    "tags": [
+      "functional",
+      "skeleton"
+    ],
+    "rule_ids": []
+  },
+  {
+    "id": "TC-F010-01",
+    "title": "Verify define PEAK_TH        1.08f",
+    "description": "Validate that define PEAK_TH        1.08f works as described: enum State { IDLE, WAIT_PEAK, WAIT_VALLEY, REST };",
+    "feature_id": "F-010",
+    "preconditions": [
+      "System is accessible",
+      "User is authenticated"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Navigate to define PEAK_TH        1.08f feature",
+        "expected_result": "Feature is displayed",
+        "input_data": ""
+      },
+      {
+        "order": 2,
+        "action": "Perform primary action",
+        "expected_result": "Expected behavior observed",
+        "input_data": ""
+      },
+      {
+        "order": 3,
+        "action": "Verify result",
+        "expected_result": "Result matches specification",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "define PEAK_TH        1.08f functions correctly as specified",
+    "priority": "medium",
+    "tags": [
+      "functional",
+      "skeleton"
+    ],
+    "rule_ids": []
+  },
+  {
+    "id": "TC-F011-01",
+    "title": "Verify define VALLEY_TH      0.92f",
+    "description": "Validate that define VALLEY_TH      0.92f works as described: enum State { IDLE, WAIT_PEAK, WAIT_VALLEY, REST };",
+    "feature_id": "F-011",
+    "preconditions": [
+      "System is accessible",
+      "User is authenticated"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Navigate to define VALLEY_TH      0.92f feature",
+        "expected_result": "Feature is displayed",
+        "input_data": ""
+      },
+      {
+        "order": 2,
+        "action": "Perform primary action",
+        "expected_result": "Expected behavior observed",
+        "input_data": ""
+      },
+      {
+        "order": 3,
+        "action": "Verify result",
+        "expected_result": "Result matches specification",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "define VALLEY_TH      0.92f functions correctly as specified",
+    "priority": "medium",
+    "tags": [
+      "functional",
+      "skeleton"
+    ],
+    "rule_ids": []
+  },
+  {
+    "id": "TC-F012-01",
+    "title": "Verify define MIN_REP_MS     400",
+    "description": "Validate that define MIN_REP_MS     400 works as described: enum State { IDLE, WAIT_PEAK, WAIT_VALLEY, REST };",
+    "feature_id": "F-012",
+    "preconditions": [
+      "System is accessible",
+      "User is authenticated"
+    ],
+    "steps": [
+      {
+        "order": 1,
+        "action": "Navigate to define MIN_REP_MS     400 feature",
+        "expected_result": "Feature is displayed",
+        "input_data": ""
+      },
+      {
+        "order": 2,
+        "action": "Perform primary action",
+        "expected_result": "Expected behavior observed",
+        "input_data": ""
+      },
+      {
+        "order": 3,
+        "action": "Verify result",
+        "expected_result": "Result matches specification",
+        "input_data": ""
+      }
+    ],
+    "expected_result": "define MIN_REP_MS     400 functions correctly as specified",
+    "priority": "medium",
+    "tags": [
+      "functional",
+      "skeleton"
+    ],
+    "rule_ids": []
+  },
+  {
+    "id": "UC-001",
+    "title": "Default User -- primary workflow",
+    "description": "End-to-end scenario for Default User",
+    "persona_id": "P-DEFAULT",
+    "persona_name": "Default User",
+    "preconditions": [
+      "User is authenticated",
+      "System is in default state"
+    ],
+    "scenario_steps": [
+      "As Default User, navigate to the application",
+      "Interact with Firmware Source: main.cpp",
+      "Interact with include <M5StickCPlus2.h>",
+      "Interact with include <Wire.h>",
+      "Verify final state matches expectations"
+    ],
+    "expected_outcome": "All interactions complete successfully",
+    "features_covered": [
+      "F-001",
+      "F-002",
+      "F-003"
+    ],
+    "priority": "medium",
+    "tags": [
+      "e2e",
+      "skeleton"
+    ]
+  },
+  {
+    "id": "UC-CRUD-001-list-view",
+    "title": "View Firmware Source: main.cpp list",
+    "description": "CRUD flow validation for Firmware Source: main.cpp",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "Firmware Source: main.cpp has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to Firmware Source: main.cpp section",
+      "Verify list/table is displayed with items",
+      "Verify each item shows key information (ID, name, status)",
+      "Verify empty state message when no items exist"
+    ],
+    "expected_outcome": "List displays all items with sufficient information to identify each one",
+    "features_covered": [
+      "F-001"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "list",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-001-detail-view",
+    "title": "View Firmware Source: main.cpp detail",
+    "description": "CRUD flow validation for Firmware Source: main.cpp",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "Firmware Source: main.cpp has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to Firmware Source: main.cpp list",
+      "Click on a specific item",
+      "Verify detail view shows ALL fields (not just summary)",
+      "Verify user can see full description, attributes, metadata",
+      "Verify back/close navigation to return to list"
+    ],
+    "expected_outcome": "Detail view shows complete information about the selected item",
+    "features_covered": [
+      "F-001"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "detail",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-001-edit-flow",
+    "title": "Edit Firmware Source: main.cpp item",
+    "description": "CRUD flow validation for Firmware Source: main.cpp",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "Firmware Source: main.cpp has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to Firmware Source: main.cpp detail view",
+      "Click edit button or inline edit field",
+      "Modify one or more fields",
+      "Save changes",
+      "Verify updated data is reflected in list and detail views"
+    ],
+    "expected_outcome": "User can modify item data and changes persist",
+    "features_covered": [
+      "F-001"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "edit",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-001-delete-flow",
+    "title": "Delete Firmware Source: main.cpp item",
+    "description": "CRUD flow validation for Firmware Source: main.cpp",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "Firmware Source: main.cpp has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to Firmware Source: main.cpp list or detail view",
+      "Click delete button",
+      "Confirm deletion in dialog",
+      "Verify item is removed from list",
+      "Verify proper feedback (toast or message)"
+    ],
+    "expected_outcome": "Item is deleted with confirmation step and user feedback",
+    "features_covered": [
+      "F-001"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "delete",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-002-list-view",
+    "title": "View include <M5StickCPlus2.h> list",
+    "description": "CRUD flow validation for include <M5StickCPlus2.h>",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "include <M5StickCPlus2.h> has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to include <M5StickCPlus2.h> section",
+      "Verify list/table is displayed with items",
+      "Verify each item shows key information (ID, name, status)",
+      "Verify empty state message when no items exist"
+    ],
+    "expected_outcome": "List displays all items with sufficient information to identify each one",
+    "features_covered": [
+      "F-002"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "list",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-002-detail-view",
+    "title": "View include <M5StickCPlus2.h> detail",
+    "description": "CRUD flow validation for include <M5StickCPlus2.h>",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "include <M5StickCPlus2.h> has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to include <M5StickCPlus2.h> list",
+      "Click on a specific item",
+      "Verify detail view shows ALL fields (not just summary)",
+      "Verify user can see full description, attributes, metadata",
+      "Verify back/close navigation to return to list"
+    ],
+    "expected_outcome": "Detail view shows complete information about the selected item",
+    "features_covered": [
+      "F-002"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "detail",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-002-edit-flow",
+    "title": "Edit include <M5StickCPlus2.h> item",
+    "description": "CRUD flow validation for include <M5StickCPlus2.h>",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "include <M5StickCPlus2.h> has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to include <M5StickCPlus2.h> detail view",
+      "Click edit button or inline edit field",
+      "Modify one or more fields",
+      "Save changes",
+      "Verify updated data is reflected in list and detail views"
+    ],
+    "expected_outcome": "User can modify item data and changes persist",
+    "features_covered": [
+      "F-002"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "edit",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-002-delete-flow",
+    "title": "Delete include <M5StickCPlus2.h> item",
+    "description": "CRUD flow validation for include <M5StickCPlus2.h>",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "include <M5StickCPlus2.h> has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to include <M5StickCPlus2.h> list or detail view",
+      "Click delete button",
+      "Confirm deletion in dialog",
+      "Verify item is removed from list",
+      "Verify proper feedback (toast or message)"
+    ],
+    "expected_outcome": "Item is deleted with confirmation step and user feedback",
+    "features_covered": [
+      "F-002"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "delete",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-003-list-view",
+    "title": "View include <Wire.h> list",
+    "description": "CRUD flow validation for include <Wire.h>",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "include <Wire.h> has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to include <Wire.h> section",
+      "Verify list/table is displayed with items",
+      "Verify each item shows key information (ID, name, status)",
+      "Verify empty state message when no items exist"
+    ],
+    "expected_outcome": "List displays all items with sufficient information to identify each one",
+    "features_covered": [
+      "F-003"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "list",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-003-detail-view",
+    "title": "View include <Wire.h> detail",
+    "description": "CRUD flow validation for include <Wire.h>",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "include <Wire.h> has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to include <Wire.h> list",
+      "Click on a specific item",
+      "Verify detail view shows ALL fields (not just summary)",
+      "Verify user can see full description, attributes, metadata",
+      "Verify back/close navigation to return to list"
+    ],
+    "expected_outcome": "Detail view shows complete information about the selected item",
+    "features_covered": [
+      "F-003"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "detail",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-003-edit-flow",
+    "title": "Edit include <Wire.h> item",
+    "description": "CRUD flow validation for include <Wire.h>",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "include <Wire.h> has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to include <Wire.h> detail view",
+      "Click edit button or inline edit field",
+      "Modify one or more fields",
+      "Save changes",
+      "Verify updated data is reflected in list and detail views"
+    ],
+    "expected_outcome": "User can modify item data and changes persist",
+    "features_covered": [
+      "F-003"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "edit",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-003-delete-flow",
+    "title": "Delete include <Wire.h> item",
+    "description": "CRUD flow validation for include <Wire.h>",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "include <Wire.h> has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to include <Wire.h> list or detail view",
+      "Click delete button",
+      "Confirm deletion in dialog",
+      "Verify item is removed from list",
+      "Verify proper feedback (toast or message)"
+    ],
+    "expected_outcome": "Item is deleted with confirmation step and user feedback",
+    "features_covered": [
+      "F-003"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "delete",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-004-list-view",
+    "title": "View include <math.h> list",
+    "description": "CRUD flow validation for include <math.h>",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "include <math.h> has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to include <math.h> section",
+      "Verify list/table is displayed with items",
+      "Verify each item shows key information (ID, name, status)",
+      "Verify empty state message when no items exist"
+    ],
+    "expected_outcome": "List displays all items with sufficient information to identify each one",
+    "features_covered": [
+      "F-004"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "list",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-004-detail-view",
+    "title": "View include <math.h> detail",
+    "description": "CRUD flow validation for include <math.h>",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "include <math.h> has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to include <math.h> list",
+      "Click on a specific item",
+      "Verify detail view shows ALL fields (not just summary)",
+      "Verify user can see full description, attributes, metadata",
+      "Verify back/close navigation to return to list"
+    ],
+    "expected_outcome": "Detail view shows complete information about the selected item",
+    "features_covered": [
+      "F-004"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "detail",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-004-edit-flow",
+    "title": "Edit include <math.h> item",
+    "description": "CRUD flow validation for include <math.h>",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "include <math.h> has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to include <math.h> detail view",
+      "Click edit button or inline edit field",
+      "Modify one or more fields",
+      "Save changes",
+      "Verify updated data is reflected in list and detail views"
+    ],
+    "expected_outcome": "User can modify item data and changes persist",
+    "features_covered": [
+      "F-004"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "edit",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-004-delete-flow",
+    "title": "Delete include <math.h> item",
+    "description": "CRUD flow validation for include <math.h>",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "include <math.h> has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to include <math.h> list or detail view",
+      "Click delete button",
+      "Confirm deletion in dialog",
+      "Verify item is removed from list",
+      "Verify proper feedback (toast or message)"
+    ],
+    "expected_outcome": "Item is deleted with confirmation step and user feedback",
+    "features_covered": [
+      "F-004"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "delete",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-005-list-view",
+    "title": "View define MPU6886_ADDR       0x68 list",
+    "description": "CRUD flow validation for define MPU6886_ADDR       0x68",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "define MPU6886_ADDR       0x68 has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to define MPU6886_ADDR       0x68 section",
+      "Verify list/table is displayed with items",
+      "Verify each item shows key information (ID, name, status)",
+      "Verify empty state message when no items exist"
+    ],
+    "expected_outcome": "List displays all items with sufficient information to identify each one",
+    "features_covered": [
+      "F-005"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "list",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-005-detail-view",
+    "title": "View define MPU6886_ADDR       0x68 detail",
+    "description": "CRUD flow validation for define MPU6886_ADDR       0x68",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "define MPU6886_ADDR       0x68 has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to define MPU6886_ADDR       0x68 list",
+      "Click on a specific item",
+      "Verify detail view shows ALL fields (not just summary)",
+      "Verify user can see full description, attributes, metadata",
+      "Verify back/close navigation to return to list"
+    ],
+    "expected_outcome": "Detail view shows complete information about the selected item",
+    "features_covered": [
+      "F-005"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "detail",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-005-edit-flow",
+    "title": "Edit define MPU6886_ADDR       0x68 item",
+    "description": "CRUD flow validation for define MPU6886_ADDR       0x68",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "define MPU6886_ADDR       0x68 has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to define MPU6886_ADDR       0x68 detail view",
+      "Click edit button or inline edit field",
+      "Modify one or more fields",
+      "Save changes",
+      "Verify updated data is reflected in list and detail views"
+    ],
+    "expected_outcome": "User can modify item data and changes persist",
+    "features_covered": [
+      "F-005"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "edit",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-005-delete-flow",
+    "title": "Delete define MPU6886_ADDR       0x68 item",
+    "description": "CRUD flow validation for define MPU6886_ADDR       0x68",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "define MPU6886_ADDR       0x68 has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to define MPU6886_ADDR       0x68 list or detail view",
+      "Click delete button",
+      "Confirm deletion in dialog",
+      "Verify item is removed from list",
+      "Verify proper feedback (toast or message)"
+    ],
+    "expected_outcome": "Item is deleted with confirmation step and user feedback",
+    "features_covered": [
+      "F-005"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "delete",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-006-list-view",
+    "title": "View define MPU6886_PWR_MGMT_1 0x6B list",
+    "description": "CRUD flow validation for define MPU6886_PWR_MGMT_1 0x6B",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "define MPU6886_PWR_MGMT_1 0x6B has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to define MPU6886_PWR_MGMT_1 0x6B section",
+      "Verify list/table is displayed with items",
+      "Verify each item shows key information (ID, name, status)",
+      "Verify empty state message when no items exist"
+    ],
+    "expected_outcome": "List displays all items with sufficient information to identify each one",
+    "features_covered": [
+      "F-006"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "list",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-006-detail-view",
+    "title": "View define MPU6886_PWR_MGMT_1 0x6B detail",
+    "description": "CRUD flow validation for define MPU6886_PWR_MGMT_1 0x6B",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "define MPU6886_PWR_MGMT_1 0x6B has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to define MPU6886_PWR_MGMT_1 0x6B list",
+      "Click on a specific item",
+      "Verify detail view shows ALL fields (not just summary)",
+      "Verify user can see full description, attributes, metadata",
+      "Verify back/close navigation to return to list"
+    ],
+    "expected_outcome": "Detail view shows complete information about the selected item",
+    "features_covered": [
+      "F-006"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "detail",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-006-edit-flow",
+    "title": "Edit define MPU6886_PWR_MGMT_1 0x6B item",
+    "description": "CRUD flow validation for define MPU6886_PWR_MGMT_1 0x6B",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "define MPU6886_PWR_MGMT_1 0x6B has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to define MPU6886_PWR_MGMT_1 0x6B detail view",
+      "Click edit button or inline edit field",
+      "Modify one or more fields",
+      "Save changes",
+      "Verify updated data is reflected in list and detail views"
+    ],
+    "expected_outcome": "User can modify item data and changes persist",
+    "features_covered": [
+      "F-006"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "edit",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-006-delete-flow",
+    "title": "Delete define MPU6886_PWR_MGMT_1 0x6B item",
+    "description": "CRUD flow validation for define MPU6886_PWR_MGMT_1 0x6B",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "define MPU6886_PWR_MGMT_1 0x6B has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to define MPU6886_PWR_MGMT_1 0x6B list or detail view",
+      "Click delete button",
+      "Confirm deletion in dialog",
+      "Verify item is removed from list",
+      "Verify proper feedback (toast or message)"
+    ],
+    "expected_outcome": "Item is deleted with confirmation step and user feedback",
+    "features_covered": [
+      "F-006"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "delete",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-007-list-view",
+    "title": "View define MPU6886_ACCEL_CONFIG 0x1C list",
+    "description": "CRUD flow validation for define MPU6886_ACCEL_CONFIG 0x1C",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "define MPU6886_ACCEL_CONFIG 0x1C has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to define MPU6886_ACCEL_CONFIG 0x1C section",
+      "Verify list/table is displayed with items",
+      "Verify each item shows key information (ID, name, status)",
+      "Verify empty state message when no items exist"
+    ],
+    "expected_outcome": "List displays all items with sufficient information to identify each one",
+    "features_covered": [
+      "F-007"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "list",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-007-detail-view",
+    "title": "View define MPU6886_ACCEL_CONFIG 0x1C detail",
+    "description": "CRUD flow validation for define MPU6886_ACCEL_CONFIG 0x1C",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "define MPU6886_ACCEL_CONFIG 0x1C has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to define MPU6886_ACCEL_CONFIG 0x1C list",
+      "Click on a specific item",
+      "Verify detail view shows ALL fields (not just summary)",
+      "Verify user can see full description, attributes, metadata",
+      "Verify back/close navigation to return to list"
+    ],
+    "expected_outcome": "Detail view shows complete information about the selected item",
+    "features_covered": [
+      "F-007"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "detail",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-007-edit-flow",
+    "title": "Edit define MPU6886_ACCEL_CONFIG 0x1C item",
+    "description": "CRUD flow validation for define MPU6886_ACCEL_CONFIG 0x1C",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "define MPU6886_ACCEL_CONFIG 0x1C has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to define MPU6886_ACCEL_CONFIG 0x1C detail view",
+      "Click edit button or inline edit field",
+      "Modify one or more fields",
+      "Save changes",
+      "Verify updated data is reflected in list and detail views"
+    ],
+    "expected_outcome": "User can modify item data and changes persist",
+    "features_covered": [
+      "F-007"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "edit",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-007-delete-flow",
+    "title": "Delete define MPU6886_ACCEL_CONFIG 0x1C item",
+    "description": "CRUD flow validation for define MPU6886_ACCEL_CONFIG 0x1C",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "define MPU6886_ACCEL_CONFIG 0x1C has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to define MPU6886_ACCEL_CONFIG 0x1C list or detail view",
+      "Click delete button",
+      "Confirm deletion in dialog",
+      "Verify item is removed from list",
+      "Verify proper feedback (toast or message)"
+    ],
+    "expected_outcome": "Item is deleted with confirmation step and user feedback",
+    "features_covered": [
+      "F-007"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "delete",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-008-list-view",
+    "title": "View define MPU6886_ACCEL_XOUT_H 0x3B list",
+    "description": "CRUD flow validation for define MPU6886_ACCEL_XOUT_H 0x3B",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "define MPU6886_ACCEL_XOUT_H 0x3B has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to define MPU6886_ACCEL_XOUT_H 0x3B section",
+      "Verify list/table is displayed with items",
+      "Verify each item shows key information (ID, name, status)",
+      "Verify empty state message when no items exist"
+    ],
+    "expected_outcome": "List displays all items with sufficient information to identify each one",
+    "features_covered": [
+      "F-008"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "list",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-008-detail-view",
+    "title": "View define MPU6886_ACCEL_XOUT_H 0x3B detail",
+    "description": "CRUD flow validation for define MPU6886_ACCEL_XOUT_H 0x3B",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "define MPU6886_ACCEL_XOUT_H 0x3B has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to define MPU6886_ACCEL_XOUT_H 0x3B list",
+      "Click on a specific item",
+      "Verify detail view shows ALL fields (not just summary)",
+      "Verify user can see full description, attributes, metadata",
+      "Verify back/close navigation to return to list"
+    ],
+    "expected_outcome": "Detail view shows complete information about the selected item",
+    "features_covered": [
+      "F-008"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "detail",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-008-edit-flow",
+    "title": "Edit define MPU6886_ACCEL_XOUT_H 0x3B item",
+    "description": "CRUD flow validation for define MPU6886_ACCEL_XOUT_H 0x3B",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "define MPU6886_ACCEL_XOUT_H 0x3B has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to define MPU6886_ACCEL_XOUT_H 0x3B detail view",
+      "Click edit button or inline edit field",
+      "Modify one or more fields",
+      "Save changes",
+      "Verify updated data is reflected in list and detail views"
+    ],
+    "expected_outcome": "User can modify item data and changes persist",
+    "features_covered": [
+      "F-008"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "edit",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-008-delete-flow",
+    "title": "Delete define MPU6886_ACCEL_XOUT_H 0x3B item",
+    "description": "CRUD flow validation for define MPU6886_ACCEL_XOUT_H 0x3B",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "define MPU6886_ACCEL_XOUT_H 0x3B has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to define MPU6886_ACCEL_XOUT_H 0x3B list or detail view",
+      "Click delete button",
+      "Confirm deletion in dialog",
+      "Verify item is removed from list",
+      "Verify proper feedback (toast or message)"
+    ],
+    "expected_outcome": "Item is deleted with confirmation step and user feedback",
+    "features_covered": [
+      "F-008"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "delete",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-009-list-view",
+    "title": "View define SAMPLE_MS      20 list",
+    "description": "CRUD flow validation for define SAMPLE_MS      20",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "define SAMPLE_MS      20 has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to define SAMPLE_MS      20 section",
+      "Verify list/table is displayed with items",
+      "Verify each item shows key information (ID, name, status)",
+      "Verify empty state message when no items exist"
+    ],
+    "expected_outcome": "List displays all items with sufficient information to identify each one",
+    "features_covered": [
+      "F-009"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "list",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-009-detail-view",
+    "title": "View define SAMPLE_MS      20 detail",
+    "description": "CRUD flow validation for define SAMPLE_MS      20",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "define SAMPLE_MS      20 has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to define SAMPLE_MS      20 list",
+      "Click on a specific item",
+      "Verify detail view shows ALL fields (not just summary)",
+      "Verify user can see full description, attributes, metadata",
+      "Verify back/close navigation to return to list"
+    ],
+    "expected_outcome": "Detail view shows complete information about the selected item",
+    "features_covered": [
+      "F-009"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "detail",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-009-edit-flow",
+    "title": "Edit define SAMPLE_MS      20 item",
+    "description": "CRUD flow validation for define SAMPLE_MS      20",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "define SAMPLE_MS      20 has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to define SAMPLE_MS      20 detail view",
+      "Click edit button or inline edit field",
+      "Modify one or more fields",
+      "Save changes",
+      "Verify updated data is reflected in list and detail views"
+    ],
+    "expected_outcome": "User can modify item data and changes persist",
+    "features_covered": [
+      "F-009"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "edit",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-009-delete-flow",
+    "title": "Delete define SAMPLE_MS      20 item",
+    "description": "CRUD flow validation for define SAMPLE_MS      20",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "define SAMPLE_MS      20 has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to define SAMPLE_MS      20 list or detail view",
+      "Click delete button",
+      "Confirm deletion in dialog",
+      "Verify item is removed from list",
+      "Verify proper feedback (toast or message)"
+    ],
+    "expected_outcome": "Item is deleted with confirmation step and user feedback",
+    "features_covered": [
+      "F-009"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "delete",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-010-list-view",
+    "title": "View define PEAK_TH        1.08f list",
+    "description": "CRUD flow validation for define PEAK_TH        1.08f",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "define PEAK_TH        1.08f has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to define PEAK_TH        1.08f section",
+      "Verify list/table is displayed with items",
+      "Verify each item shows key information (ID, name, status)",
+      "Verify empty state message when no items exist"
+    ],
+    "expected_outcome": "List displays all items with sufficient information to identify each one",
+    "features_covered": [
+      "F-010"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "list",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-010-detail-view",
+    "title": "View define PEAK_TH        1.08f detail",
+    "description": "CRUD flow validation for define PEAK_TH        1.08f",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "define PEAK_TH        1.08f has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to define PEAK_TH        1.08f list",
+      "Click on a specific item",
+      "Verify detail view shows ALL fields (not just summary)",
+      "Verify user can see full description, attributes, metadata",
+      "Verify back/close navigation to return to list"
+    ],
+    "expected_outcome": "Detail view shows complete information about the selected item",
+    "features_covered": [
+      "F-010"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "detail",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-010-edit-flow",
+    "title": "Edit define PEAK_TH        1.08f item",
+    "description": "CRUD flow validation for define PEAK_TH        1.08f",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "define PEAK_TH        1.08f has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to define PEAK_TH        1.08f detail view",
+      "Click edit button or inline edit field",
+      "Modify one or more fields",
+      "Save changes",
+      "Verify updated data is reflected in list and detail views"
+    ],
+    "expected_outcome": "User can modify item data and changes persist",
+    "features_covered": [
+      "F-010"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "edit",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-010-delete-flow",
+    "title": "Delete define PEAK_TH        1.08f item",
+    "description": "CRUD flow validation for define PEAK_TH        1.08f",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "define PEAK_TH        1.08f has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to define PEAK_TH        1.08f list or detail view",
+      "Click delete button",
+      "Confirm deletion in dialog",
+      "Verify item is removed from list",
+      "Verify proper feedback (toast or message)"
+    ],
+    "expected_outcome": "Item is deleted with confirmation step and user feedback",
+    "features_covered": [
+      "F-010"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "delete",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-011-list-view",
+    "title": "View define VALLEY_TH      0.92f list",
+    "description": "CRUD flow validation for define VALLEY_TH      0.92f",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "define VALLEY_TH      0.92f has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to define VALLEY_TH      0.92f section",
+      "Verify list/table is displayed with items",
+      "Verify each item shows key information (ID, name, status)",
+      "Verify empty state message when no items exist"
+    ],
+    "expected_outcome": "List displays all items with sufficient information to identify each one",
+    "features_covered": [
+      "F-011"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "list",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-011-detail-view",
+    "title": "View define VALLEY_TH      0.92f detail",
+    "description": "CRUD flow validation for define VALLEY_TH      0.92f",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "define VALLEY_TH      0.92f has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to define VALLEY_TH      0.92f list",
+      "Click on a specific item",
+      "Verify detail view shows ALL fields (not just summary)",
+      "Verify user can see full description, attributes, metadata",
+      "Verify back/close navigation to return to list"
+    ],
+    "expected_outcome": "Detail view shows complete information about the selected item",
+    "features_covered": [
+      "F-011"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "detail",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-011-edit-flow",
+    "title": "Edit define VALLEY_TH      0.92f item",
+    "description": "CRUD flow validation for define VALLEY_TH      0.92f",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "define VALLEY_TH      0.92f has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to define VALLEY_TH      0.92f detail view",
+      "Click edit button or inline edit field",
+      "Modify one or more fields",
+      "Save changes",
+      "Verify updated data is reflected in list and detail views"
+    ],
+    "expected_outcome": "User can modify item data and changes persist",
+    "features_covered": [
+      "F-011"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "edit",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-011-delete-flow",
+    "title": "Delete define VALLEY_TH      0.92f item",
+    "description": "CRUD flow validation for define VALLEY_TH      0.92f",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "define VALLEY_TH      0.92f has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to define VALLEY_TH      0.92f list or detail view",
+      "Click delete button",
+      "Confirm deletion in dialog",
+      "Verify item is removed from list",
+      "Verify proper feedback (toast or message)"
+    ],
+    "expected_outcome": "Item is deleted with confirmation step and user feedback",
+    "features_covered": [
+      "F-011"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "delete",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-012-list-view",
+    "title": "View define MIN_REP_MS     400 list",
+    "description": "CRUD flow validation for define MIN_REP_MS     400",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "define MIN_REP_MS     400 has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to define MIN_REP_MS     400 section",
+      "Verify list/table is displayed with items",
+      "Verify each item shows key information (ID, name, status)",
+      "Verify empty state message when no items exist"
+    ],
+    "expected_outcome": "List displays all items with sufficient information to identify each one",
+    "features_covered": [
+      "F-012"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "list",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-012-detail-view",
+    "title": "View define MIN_REP_MS     400 detail",
+    "description": "CRUD flow validation for define MIN_REP_MS     400",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "define MIN_REP_MS     400 has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to define MIN_REP_MS     400 list",
+      "Click on a specific item",
+      "Verify detail view shows ALL fields (not just summary)",
+      "Verify user can see full description, attributes, metadata",
+      "Verify back/close navigation to return to list"
+    ],
+    "expected_outcome": "Detail view shows complete information about the selected item",
+    "features_covered": [
+      "F-012"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "detail",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-012-edit-flow",
+    "title": "Edit define MIN_REP_MS     400 item",
+    "description": "CRUD flow validation for define MIN_REP_MS     400",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "define MIN_REP_MS     400 has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to define MIN_REP_MS     400 detail view",
+      "Click edit button or inline edit field",
+      "Modify one or more fields",
+      "Save changes",
+      "Verify updated data is reflected in list and detail views"
+    ],
+    "expected_outcome": "User can modify item data and changes persist",
+    "features_covered": [
+      "F-012"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "edit",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "UC-CRUD-012-delete-flow",
+    "title": "Delete define MIN_REP_MS     400 item",
+    "description": "CRUD flow validation for define MIN_REP_MS     400",
+    "persona_id": "",
+    "persona_name": "Default User",
+    "preconditions": [
+      "define MIN_REP_MS     400 has existing data"
+    ],
+    "scenario_steps": [
+      "Navigate to define MIN_REP_MS     400 list or detail view",
+      "Click delete button",
+      "Confirm deletion in dialog",
+      "Verify item is removed from list",
+      "Verify proper feedback (toast or message)"
+    ],
+    "expected_outcome": "Item is deleted with confirmation step and user feedback",
+    "features_covered": [
+      "F-012"
+    ],
+    "priority": "high",
+    "tags": [
+      "crud",
+      "delete",
+      "design-phase"
+    ]
+  },
+  {
+    "id": "CL-001",
+    "title": "Manual check: Firmware Source: main.cpp",
+    "description": "Verify Firmware Source: main.cpp manually: ```cpp",
+    "category": "functionality",
+    "feature_id": "F-001",
+    "check_steps": [
+      "Navigate to the Firmware Source: main.cpp area",
+      "Verify all UI elements are displayed correctly",
+      "Perform the primary action and observe results",
+      "Check error handling with invalid input"
+    ],
+    "pass_criteria": "Firmware Source: main.cpp behaves as documented",
+    "priority": "medium"
+  },
+  {
+    "id": "CL-002",
+    "title": "Manual check: include <M5StickCPlus2.h>",
+    "description": "Verify include <M5StickCPlus2.h> manually: enum State { IDLE, WAIT_PEAK, WAIT_VALLEY, REST };",
+    "category": "functionality",
+    "feature_id": "F-002",
+    "check_steps": [
+      "Navigate to the include <M5StickCPlus2.h> area",
+      "Verify all UI elements are displayed correctly",
+      "Perform the primary action and observe results",
+      "Check error handling with invalid input"
+    ],
+    "pass_criteria": "include <M5StickCPlus2.h> behaves as documented",
+    "priority": "medium"
+  },
+  {
+    "id": "CL-003",
+    "title": "Manual check: include <Wire.h>",
+    "description": "Verify include <Wire.h> manually: enum State { IDLE, WAIT_PEAK, WAIT_VALLEY, REST };",
+    "category": "functionality",
+    "feature_id": "F-003",
+    "check_steps": [
+      "Navigate to the include <Wire.h> area",
+      "Verify all UI elements are displayed correctly",
+      "Perform the primary action and observe results",
+      "Check error handling with invalid input"
+    ],
+    "pass_criteria": "include <Wire.h> behaves as documented",
+    "priority": "medium"
+  },
+  {
+    "id": "CL-004",
+    "title": "Manual check: include <math.h>",
+    "description": "Verify include <math.h> manually: enum State { IDLE, WAIT_PEAK, WAIT_VALLEY, REST };",
+    "category": "functionality",
+    "feature_id": "F-004",
+    "check_steps": [
+      "Navigate to the include <math.h> area",
+      "Verify all UI elements are displayed correctly",
+      "Perform the primary action and observe results",
+      "Check error handling with invalid input"
+    ],
+    "pass_criteria": "include <math.h> behaves as documented",
+    "priority": "medium"
+  },
+  {
+    "id": "CL-005",
+    "title": "Manual check: define MPU6886_ADDR       0x68",
+    "description": "Verify define MPU6886_ADDR       0x68 manually: enum State { IDLE, WAIT_PEAK, WAIT_VALLEY, REST };",
+    "category": "functionality",
+    "feature_id": "F-005",
+    "check_steps": [
+      "Navigate to the define MPU6886_ADDR       0x68 area",
+      "Verify all UI elements are displayed correctly",
+      "Perform the primary action and observe results",
+      "Check error handling with invalid input"
+    ],
+    "pass_criteria": "define MPU6886_ADDR       0x68 behaves as documented",
+    "priority": "medium"
+  },
+  {
+    "id": "CL-006",
+    "title": "Manual check: define MPU6886_PWR_MGMT_1 0x6B",
+    "description": "Verify define MPU6886_PWR_MGMT_1 0x6B manually: enum State { IDLE, WAIT_PEAK, WAIT_VALLEY, REST };",
+    "category": "functionality",
+    "feature_id": "F-006",
+    "check_steps": [
+      "Navigate to the define MPU6886_PWR_MGMT_1 0x6B area",
+      "Verify all UI elements are displayed correctly",
+      "Perform the primary action and observe results",
+      "Check error handling with invalid input"
+    ],
+    "pass_criteria": "define MPU6886_PWR_MGMT_1 0x6B behaves as documented",
+    "priority": "medium"
+  },
+  {
+    "id": "CL-007",
+    "title": "Manual check: define MPU6886_ACCEL_CONFIG 0x1C",
+    "description": "Verify define MPU6886_ACCEL_CONFIG 0x1C manually: enum State { IDLE, WAIT_PEAK, WAIT_VALLEY, REST };",
+    "category": "functionality",
+    "feature_id": "F-007",
+    "check_steps": [
+      "Navigate to the define MPU6886_ACCEL_CONFIG 0x1C area",
+      "Verify all UI elements are displayed correctly",
+      "Perform the primary action and observe results",
+      "Check error handling with invalid input"
+    ],
+    "pass_criteria": "define MPU6886_ACCEL_CONFIG 0x1C behaves as documented",
+    "priority": "medium"
+  },
+  {
+    "id": "CL-008",
+    "title": "Manual check: define MPU6886_ACCEL_XOUT_H 0x3B",
+    "description": "Verify define MPU6886_ACCEL_XOUT_H 0x3B manually: enum State { IDLE, WAIT_PEAK, WAIT_VALLEY, REST };",
+    "category": "functionality",
+    "feature_id": "F-008",
+    "check_steps": [
+      "Navigate to the define MPU6886_ACCEL_XOUT_H 0x3B area",
+      "Verify all UI elements are displayed correctly",
+      "Perform the primary action and observe results",
+      "Check error handling with invalid input"
+    ],
+    "pass_criteria": "define MPU6886_ACCEL_XOUT_H 0x3B behaves as documented",
+    "priority": "medium"
+  },
+  {
+    "id": "CL-009",
+    "title": "Manual check: define SAMPLE_MS      20",
+    "description": "Verify define SAMPLE_MS      20 manually: enum State { IDLE, WAIT_PEAK, WAIT_VALLEY, REST };",
+    "category": "functionality",
+    "feature_id": "F-009",
+    "check_steps": [
+      "Navigate to the define SAMPLE_MS      20 area",
+      "Verify all UI elements are displayed correctly",
+      "Perform the primary action and observe results",
+      "Check error handling with invalid input"
+    ],
+    "pass_criteria": "define SAMPLE_MS      20 behaves as documented",
+    "priority": "medium"
+  },
+  {
+    "id": "CL-010",
+    "title": "Manual check: define PEAK_TH        1.08f",
+    "description": "Verify define PEAK_TH        1.08f manually: enum State { IDLE, WAIT_PEAK, WAIT_VALLEY, REST };",
+    "category": "functionality",
+    "feature_id": "F-010",
+    "check_steps": [
+      "Navigate to the define PEAK_TH        1.08f area",
+      "Verify all UI elements are displayed correctly",
+      "Perform the primary action and observe results",
+      "Check error handling with invalid input"
+    ],
+    "pass_criteria": "define PEAK_TH        1.08f behaves as documented",
+    "priority": "medium"
+  },
+  {
+    "id": "CL-011",
+    "title": "Manual check: define VALLEY_TH      0.92f",
+    "description": "Verify define VALLEY_TH      0.92f manually: enum State { IDLE, WAIT_PEAK, WAIT_VALLEY, REST };",
+    "category": "functionality",
+    "feature_id": "F-011",
+    "check_steps": [
+      "Navigate to the define VALLEY_TH      0.92f area",
+      "Verify all UI elements are displayed correctly",
+      "Perform the primary action and observe results",
+      "Check error handling with invalid input"
+    ],
+    "pass_criteria": "define VALLEY_TH      0.92f behaves as documented",
+    "priority": "medium"
+  },
+  {
+    "id": "CL-012",
+    "title": "Manual check: define MIN_REP_MS     400",
+    "description": "Verify define MIN_REP_MS     400 manually: enum State { IDLE, WAIT_PEAK, WAIT_VALLEY, REST };",
+    "category": "functionality",
+    "feature_id": "F-012",
+    "check_steps": [
+      "Navigate to the define MIN_REP_MS     400 area",
+      "Verify all UI elements are displayed correctly",
+      "Perform the primary action and observe results",
+      "Check error handling with invalid input"
+    ],
+    "pass_criteria": "define MIN_REP_MS     400 behaves as documented",
+    "priority": "medium"
+  }
+]

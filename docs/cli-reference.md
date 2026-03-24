@@ -11,9 +11,12 @@ testforge [OPTIONS] COMMAND [ARGS]...
 
 Options:
   -y, --non-interactive   Skip confirmation prompts and auto-approve.
+  --no-llm                Force offline mode -- skip all LLM calls and use heuristics/skeleton output.
   --version               Show version and exit.
   --help                  Show help and exit.
 ```
+
+`--no-llm` applies to `analyze`, `generate`, `script`, `pipeline`, and `research`.
 
 ---
 
@@ -107,6 +110,9 @@ testforge analyze my-webapp -i https://staging.example.com
 
 # Mix files and URLs
 testforge analyze my-webapp -i inputs/spec.pdf -i https://staging.example.com
+
+# Force offline analysis
+testforge --no-llm analyze my-webapp -i inputs/spec.md
 ```
 
 **Output:**
@@ -171,6 +177,9 @@ testforge generate my-webapp --type checklist
 testforge generate my-webapp --use-cases
 testforge generate my-webapp --checklists
 testforge generate my-webapp --use-cases --checklists
+
+# Force offline skeleton generation
+testforge --no-llm generate my-webapp
 ```
 
 **Output:**
@@ -212,6 +221,7 @@ testforge script PROJECT [OPTIONS]
 ```bash
 testforge script my-webapp
 testforge script my-webapp --framework playwright
+testforge --no-llm script my-webapp
 ```
 
 **Output:**

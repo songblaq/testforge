@@ -1,0 +1,25 @@
+{
+  "project": "testforge",
+  "strategy": "fix-failed",
+  "max_iterations": 1,
+  "threshold": 0.95,
+  "converged": false,
+  "final_pass_rate": 0.0,
+  "status": "no-op",
+  "iterations": [
+    {
+      "iteration": 1,
+      "pass_rate": 0.0,
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "skipped": 0,
+      "improved_cases": [],
+      "timestamp": "2026-03-23T00:07:06.328325",
+      "decision": "no-op",
+      "best_pass_rate_so_far": 0.0,
+      "summary_path": "",
+      "iteration_path": "/Users/lucablaq/_/projects/testforge/research/iter-001/iteration-result.json"
+    }
+  ]
+}

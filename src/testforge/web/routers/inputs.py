@@ -1,0 +1,106 @@
+"""Input file management endpoints."""
+from __future__ import annotations
+
+from pathlib import Path
+
+from fastapi import APIRouter, HTTPException, UploadFile, File, Query
+
+from testforge.web.deps import resolve_project
+from testforge.core.config import load_config
+
+# Two routers to avoid Starlette greedy-path-param routing conflicts:
+#   - router: GET/POST  on /api/projects/{project_path:path}/inputs
+#   - delete_router: DELETE on /api/inputs  (project_path as query param)
+router = APIRouter(prefix="/api/projects", tags=["inputs"])
+delete_router = APIRouter(prefix="/api/inputs", tags=["inputs"])
+
+
+@router.get("/{project_path:path}/inputs")
+async def list_inputs(project_path: str):
+    """List input files in the project."""
+    p = resolve_project(project_path)
+    config = load_config(p)
+    input_dir = p / config.input_dir
+    if not input_dir.exists():
+        return {"files": [], "count": 0}
+
+    files = []
+    for f in sorted(input_dir.iterdir()):
+        if f.is_file() and not f.name.startswith("."):
+            files.append({
+                "name": f.name,
+                "size": f.stat().st_size,
+                "type": f.suffix.lstrip(".") or "unknown",
+            })
+    return {"files": files, "count": len(files)}
+
+
+@router.post("/{project_path:path}/inputs")
+async def upload_input(project_path: str, file: UploadFile = File(...)):
+    """Upload an input file to the project."""
+    p = resolve_project(project_path)
+    config = load_config(p)
+    input_dir = p / config.input_dir
+    input_dir.mkdir(parents=True, exist_ok=True)
+
+    # Sanitize filename
+    safe_name = Path(file.filename).name
+    if not safe_name or safe_name.startswith("."):
+        raise HTTPException(status_code=400, detail="Invalid filename")
+
+    dest = input_dir / safe_name
+    with open(dest, "wb") as out:
+        content = await file.read()
+        out.write(content)
+
+    return {
+        "name": safe_name,
+        "size": dest.stat().st_size,
+        "type": dest.suffix.lstrip(".") or "unknown",
+    }
+
+
+@router.get("/{project_path:path}/inputs/{filename}")
+async def get_input_content(project_path: str, filename: str):
+    """Get input file content for preview/download."""
+    from fastapi.responses import Response
+    p = resolve_project(project_path)
+    config = load_config(p)
+    safe_name = Path(filename).name
+    target = p / config.input_dir / safe_name
+    if not target.exists():
+        raise HTTPException(status_code=404, detail=f"File not found: {filename}")
+
+    content = target.read_bytes()
+    ext = target.suffix.lower()
+    content_types = {
+        '.md': 'text/markdown', '.txt': 'text/plain', '.json': 'application/json',
+        '.yaml': 'text/yaml', '.yml': 'text/yaml',
+        '.pdf': 'application/pdf', '.png': 'image/png', '.jpg': 'image/jpeg',
+        '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    }
+    ct = content_types.get(ext, 'application/octet-stream')
+
+    return Response(content=content, media_type=ct, headers={
+        "Content-Disposition": f'inline; filename="{safe_name}"'
+    })
+
+
+@delete_router.delete("")
+async def delete_input(
+    project_path: str = Query(..., description="Project path"),
+    filename: str = Query(..., description="Filename to delete"),
+):
+    """Delete an input file. Pass project_path and filename as query params."""
+    p = resolve_project(project_path)
+    config = load_config(p)
+
+    # Sanitize - prevent path traversal in filename
+    safe_name = Path(filename).name
+    target = p / config.input_dir / safe_name
+
+    if not target.exists():
+        raise HTTPException(status_code=404, detail=f"File not found: {filename}")
+
+    target.unlink()
+    return {"deleted": safe_name}

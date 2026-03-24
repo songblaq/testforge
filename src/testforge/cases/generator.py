@@ -11,7 +11,11 @@ from testforge.core.project import save_cases
 logger = logging.getLogger(__name__)
 
 
-def generate_cases(project_dir: Path, case_type: str = "all") -> list[dict[str, Any]]:
+def generate_cases(
+    project_dir: Path,
+    case_type: str = "all",
+    no_llm: bool = False,
+) -> list[dict[str, Any]]:
     """Generate test cases for a project.
 
     Parameters
@@ -37,9 +41,9 @@ def generate_cases(project_dir: Path, case_type: str = "all") -> list[dict[str, 
     if case_type == "all":
         for gen_name, gen in generators.items():
             logger.info("Generating %s cases...", gen_name)
-            cases.extend(gen(project_dir))
+            cases.extend(gen(project_dir, no_llm=no_llm))
     elif case_type in generators:
-        cases.extend(generators[case_type](project_dir))
+        cases.extend(generators[case_type](project_dir, no_llm=no_llm))
     else:
         raise ValueError(f"Unknown case type: {case_type}")
 
@@ -51,22 +55,22 @@ def generate_cases(project_dir: Path, case_type: str = "all") -> list[dict[str, 
     return cases
 
 
-def _generate_functional(project_dir: Path) -> list[dict[str, Any]]:
+def _generate_functional(project_dir: Path, no_llm: bool = False) -> list[dict[str, Any]]:
     """Generate functional test cases."""
     from testforge.cases.functional import generate_functional_cases
 
-    return generate_functional_cases(project_dir)
+    return generate_functional_cases(project_dir, no_llm=no_llm)
 
 
-def _generate_usecases(project_dir: Path) -> list[dict[str, Any]]:
+def _generate_usecases(project_dir: Path, no_llm: bool = False) -> list[dict[str, Any]]:
     """Generate use case test scenarios."""
     from testforge.cases.usecases import generate_usecase_tests
 
-    return generate_usecase_tests(project_dir)
+    return generate_usecase_tests(project_dir, no_llm=no_llm)
 
 
-def _generate_checklist(project_dir: Path) -> list[dict[str, Any]]:
+def _generate_checklist(project_dir: Path, no_llm: bool = False) -> list[dict[str, Any]]:
     """Generate manual test checklists."""
     from testforge.cases.checklist import generate_checklist
 
-    return generate_checklist(project_dir)
+    return generate_checklist(project_dir, no_llm=no_llm)

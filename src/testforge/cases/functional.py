@@ -37,13 +37,14 @@ class FunctionalTestCase:
     expected_result: str = ""
     priority: str = "medium"
     tags: list[str] = field(default_factory=list)
+    rule_ids: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         d = asdict(self)
         return d
 
 
-def generate_functional_cases(project_dir: Path) -> list[dict[str, Any]]:
+def generate_functional_cases(project_dir: Path, no_llm: bool = False) -> list[dict[str, Any]]:
     """Generate functional test cases from analysis results.
 
     Parameters
@@ -62,6 +63,9 @@ def generate_functional_cases(project_dir: Path) -> list[dict[str, Any]]:
     if analysis is None or not analysis.features:
         logger.info("No analysis results found; skipping functional case generation")
         return []
+
+    if no_llm:
+        return _generate_skeleton_cases(analysis)
 
     # Try LLM-powered generation
     from testforge.llm import create_adapter
@@ -121,11 +125,17 @@ Include positive, negative, and edge case tests. Return a JSON array only."""
 
     cases: list[dict[str, Any]] = []
     for i, tc in enumerate(cases_data):
+        feature_id = tc.get("feature_id", "")
+        # Use LLM-provided rule_ids; fall back to auto-mapping when absent or empty
+        rule_ids: list[str] = tc.get("rule_ids") or []
+        if not rule_ids and analysis is not None:
+            rule_ids = _map_rule_ids_for_feature(feature_id, analysis)
+
         case = FunctionalTestCase(
             id=tc.get("id", f"TC-F{i+1:03d}"),
             title=tc.get("title", f"Functional Test {i+1}"),
             description=tc.get("description", ""),
-            feature_id=tc.get("feature_id", ""),
+            feature_id=feature_id,
             preconditions=tc.get("preconditions", []),
             steps=[
                 TestStep(
@@ -139,16 +149,47 @@ Include positive, negative, and edge case tests. Return a JSON array only."""
             expected_result=tc.get("expected_result", ""),
             priority=tc.get("priority", "medium"),
             tags=tc.get("tags", []),
+            rule_ids=rule_ids,
         )
         cases.append(case.to_dict())
 
     return cases
 
 
+def _map_rule_ids_for_feature(feature_id: str, analysis: Any) -> list[str]:
+    """Return rule IDs whose condition/description text references the feature_id or feature name.
+
+    Falls back to returning all rule IDs when no targeted match is found so that
+    skeleton cases always surface at least the full rule set for coverage tracking.
+    """
+    # Find the feature object
+    feature_name = ""
+    for f in analysis.features:
+        if f.id == feature_id:
+            feature_name = f.name.lower()
+            break
+
+    matched: list[str] = []
+    for rule in analysis.rules:
+        searchable = " ".join([
+            rule.id.lower(),
+            getattr(rule, "name", "").lower(),
+            getattr(rule, "description", "").lower(),
+            getattr(rule, "condition", "").lower(),
+            getattr(rule, "expected_behavior", "").lower(),
+        ])
+        if feature_id.lower() in searchable or (feature_name and feature_name in searchable):
+            matched.append(rule.id)
+
+    # If no match found, return all rule IDs (better than zero coverage)
+    return matched if matched else [r.id for r in analysis.rules]
+
+
 def _generate_skeleton_cases(analysis: Any) -> list[dict[str, Any]]:
     """Generate minimal skeleton test cases without LLM."""
     cases: list[dict[str, Any]] = []
     for i, feature in enumerate(analysis.features):
+        rule_ids = _map_rule_ids_for_feature(feature.id, analysis)
         case = FunctionalTestCase(
             id=f"TC-F{i+1:03d}-01",
             title=f"Verify {feature.name}",
@@ -163,6 +204,7 @@ def _generate_skeleton_cases(analysis: Any) -> list[dict[str, Any]]:
             expected_result=f"{feature.name} functions correctly as specified",
             priority=feature.priority,
             tags=["functional", "skeleton"],
+            rule_ids=rule_ids,
         )
         cases.append(case.to_dict())
     return cases

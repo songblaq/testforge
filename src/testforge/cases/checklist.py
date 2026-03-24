@@ -65,7 +65,7 @@ def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def start_session(project_dir: Path) -> ChecklistSession:
+def start_session(project_dir: Path, no_llm: bool = False) -> ChecklistSession:
     """Start a new manual test checklist session.
 
     Generates checklist items and saves a session JSON to
@@ -73,7 +73,7 @@ def start_session(project_dir: Path) -> ChecklistSession:
 
     Returns the new session object.
     """
-    items = generate_checklist(project_dir)
+    items = generate_checklist(project_dir, no_llm=no_llm)
     session = ChecklistSession(
         session_id=str(uuid.uuid4()),
         started_at=_now_iso(),
@@ -196,7 +196,7 @@ class ChecklistItem:
         return asdict(self)
 
 
-def generate_checklist(project_dir: Path) -> list[dict[str, Any]]:
+def generate_checklist(project_dir: Path, no_llm: bool = False) -> list[dict[str, Any]]:
     """Generate manual test checklists for human testers.
 
     Parameters
@@ -215,6 +215,9 @@ def generate_checklist(project_dir: Path) -> list[dict[str, Any]]:
     if analysis is None or not analysis.features:
         logger.info("No analysis results; skipping checklist generation")
         return []
+
+    if no_llm:
+        return _generate_skeleton_checklist(analysis)
 
     adapter_kwargs: dict[str, Any] = {}
     if config.llm_model:
