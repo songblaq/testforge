@@ -343,16 +343,17 @@ function showCaseDetail(c) {
 
   openDetailPanel(c.title || c.name || c.id, html);
 
-  // Load mapped scripts asynchronously
+  // Load mapped scripts asynchronously with drill-down links
   if (currentProject && c.id) {
     api("GET", "/api/projects/" + encodePath(currentProject.path) + "/cases/" + encodeURIComponent(c.id) + "/scripts")
       .then(function(data) {
         if (data.scripts && data.scripts.length > 0) {
-          var scriptHtml = '<div class="detail-field"><div class="detail-field-label">' + esc(t("detail.mapped_scripts")) + '</div><div class="detail-field-value">';
+          var scriptHtml = '<div class="detail-field"><div class="detail-field-label">' + esc(t("detail.mapped_scripts")) + '</div><div class="detail-field-value"><div class="detail-drill-links">';
           scriptHtml += data.scripts.map(function(s) {
-            return '<div class="mapped-item">' + esc(s.name) + ' <span class="badge badge-dim">' + s.lines + ' lines</span></div>';
+            var srcClass = s.mapping_source === "authoritative" ? "authoritative" : "heuristic";
+            return '<button class="drill-link" data-action="goto-script" data-script-name="' + esc(s.name) + '">' + esc(s.name) + ' <span class="mapping-badge ' + srcClass + '">' + esc(s.mapping_source) + '</span></button>';
           }).join("");
-          scriptHtml += '</div></div>';
+          scriptHtml += '</div></div></div>';
           var body = document.getElementById("detail-body");
           if (body) body.innerHTML += scriptHtml;
         }
@@ -378,10 +379,21 @@ function showScriptDetail(script) {
       '<div class="code-viewer"><pre>' + codeLines + '</pre></div>');
   }
 
-  // Mapped case link
-  if (script.case_id && script.case_id !== "-") {
-    html += '<div class="detail-field"><div class="detail-field-label">' + esc(t("detail.mapped_case")) + '</div><div class="detail-field-value"><button class="btn btn-sm btn-secondary" data-action="goto-tab" data-tab="cases">' + esc(script.case_id) + ' \u2192</button></div></div>';
+  // Mapped cases with drill-down
+  var mappedCases = script.mapped_cases || [];
+  if (mappedCases.length > 0) {
+    html += '<div class="detail-field"><div class="detail-field-label">' + esc(t("detail.mapped_case")) + '</div><div class="detail-field-value"><div class="detail-drill-links">';
+    html += mappedCases.map(function(m) {
+      var srcClass = m.source === "authoritative" || m.source === "generated" ? "authoritative" : (m.source === "manual" ? "manual" : "heuristic");
+      return '<button class="drill-link" data-action="goto-case" data-case-id="' + esc(m.case_id) + '">' + esc(m.case_id) + ' <span class="mapping-badge ' + srcClass + '">' + esc(m.source) + '</span></button>';
+    }).join("");
+    html += '</div></div></div>';
+  } else if (script.case_id && script.case_id !== "-") {
+    html += '<div class="detail-field"><div class="detail-field-label">' + esc(t("detail.mapped_case")) + '</div><div class="detail-field-value"><button class="drill-link" data-action="goto-case" data-case-id="' + esc(script.case_id) + '">' + esc(script.case_id) + ' ' + esc(t("nav.goto_case")) + '</button></div></div>';
   }
+
+  // Edit button
+  html += '<div style="margin-top:12px;"><button class="btn btn-secondary btn-sm" data-action="edit-current-script">' + esc(t("crud.edit")) + '</button></div>';
 
   openDetailPanel(script.name || script.file || "Script", html);
 }
@@ -823,7 +835,9 @@ function switchTab(tabName) {
 
   // Update tab buttons
   document.querySelectorAll(".tab-btn").forEach(function(b) {
-    b.classList.toggle("active", b.dataset.tab === tabName);
+    var on = b.dataset.tab === tabName;
+    b.classList.toggle("active", on);
+    b.setAttribute("aria-selected", on ? "true" : "false");
   });
 
   // Update panels
@@ -1232,17 +1246,29 @@ function renderAnalysis(analysis) {
   var ftbody = document.querySelector("#features-table tbody");
   ftbody.innerHTML = features.map(function(f, i) {
     var catBadge = '<span class="badge badge-dim" title="' + esc(f.category || "") + '">' + esc(f.category || "") + '</span>';
-    return '<tr class="clickable-row" data-detail-type="feature" data-detail-index="' + i + '"><td>' + esc(f.id) + "</td><td>" + esc(f.name) + "</td><td>" + catBadge + "</td><td>" + priorityBadge(f.priority) + "</td><td>" + esc((f.description || "").substring(0, 80)) + "</td></tr>";
+    return '<tr class="clickable-row" data-detail-type="feature" data-detail-index="' + i + '"><td>' + esc(f.id) + "</td><td>" + esc(f.name) + "</td><td>" + catBadge + "</td><td>" + priorityBadge(f.priority) + "</td><td>" + esc((f.description || "").substring(0, 80)) + '</td><td class="row-actions"><button class="btn-icon" data-action="edit-feature" data-detail-index="' + i + '" aria-label="Edit">&#9998;</button><button class="btn-icon btn-icon-danger" data-action="delete-feature" data-entity-id="' + esc(f.id) + '" aria-label="Delete">&#128465;</button></td></tr>';
   }).join("");
 
   if (!ftbody._clickBound) {
     ftbody._clickBound = true;
     ftbody.addEventListener("click", function(e) {
+      var editBtn = e.target.closest("[data-action='edit-feature']");
+      if (editBtn && _analysisData) {
+        var idx = parseInt(editBtn.dataset.detailIndex, 10);
+        var item = (_analysisData.features || [])[idx];
+        if (item) showCrudModal("feature", item);
+        return;
+      }
+      var delBtn = e.target.closest("[data-action='delete-feature']");
+      if (delBtn) {
+        deleteAnalysisEntity("features", delBtn.dataset.entityId);
+        return;
+      }
       var row = e.target.closest("tr.clickable-row");
       if (row && _analysisData) {
-        var idx = parseInt(row.dataset.detailIndex, 10);
-        var item = (_analysisData.features || [])[idx];
-        if (item) showFeatureDetail(item);
+        var idx2 = parseInt(row.dataset.detailIndex, 10);
+        var item2 = (_analysisData.features || [])[idx2];
+        if (item2) showFeatureDetail(item2);
       }
     });
   }
@@ -1250,17 +1276,29 @@ function renderAnalysis(analysis) {
   // Personas table
   var ptbody = document.querySelector("#personas-table tbody");
   ptbody.innerHTML = personas.map(function(p, i) {
-    return '<tr class="clickable-row" data-detail-type="persona" data-detail-index="' + i + '"><td>' + esc(p.id) + "</td><td>" + esc(p.name) + "</td><td>" + esc(p.tech_level) + "</td><td>" + esc(p.description) + "</td></tr>";
+    return '<tr class="clickable-row" data-detail-type="persona" data-detail-index="' + i + '"><td>' + esc(p.id) + "</td><td>" + esc(p.name) + "</td><td>" + esc(p.tech_level) + "</td><td>" + esc(p.description) + '</td><td class="row-actions"><button class="btn-icon" data-action="edit-persona" data-detail-index="' + i + '" aria-label="Edit">&#9998;</button><button class="btn-icon btn-icon-danger" data-action="delete-persona" data-entity-id="' + esc(p.id) + '" aria-label="Delete">&#128465;</button></td></tr>';
   }).join("");
 
   if (!ptbody._clickBound) {
     ptbody._clickBound = true;
     ptbody.addEventListener("click", function(e) {
+      var editBtn = e.target.closest("[data-action='edit-persona']");
+      if (editBtn && _analysisData) {
+        var idx = parseInt(editBtn.dataset.detailIndex, 10);
+        var item = (_analysisData.personas || [])[idx];
+        if (item) showCrudModal("persona", item);
+        return;
+      }
+      var delBtn = e.target.closest("[data-action='delete-persona']");
+      if (delBtn) {
+        deleteAnalysisEntity("personas", delBtn.dataset.entityId);
+        return;
+      }
       var row = e.target.closest("tr.clickable-row");
       if (row && _analysisData) {
-        var idx = parseInt(row.dataset.detailIndex, 10);
-        var item = (_analysisData.personas || [])[idx];
-        if (item) showPersonaDetail(item);
+        var idx2 = parseInt(row.dataset.detailIndex, 10);
+        var item2 = (_analysisData.personas || [])[idx2];
+        if (item2) showPersonaDetail(item2);
       }
     });
   }
@@ -1268,17 +1306,29 @@ function renderAnalysis(analysis) {
   // Rules table
   var rtbody = document.querySelector("#rules-table tbody");
   rtbody.innerHTML = rules.map(function(r, i) {
-    return '<tr class="clickable-row" data-detail-type="rule" data-detail-index="' + i + '"><td>' + esc(r.id) + "</td><td>" + esc(r.name) + "</td><td>" + esc(r.condition) + "</td><td>" + esc(r.expected_behavior) + "</td></tr>";
+    return '<tr class="clickable-row" data-detail-type="rule" data-detail-index="' + i + '"><td>' + esc(r.id) + "</td><td>" + esc(r.name) + "</td><td>" + esc(r.condition) + "</td><td>" + esc(r.expected_behavior) + '</td><td class="row-actions"><button class="btn-icon" data-action="edit-rule" data-detail-index="' + i + '" aria-label="Edit">&#9998;</button><button class="btn-icon btn-icon-danger" data-action="delete-rule" data-entity-id="' + esc(r.id) + '" aria-label="Delete">&#128465;</button></td></tr>';
   }).join("");
 
   if (!rtbody._clickBound) {
     rtbody._clickBound = true;
     rtbody.addEventListener("click", function(e) {
+      var editBtn = e.target.closest("[data-action='edit-rule']");
+      if (editBtn && _analysisData) {
+        var idx = parseInt(editBtn.dataset.detailIndex, 10);
+        var item = (_analysisData.rules || [])[idx];
+        if (item) showCrudModal("rule", item);
+        return;
+      }
+      var delBtn = e.target.closest("[data-action='delete-rule']");
+      if (delBtn) {
+        deleteAnalysisEntity("rules", delBtn.dataset.entityId);
+        return;
+      }
       var row = e.target.closest("tr.clickable-row");
       if (row && _analysisData) {
-        var idx = parseInt(row.dataset.detailIndex, 10);
-        var item = (_analysisData.rules || [])[idx];
-        if (item) showRuleDetail(item);
+        var idx2 = parseInt(row.dataset.detailIndex, 10);
+        var item2 = (_analysisData.rules || [])[idx2];
+        if (item2) showRuleDetail(item2);
       }
     });
   }
@@ -1358,6 +1408,7 @@ function renderCases(cases) {
     var type = c.type || c.case_type || "functional";
     var status = c.status || "pending";
     return '<tr class="clickable-row" data-detail-index="' + i + '">' +
+      '<td><input type="checkbox" class="case-checkbox" data-case-id="' + esc(c.id) + '" onclick="event.stopPropagation(); updateBulkActions();"></td>' +
       "<td>" + esc(c.id) + "</td>" +
       "<td>" + esc(c.title || c.name || "") + "</td>" +
       "<td><span class='badge badge-dim'>" + esc(type) + "</span></td>" +
@@ -1365,20 +1416,42 @@ function renderCases(cases) {
       "<td>" + priorityBadge(c.priority) + "</td>" +
       "<td>" + esc(c.feature_id || "") + "</td>" +
       "<td>" + statusBadge(status) + "</td>" +
+      '<td class="row-actions">' +
+        '<button class="btn-icon" data-action="edit-case" data-detail-index="' + i + '" title="' + esc(t("crud.edit")) + '" aria-label="Edit">&#9998;</button>' +
+        '<button class="btn-icon btn-icon-danger" data-action="delete-case" data-case-id="' + esc(c.id) + '" title="' + esc(t("crud.delete")) + '" aria-label="Delete">&#128465;</button>' +
+      '</td>' +
       "</tr>";
   }).join("");
 
   if (!tbody._clickBound) {
     tbody._clickBound = true;
     tbody.addEventListener("click", function(e) {
-      var row = e.target.closest("tr.clickable-row");
-      if (row) {
-        var idx = parseInt(row.dataset.detailIndex, 10);
+      var editBtn = e.target.closest("[data-action='edit-case']");
+      if (editBtn) {
+        var idx = parseInt(editBtn.dataset.detailIndex, 10);
         var item = _renderedCases[idx];
-        if (item) showCaseDetail(item);
+        if (item) showCrudModal("case", item);
+        return;
+      }
+      var delBtn = e.target.closest("[data-action='delete-case']");
+      if (delBtn) {
+        deleteCase(delBtn.dataset.caseId);
+        return;
+      }
+      var row = e.target.closest("tr.clickable-row");
+      if (row && !e.target.closest("input")) {
+        var idx2 = parseInt(row.dataset.detailIndex, 10);
+        var item2 = _renderedCases[idx2];
+        if (item2) showCaseDetail(item2);
       }
     });
   }
+
+  // Reset bulk actions
+  var selectAll = document.getElementById("case-select-all");
+  if (selectAll) selectAll.checked = false;
+  var bulkBar = document.getElementById("cases-bulk-actions");
+  if (bulkBar) bulkBar.style.display = "none";
 
   // Bottom CTA
   showTabBottomCta("cases", t("cta.done_cases"), t("cta.next_scripts"), "scripts");
@@ -1420,11 +1493,12 @@ function filterCases() {
 async function generateCases() {
   if (!currentProject) { toast(t("toast.select_project"), "error"); return; }
   var caseType = document.getElementById("case-type-select").value;
+  var mode = document.getElementById("case-gen-mode") ? document.getElementById("case-gen-mode").value : "generate";
   var btn = document.getElementById("btn-generate");
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span> ' + esc(t("common.generating"));
   try {
-    var data = await api("POST", "/api/projects/" + encodePath(currentProject.path) + "/cases", { case_type: caseType });
+    var data = await api("POST", "/api/projects/" + encodePath(currentProject.path) + "/cases", { case_type: caseType, mode: mode });
     allCases = data.cases || [];
     renderCases(allCases);
     toast(t("toast.generated_cases", {n: data.count || 0}), "success");
@@ -1491,22 +1565,45 @@ async function loadScripts() {
 
     var tbody = document.querySelector("#scripts-table tbody");
     tbody.innerHTML = scripts.map(function(s, i) {
+      var mappedCases = s.mapped_cases || [];
+      var caseDisplay = mappedCases.length > 0 ?
+        mappedCases.map(function(m) {
+          var srcClass = m.source === "authoritative" || m.source === "generated" ? "authoritative" : (m.source === "manual" ? "manual" : "heuristic");
+          return '<span class="mapping-badge ' + srcClass + '">' + esc(m.case_id) + '</span>';
+        }).join(" ") :
+        '<span class="badge badge-dim">' + esc(s.case_id || "-") + '</span>';
       return '<tr class="clickable-row" data-detail-index="' + i + '">' +
         '<td>' + esc(s.name || "") + '</td>' +
         '<td>' + (s.lines || "-") + '</td>' +
-        '<td>' + esc(s.case_id || "-") + '</td>' +
+        '<td>' + caseDisplay + '</td>' +
         '<td>' + (s.size !== undefined ? formatBytes(s.size) : "-") + '</td>' +
+        '<td class="row-actions">' +
+          '<button class="btn-icon" data-action="edit-script" data-detail-index="' + i + '" title="' + esc(t("crud.edit")) + '" aria-label="Edit">&#9998;</button>' +
+          '<button class="btn-icon btn-icon-danger" data-action="delete-script" data-script-name="' + esc(s.name) + '" title="' + esc(t("crud.delete")) + '" aria-label="Delete">&#128465;</button>' +
+        '</td>' +
         '</tr>';
     }).join("");
 
     if (!tbody._clickBound) {
       tbody._clickBound = true;
       tbody.addEventListener("click", function(e) {
+        var editBtn = e.target.closest("[data-action='edit-script']");
+        if (editBtn) {
+          var idx = parseInt(editBtn.dataset.detailIndex, 10);
+          var item = _renderedScripts[idx];
+          if (item) editScript(item);
+          return;
+        }
+        var delBtn = e.target.closest("[data-action='delete-script']");
+        if (delBtn) {
+          deleteScript(delBtn.dataset.scriptName);
+          return;
+        }
         var row = e.target.closest("tr.clickable-row");
         if (row) {
-          var idx = parseInt(row.dataset.detailIndex, 10);
-          var item = _renderedScripts[idx];
-          if (item) showScriptDetail(item);
+          var idx2 = parseInt(row.dataset.detailIndex, 10);
+          var item2 = _renderedScripts[idx2];
+          if (item2) showScriptDetail(item2);
         }
       });
     }
@@ -1522,11 +1619,12 @@ async function loadScripts() {
 
 async function generateScripts() {
   if (!currentProject) { toast(t("toast.select_project"), "error"); return; }
+  var mode = document.getElementById("script-gen-mode") ? document.getElementById("script-gen-mode").value : "generate";
   var btn = document.getElementById("btn-gen-scripts");
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span> ' + esc(t("common.generating"));
   try {
-    var data = await api("POST", "/api/projects/" + encodePath(currentProject.path) + "/scripts", { force: false });
+    var data = await api("POST", "/api/projects/" + encodePath(currentProject.path) + "/scripts", { force: false, mode: mode });
     var scripts = data.scripts || [];
     _renderedScripts = scripts;
     toast(t("toast.generated_scripts", {n: scripts.length}), "success");
@@ -1555,6 +1653,7 @@ async function loadExecution() {
     document.getElementById("execution-summary").style.display = "none";
     document.getElementById("btn-run").disabled = true;
     document.getElementById("execution-next-cta").style.display = "none";
+    loadRunHistory();
     return;
   }
 
@@ -1583,6 +1682,18 @@ async function loadExecution() {
             '<td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + esc((r.output || "").substring(0, 200)) + '</td>' +
             '</tr>';
         }).join("");
+
+        if (!tbody._clickBound) {
+          tbody._clickBound = true;
+          tbody.addEventListener("click", function(e) {
+            var row = e.target.closest("tr.clickable-row");
+            if (row) {
+              var idx = parseInt(row.dataset.detailIndex, 10);
+              var item = _renderedExecResults[idx];
+              if (item) showExecutionDetail(item);
+            }
+          });
+        }
       }
       showTabBottomCta("execution", t("cta.done_execution"), t("cta.next_report"), "report");
     } else {
@@ -1595,6 +1706,9 @@ async function loadExecution() {
     document.getElementById("execution-summary").style.display = "none";
     document.getElementById("execution-next-cta").style.display = "none";
   }
+
+  // Load run history
+  loadRunHistory();
 }
 
 async function runExecution() {
@@ -1655,6 +1769,8 @@ function renderExecution(data) {
   }
 
   showTabBottomCta("execution", t("cta.done_execution"), t("cta.next_report"), "report");
+
+  loadRunHistory();
 }
 
 // ---------------------------------------------------------------------------
@@ -1860,7 +1976,7 @@ async function loadReport() {
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span> ' + esc(t("common.loading"));
   try {
-    var data = await api("GET", "/api/projects/" + encodePath(currentProject.path) + "/report?fmt=" + fmt);
+    var data = await api("POST", "/api/projects/" + encodePath(currentProject.path) + "/report?fmt=" + fmt);
     _lastReportContent = { content: data.report || "", fmt: fmt };
     document.getElementById("report-empty").style.display = "none";
     document.getElementById("report-guard").style.display = "none";
@@ -1885,6 +2001,8 @@ async function loadReport() {
   loadCoverage();
   // Load executive summary
   loadExecutiveSummary();
+  // Load report history
+  loadReportHistory();
 }
 
 async function loadCoverage() {
@@ -1998,12 +2116,46 @@ document.addEventListener("click", function(e) {
     switchTab(ctxStat.dataset.tab);
     return;
   }
+
+  // Drill-down: goto script
+  var gotoScript = e.target.closest("[data-action='goto-script']");
+  if (gotoScript && gotoScript.dataset.scriptName) {
+    closeDetailPanel();
+    navigateToScript(gotoScript.dataset.scriptName);
+    return;
+  }
+
+  // Drill-down: goto case
+  var gotoCase = e.target.closest("[data-action='goto-case']");
+  if (gotoCase && gotoCase.dataset.caseId) {
+    closeDetailPanel();
+    navigateToCase(gotoCase.dataset.caseId);
+    return;
+  }
+
+  // Edit script from detail panel
+  var editScriptBtn = e.target.closest("[data-action='edit-current-script']");
+  if (editScriptBtn) {
+    var panel = document.getElementById("detail-panel");
+    var titleEl = document.getElementById("detail-title");
+    if (titleEl && panel.classList.contains("open")) {
+      var scriptName = titleEl.textContent;
+      for (var si = 0; si < _renderedScripts.length; si++) {
+        if (_renderedScripts[si].name === scriptName) {
+          editScript(_renderedScripts[si]);
+          return;
+        }
+      }
+    }
+    return;
+  }
 });
 
 // ---------------------------------------------------------------------------
 // Init
 // ---------------------------------------------------------------------------
 (function init() {
+  document.documentElement.lang = getLang();
   // Apply i18n translations on load
   applyTranslations();
   updateLangSelect();
@@ -2073,9 +2225,16 @@ document.addEventListener("click", function(e) {
   // Detail panel close button
   document.getElementById("detail-close").addEventListener("click", closeDetailPanel);
 
-  // ESC to close modal and detail panel
+  // ESC: topmost overlay first (confirm > CRUD > detail + create project modal)
   document.addEventListener("keydown", function(e) {
-    if (e.key === "Escape") {
+    if (e.key !== "Escape") return;
+    var confirmDlg = document.getElementById("confirm-dialog");
+    var crudDlg = document.getElementById("crud-modal");
+    if (confirmDlg && confirmDlg.style.display === "flex") {
+      hideConfirmDialog();
+    } else if (crudDlg && crudDlg.style.display === "flex") {
+      hideCrudModal();
+    } else {
       closeDetailPanel();
       hideCreateModal();
     }
@@ -2091,6 +2250,474 @@ document.addEventListener("click", function(e) {
     if (currentProject) deselectProject();
   });
 
+  // CRUD buttons
+  var addFeatureBtn = document.getElementById("btn-add-feature");
+  if (addFeatureBtn) addFeatureBtn.addEventListener("click", function() { showCrudModal("feature"); });
+  var addPersonaBtn = document.getElementById("btn-add-persona");
+  if (addPersonaBtn) addPersonaBtn.addEventListener("click", function() { showCrudModal("persona"); });
+  var addRuleBtn = document.getElementById("btn-add-rule");
+  if (addRuleBtn) addRuleBtn.addEventListener("click", function() { showCrudModal("rule"); });
+  var addCaseBtn = document.getElementById("btn-add-case");
+  if (addCaseBtn) addCaseBtn.addEventListener("click", function() { showCrudModal("case"); });
+
+  // CRUD modal
+  var crudClose = document.getElementById("crud-modal-close");
+  if (crudClose) crudClose.addEventListener("click", hideCrudModal);
+  var crudCancel = document.getElementById("crud-modal-cancel");
+  if (crudCancel) crudCancel.addEventListener("click", hideCrudModal);
+  var crudSave = document.getElementById("crud-modal-save");
+  if (crudSave) crudSave.addEventListener("click", saveCrudModal);
+  var crudOverlay = document.getElementById("crud-modal");
+  if (crudOverlay) crudOverlay.addEventListener("click", function(e) { if (e.target === this) hideCrudModal(); });
+
+  // Confirm dialog
+  var confirmCancel = document.getElementById("confirm-cancel");
+  if (confirmCancel) confirmCancel.addEventListener("click", hideConfirmDialog);
+  var confirmOverlay = document.getElementById("confirm-dialog");
+  if (confirmOverlay) confirmOverlay.addEventListener("click", function(e) { if (e.target === this) hideConfirmDialog(); });
+
+  // Bulk delete
+  var bulkDeleteBtn = document.getElementById("btn-bulk-delete-cases");
+  if (bulkDeleteBtn) bulkDeleteBtn.addEventListener("click", bulkDeleteCases);
+
+  // Select all checkbox
+  var selectAllCb = document.getElementById("case-select-all");
+  if (selectAllCb) selectAllCb.addEventListener("change", function() {
+    var cbs = document.querySelectorAll(".case-checkbox");
+    for (var i = 0; i < cbs.length; i++) cbs[i].checked = this.checked;
+    updateBulkActions();
+  });
+
   // Load projects on init
   loadProjects();
 })();
+
+// ---------------------------------------------------------------------------
+// Script Edit Helper
+// ---------------------------------------------------------------------------
+async function editScript(script) {
+  if (!currentProject) return;
+  try {
+    var data = await api("GET", "/api/projects/" + encodePath(currentProject.path) + "/scripts/" + encodeURIComponent(script.name));
+    showCrudModal("script", { name: script.name, content: data.content });
+  } catch (e) {
+    showCrudModal("script", { name: script.name, content: script.preview || "" });
+  }
+}
+
+// ---------------------------------------------------------------------------
+// CRUD Modal System
+// ---------------------------------------------------------------------------
+var _crudContext = null;
+
+function showCrudModal(entityType, existingData) {
+  _crudContext = { type: entityType, data: existingData || null };
+  var modal = document.getElementById("crud-modal");
+  var title = document.getElementById("crud-modal-title");
+  var body = document.getElementById("crud-modal-body");
+
+  var isEdit = !!existingData;
+  var titleMap = { feature: t("analysis.features"), persona: t("analysis.personas"), rule: t("analysis.rules"), case: t("cases.title"), script: t("scripts.title") };
+  title.textContent = (isEdit ? t("crud.edit") : t("crud.add")) + " " + (titleMap[entityType] || entityType);
+
+  body.innerHTML = buildCrudForm(entityType, existingData);
+  modal.style.display = "flex";
+
+  var firstInput = body.querySelector("input, textarea, select");
+  if (firstInput) firstInput.focus();
+}
+
+function hideCrudModal() {
+  document.getElementById("crud-modal").style.display = "none";
+  _crudContext = null;
+}
+
+function buildCrudForm(type, data) {
+  data = data || {};
+  if (type === "feature") {
+    return '<div class="form-group"><label>' + esc(t("form.name")) + '</label><input id="crud-name" value="' + esc(data.name || "") + '"></div>' +
+      '<div class="form-group"><label>' + esc(t("form.description")) + '</label><textarea id="crud-description">' + esc(data.description || "") + '</textarea></div>' +
+      '<div class="form-row"><div class="form-group"><label>' + esc(t("form.category")) + '</label><input id="crud-category" value="' + esc(data.category || "") + '"></div>' +
+      '<div class="form-group"><label>' + esc(t("form.priority")) + '</label><select id="crud-priority"><option value="high"' + (data.priority === "high" ? " selected" : "") + '>' + esc(t("analysis.summary.high", {n:""})) + '</option><option value="medium"' + (data.priority === "medium" || !data.priority ? " selected" : "") + '>' + esc(t("analysis.summary.medium", {n:""})) + '</option><option value="low"' + (data.priority === "low" ? " selected" : "") + '>' + esc(t("analysis.summary.low", {n:""})) + '</option></select></div></div>' +
+      '<div class="form-group"><label>' + esc(t("form.source")) + '</label><input id="crud-source" value="' + esc(data.source || "") + '"></div>' +
+      '<div class="form-group"><label>' + esc(t("form.tags")) + '</label><input id="crud-tags" value="' + esc((data.tags || []).join(", ")) + '"></div>';
+  }
+  if (type === "persona") {
+    return '<div class="form-group"><label>' + esc(t("form.name")) + '</label><input id="crud-name" value="' + esc(data.name || "") + '"></div>' +
+      '<div class="form-group"><label>' + esc(t("form.description")) + '</label><textarea id="crud-description">' + esc(data.description || "") + '</textarea></div>' +
+      '<div class="form-group"><label>' + esc(t("form.tech_level")) + '</label><select id="crud-tech-level"><option value="beginner"' + (data.tech_level === "beginner" ? " selected" : "") + '>Beginner</option><option value="intermediate"' + (data.tech_level === "intermediate" || !data.tech_level ? " selected" : "") + '>Intermediate</option><option value="advanced"' + (data.tech_level === "advanced" ? " selected" : "") + '>Advanced</option></select></div>' +
+      '<div class="form-group"><label>' + esc(t("form.goals")) + '</label><textarea id="crud-goals">' + esc((data.goals || []).join("\n")) + '</textarea></div>' +
+      '<div class="form-group"><label>' + esc(t("form.pain_points")) + '</label><textarea id="crud-pain-points">' + esc((data.pain_points || []).join("\n")) + '</textarea></div>';
+  }
+  if (type === "rule") {
+    return '<div class="form-group"><label>' + esc(t("form.name")) + '</label><input id="crud-name" value="' + esc(data.name || "") + '"></div>' +
+      '<div class="form-group"><label>' + esc(t("form.description")) + '</label><textarea id="crud-description">' + esc(data.description || "") + '</textarea></div>' +
+      '<div class="form-group"><label>' + esc(t("form.condition")) + '</label><input id="crud-condition" value="' + esc(data.condition || "") + '"></div>' +
+      '<div class="form-group"><label>' + esc(t("form.expected_behavior")) + '</label><input id="crud-expected-behavior" value="' + esc(data.expected_behavior || "") + '"></div>' +
+      '<div class="form-group"><label>' + esc(t("form.source")) + '</label><input id="crud-source" value="' + esc(data.source || "") + '"></div>';
+  }
+  if (type === "case") {
+    return '<div class="form-group"><label>' + esc(t("form.title")) + '</label><input id="crud-title" value="' + esc(data.title || "") + '"></div>' +
+      '<div class="form-group"><label>' + esc(t("form.description")) + '</label><textarea id="crud-description">' + esc(data.description || "") + '</textarea></div>' +
+      '<div class="form-row"><div class="form-group"><label>' + esc(t("form.type")) + '</label><select id="crud-type"><option value="functional"' + (data.type === "functional" || !data.type ? " selected" : "") + '>' + esc(t("cases.functional")) + '</option><option value="usecase"' + (data.type === "usecase" ? " selected" : "") + '>' + esc(t("cases.usecase")) + '</option><option value="checklist"' + (data.type === "checklist" ? " selected" : "") + '>' + esc(t("cases.checklist")) + '</option></select></div>' +
+      '<div class="form-group"><label>' + esc(t("form.priority")) + '</label><select id="crud-priority"><option value="high"' + (data.priority === "high" ? " selected" : "") + '>High</option><option value="medium"' + (data.priority === "medium" || !data.priority ? " selected" : "") + '>Medium</option><option value="low"' + (data.priority === "low" ? " selected" : "") + '>Low</option></select></div></div>' +
+      '<div class="form-group"><label>' + esc(t("form.feature_id")) + '</label><input id="crud-feature-id" value="' + esc(data.feature_id || "") + '"></div>' +
+      '<div class="form-group"><label>' + esc(t("form.tags")) + '</label><input id="crud-tags" value="' + esc((data.tags || []).join(", ")) + '"></div>' +
+      '<div class="form-group"><label>' + esc(t("form.preconditions")) + '</label><textarea id="crud-preconditions">' + esc((data.preconditions || []).join("\n")) + '</textarea></div>' +
+      '<div class="form-group"><label>' + esc(t("form.expected_result")) + '</label><textarea id="crud-expected-result">' + esc(data.expected_result || "") + '</textarea></div>';
+  }
+  if (type === "script") {
+    return '<div class="form-group"><label>' + esc(t("detail.code")) + '</label><textarea id="crud-code" class="code-editor">' + esc(data.content || data.preview || "") + '</textarea></div>';
+  }
+  return "";
+}
+
+async function saveCrudModal() {
+  if (!_crudContext || !currentProject) return;
+  var type = _crudContext.type;
+  var isEdit = !!_crudContext.data;
+  var basePath = "/api/projects/" + encodePath(currentProject.path);
+
+  try {
+    if (type === "feature") {
+      var payload = {
+        name: document.getElementById("crud-name").value,
+        description: document.getElementById("crud-description").value,
+        category: document.getElementById("crud-category").value,
+        priority: document.getElementById("crud-priority").value,
+        source: document.getElementById("crud-source").value,
+        tags: document.getElementById("crud-tags").value.split(",").map(function(s) { return s.trim(); }).filter(Boolean)
+      };
+      if (isEdit) {
+        await api("PUT", basePath + "/analysis/features/" + encodeURIComponent(_crudContext.data.id), payload);
+      } else {
+        await api("POST", basePath + "/analysis/features", payload);
+      }
+      toast(t("common.success"), "success");
+      hideCrudModal();
+      loadAnalysis();
+    } else if (type === "persona") {
+      var payload = {
+        name: document.getElementById("crud-name").value,
+        description: document.getElementById("crud-description").value,
+        tech_level: document.getElementById("crud-tech-level").value,
+        goals: document.getElementById("crud-goals").value.split("\n").filter(Boolean),
+        pain_points: document.getElementById("crud-pain-points").value.split("\n").filter(Boolean)
+      };
+      if (isEdit) {
+        await api("PUT", basePath + "/analysis/personas/" + encodeURIComponent(_crudContext.data.id), payload);
+      } else {
+        await api("POST", basePath + "/analysis/personas", payload);
+      }
+      toast(t("common.success"), "success");
+      hideCrudModal();
+      loadAnalysis();
+    } else if (type === "rule") {
+      var payload = {
+        name: document.getElementById("crud-name").value,
+        description: document.getElementById("crud-description").value,
+        condition: document.getElementById("crud-condition").value,
+        expected_behavior: document.getElementById("crud-expected-behavior").value,
+        source: document.getElementById("crud-source").value
+      };
+      if (isEdit) {
+        await api("PUT", basePath + "/analysis/rules/" + encodeURIComponent(_crudContext.data.id), payload);
+      } else {
+        await api("POST", basePath + "/analysis/rules", payload);
+      }
+      toast(t("common.success"), "success");
+      hideCrudModal();
+      loadAnalysis();
+    } else if (type === "case") {
+      var payload = {
+        title: document.getElementById("crud-title").value,
+        description: document.getElementById("crud-description").value,
+        type: document.getElementById("crud-type").value,
+        priority: document.getElementById("crud-priority").value,
+        feature_id: document.getElementById("crud-feature-id").value,
+        tags: document.getElementById("crud-tags").value.split(",").map(function(s) { return s.trim(); }).filter(Boolean),
+        preconditions: document.getElementById("crud-preconditions").value.split("\n").filter(Boolean),
+        expected_result: document.getElementById("crud-expected-result").value
+      };
+      if (isEdit) {
+        await api("PUT", basePath + "/cases/item/" + encodeURIComponent(_crudContext.data.id), payload);
+      } else {
+        await api("POST", basePath + "/cases/item", payload);
+      }
+      toast(t("common.success"), "success");
+      hideCrudModal();
+      loadCases();
+      updateContextBar();
+    } else if (type === "script") {
+      var content = document.getElementById("crud-code").value;
+      await api("PUT", basePath + "/scripts/" + encodeURIComponent(_crudContext.data.name), { content: content });
+      toast(t("common.success"), "success");
+      hideCrudModal();
+      loadScripts();
+    }
+  } catch (e) {
+    toast(e.message, "error");
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Confirm Dialog
+// ---------------------------------------------------------------------------
+var _confirmCallback = null;
+
+function showConfirmDialog(message, callback) {
+  document.getElementById("confirm-message").textContent = message;
+  document.getElementById("confirm-dialog").style.display = "flex";
+  _confirmCallback = callback;
+  var okBtn = document.getElementById("confirm-ok");
+  okBtn.onclick = function() {
+    hideConfirmDialog();
+    if (_confirmCallback) _confirmCallback();
+  };
+}
+
+function hideConfirmDialog() {
+  document.getElementById("confirm-dialog").style.display = "none";
+  _confirmCallback = null;
+}
+
+// ---------------------------------------------------------------------------
+// Entity Delete Helpers
+// ---------------------------------------------------------------------------
+async function deleteAnalysisEntity(type, id) {
+  if (!currentProject) return;
+  showConfirmDialog(t("crud.confirm_delete_msg", { name: id }), async function() {
+    try {
+      await api("DELETE", "/api/projects/" + encodePath(currentProject.path) + "/analysis/" + type + "/" + encodeURIComponent(id));
+      toast(t("toast.deleted", { name: id }), "success");
+      loadAnalysis();
+      updateContextBar();
+    } catch (e) {
+      toast(e.message, "error");
+    }
+  });
+}
+
+async function deleteCase(caseId) {
+  if (!currentProject) return;
+  showConfirmDialog(t("crud.confirm_delete_msg", { name: caseId }), async function() {
+    try {
+      await api("DELETE", "/api/projects/" + encodePath(currentProject.path) + "/cases/item/" + encodeURIComponent(caseId));
+      toast(t("toast.deleted", { name: caseId }), "success");
+      loadCases();
+      updateContextBar();
+    } catch (e) {
+      toast(e.message, "error");
+    }
+  });
+}
+
+async function deleteScript(scriptName) {
+  if (!currentProject) return;
+  showConfirmDialog(t("crud.confirm_delete_msg", { name: scriptName }), async function() {
+    try {
+      await api("DELETE", "/api/projects/" + encodePath(currentProject.path) + "/scripts/" + encodeURIComponent(scriptName));
+      toast(t("toast.deleted", { name: scriptName }), "success");
+      loadScripts();
+    } catch (e) {
+      toast(e.message, "error");
+    }
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Bulk Actions
+// ---------------------------------------------------------------------------
+function updateBulkActions() {
+  var cbs = document.querySelectorAll(".case-checkbox:checked");
+  var bar = document.getElementById("cases-bulk-actions");
+  var countEl = document.getElementById("cases-selected-count");
+  if (bar) {
+    bar.style.display = cbs.length > 0 ? "" : "none";
+    if (countEl) countEl.textContent = cbs.length;
+  }
+}
+
+async function bulkDeleteCases() {
+  var cbs = document.querySelectorAll(".case-checkbox:checked");
+  if (!cbs.length) { toast(t("crud.no_selection"), "error"); return; }
+  var ids = [];
+  for (var i = 0; i < cbs.length; i++) ids.push(cbs[i].dataset.caseId);
+
+  showConfirmDialog(t("crud.confirm_delete_msg", { name: ids.length + " items" }), async function() {
+    try {
+      await api("POST", "/api/projects/" + encodePath(currentProject.path) + "/cases/bulk-delete", { case_ids: ids });
+      toast(t("toast.deleted", { name: ids.length + " cases" }), "success");
+      loadCases();
+      updateContextBar();
+    } catch (e) {
+      toast(e.message, "error");
+    }
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Enhanced Drill-Down Navigation
+// ---------------------------------------------------------------------------
+function navigateToScript(scriptName) {
+  switchTab("scripts");
+  setTimeout(function() {
+    for (var i = 0; i < _renderedScripts.length; i++) {
+      if (_renderedScripts[i].name === scriptName) {
+        showScriptDetail(_renderedScripts[i]);
+        return;
+      }
+    }
+  }, 300);
+}
+
+function navigateToCase(caseId) {
+  switchTab("cases");
+  setTimeout(function() {
+    for (var i = 0; i < _renderedCases.length; i++) {
+      if (_renderedCases[i].id === caseId) {
+        showCaseDetail(_renderedCases[i]);
+        return;
+      }
+    }
+  }, 300);
+}
+
+// ---------------------------------------------------------------------------
+// Run History
+// ---------------------------------------------------------------------------
+async function loadRunHistory() {
+  if (!currentProject) return;
+  var historyEl = document.getElementById("run-history");
+  if (!historyEl) return;
+  try {
+    var data = await api("GET", "/api/projects/" + encodePath(currentProject.path) + "/runs");
+    var runs = data.runs || [];
+    if (runs.length === 0) {
+      historyEl.style.display = "none";
+      return;
+    }
+    historyEl.style.display = "";
+    var tbody = document.querySelector("#runs-table tbody");
+    tbody.innerHTML = runs.map(function(r) {
+      var s = r.summary || {};
+      var date = r.started_at ? new Date(r.started_at).toLocaleString() : "-";
+      return '<tr class="clickable-row" data-run-id="' + esc(r.run_id || "") + '">' +
+        '<td><code>' + esc((r.run_id || "").substring(0, 20)) + '</code></td>' +
+        '<td>' + esc(date) + '</td>' +
+        '<td>' + (s.total || 0) + '</td>' +
+        '<td>' + statusBadge("passed") + ' ' + (s.passed || 0) + '</td>' +
+        '<td>' + statusBadge("failed") + ' ' + (s.failed || 0) + '</td>' +
+        '</tr>';
+    }).join("");
+
+    if (!tbody._histClickBound) {
+      tbody._histClickBound = true;
+      tbody.addEventListener("click", function(e) {
+        var row = e.target.closest("tr.clickable-row");
+        if (row && row.dataset.runId) {
+          loadRunDetail(row.dataset.runId);
+        }
+      });
+    }
+  } catch (e) {
+    historyEl.style.display = "none";
+  }
+}
+
+async function loadRunDetail(runId) {
+  if (!currentProject) return;
+  try {
+    var data = await api("GET", "/api/projects/" + encodePath(currentProject.path) + "/runs/" + encodeURIComponent(runId));
+    var run = data.run || {};
+    var results = run.results || [];
+    _renderedExecResults = results;
+
+    document.getElementById("execution-empty").style.display = "none";
+    document.getElementById("execution-summary").style.display = "";
+
+    var s = run.summary || {};
+    document.getElementById("exec-total").textContent = s.total || results.length;
+    document.getElementById("exec-passed").textContent = s.passed || 0;
+    document.getElementById("exec-failed").textContent = s.failed || 0;
+
+    var total = s.total || results.length || 1;
+    var pct = Math.round(((s.passed || 0) / total) * 100);
+    document.getElementById("exec-progress").style.width = pct + "%";
+
+    var tbody = document.querySelector("#execution-table tbody");
+    tbody.innerHTML = results.map(function(r, i) {
+      return '<tr class="clickable-row" data-detail-index="' + i + '">' +
+        '<td>' + esc(r.case_id || "") + '</td>' +
+        '<td>' + statusBadge(r.status || "unknown") + '</td>' +
+        '<td>' + (r.duration_ms ? r.duration_ms + "ms" : "-") + '</td>' +
+        '<td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + esc((r.output || r.error_message || "").substring(0, 200)) + '</td>' +
+        '</tr>';
+    }).join("");
+  } catch (e) {
+    toast(e.message, "error");
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Report History
+// ---------------------------------------------------------------------------
+async function loadReportHistory() {
+  if (!currentProject) return;
+  var historyEl = document.getElementById("report-history");
+  if (!historyEl) return;
+  try {
+    var data = await api("GET", "/api/projects/" + encodePath(currentProject.path) + "/reports");
+    var reports = data.reports || [];
+    if (reports.length === 0) {
+      historyEl.style.display = "none";
+      return;
+    }
+    historyEl.style.display = "";
+    var tbody = document.querySelector("#reports-history-table tbody");
+    tbody.innerHTML = reports.map(function(r) {
+      var date = r.created_at ? new Date(r.created_at).toLocaleString() : "-";
+      return '<tr>' +
+        '<td><code>' + esc((r.report_id || "").substring(0, 20)) + '</code></td>' +
+        '<td>' + esc(date) + '</td>' +
+        '<td><span class="badge badge-dim">' + esc(r.format || "-") + '</span></td>' +
+        '<td><button class="btn btn-secondary btn-sm" data-action="view-report" data-report-id="' + esc(r.report_id || "") + '">' + esc(t("exec.view_run")) + '</button></td>' +
+        '</tr>';
+    }).join("");
+
+    if (!tbody._reportClickBound) {
+      tbody._reportClickBound = true;
+      tbody.addEventListener("click", function(e) {
+        var btn = e.target.closest("[data-action='view-report']");
+        if (btn && btn.dataset.reportId) {
+          loadReportById(btn.dataset.reportId);
+        }
+      });
+    }
+  } catch (e) {
+    historyEl.style.display = "none";
+  }
+}
+
+async function loadReportById(reportId) {
+  if (!currentProject) return;
+  try {
+    var data = await api("GET", "/api/projects/" + encodePath(currentProject.path) + "/reports/" + encodeURIComponent(reportId));
+    var content = data.report || "";
+    var meta = data.meta || {};
+
+    document.getElementById("report-empty").style.display = "none";
+    document.getElementById("report-guard").style.display = "none";
+    document.getElementById("report-content").style.display = "";
+
+    var viewer = document.getElementById("report-viewer");
+    if (meta.format === "html") {
+      viewer.textContent = content;
+    } else {
+      viewer.innerHTML = simpleMarkdown(content);
+    }
+    toast(t("toast.report_loaded") + " (" + reportId.substring(0, 15) + ")", "success");
+  } catch (e) {
+    toast(e.message, "error");
+  }
+}

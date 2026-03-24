@@ -286,6 +286,75 @@ var translations = {
     "detail.mapped_scripts": "Mapped Scripts",
     "detail.mapped_case": "Mapped Case",
 
+    // CRUD
+    "crud.add": "+ Add",
+    "crud.add_case": "+ Add Case",
+    "crud.edit": "Edit",
+    "crud.delete": "Delete",
+    "crud.save": "Save",
+    "crud.cancel": "Cancel",
+    "crud.confirm": "Confirm",
+    "crud.confirm_delete": "Delete",
+    "crud.confirm_delete_msg": "Are you sure you want to delete \"{name}\"? This cannot be undone.",
+    "crud.confirm_regenerate": "This will overwrite existing data. Continue?",
+    "crud.selected": "selected",
+    "crud.bulk_delete": "Delete Selected",
+    "crud.no_selection": "No items selected",
+
+    // Generate/Regenerate
+    "gen.generate": "Generate",
+    "gen.regenerate": "Regenerate (overwrite)",
+    "gen.new_version": "New Version",
+    "gen.mode_title": "Generation Mode",
+    "gen.mode_desc": "Choose how to handle existing data:",
+
+    // Run history
+    "exec.history": "Run History",
+    "exec.run_id": "Run ID",
+    "exec.no_runs": "No previous runs",
+    "exec.view_run": "View",
+
+    // Report history
+    "report.history": "Report History",
+    "report.report_id": "Report ID",
+    "report.no_reports": "No previous reports",
+    "report.view_report": "View",
+
+    // Table headers (new)
+    "th.run_id": "Run ID",
+    "th.date": "Date",
+    "th.total": "Total",
+    "th.passed": "Passed",
+    "th.failed": "Failed",
+    "th.report_id": "Report ID",
+    "th.format": "Format",
+    "th.mapping": "Mapping",
+    "th.mapping_source": "Source",
+
+    // Drill-down
+    "nav.goto_script": "Go to Script →",
+    "nav.goto_case": "Go to Case →",
+    "nav.goto_run": "Go to Run →",
+    "nav.goto_report": "Go to Report →",
+
+    // Form labels
+    "form.title": "Title",
+    "form.name": "Name",
+    "form.description": "Description",
+    "form.category": "Category",
+    "form.priority": "Priority",
+    "form.type": "Type",
+    "form.tags": "Tags (comma separated)",
+    "form.feature_id": "Feature ID",
+    "form.preconditions": "Preconditions (one per line)",
+    "form.expected_result": "Expected Result",
+    "form.condition": "Condition",
+    "form.expected_behavior": "Expected Behavior",
+    "form.source": "Source",
+    "form.tech_level": "Tech Level",
+    "form.goals": "Goals (one per line)",
+    "form.pain_points": "Pain Points (one per line)",
+
     // Misc
     "scripts.count": "{n} script(s) generated",
     "coverage.pct": "{n}% coverage",
@@ -575,6 +644,75 @@ var translations = {
     "detail.content": "\ub0b4\uc6a9",
     "detail.mapped_scripts": "\ub9e4\ud551\ub41c \uc2a4\ud06c\ub9bd\ud2b8",
     "detail.mapped_case": "\ub9e4\ud551\ub41c \ucf00\uc774\uc2a4",
+
+    // CRUD
+    "crud.add": "+ \ucd94\uac00",
+    "crud.add_case": "+ \ucf00\uc774\uc2a4 \ucd94\uac00",
+    "crud.edit": "\ud3b8\uc9d1",
+    "crud.delete": "\uc0ad\uc81c",
+    "crud.save": "\uc800\uc7a5",
+    "crud.cancel": "\ucde8\uc18c",
+    "crud.confirm": "\ud655\uc778",
+    "crud.confirm_delete": "\uc0ad\uc81c",
+    "crud.confirm_delete_msg": "\"{name}\"\uc744(\ub97c) \uc0ad\uc81c\ud558\uc2dc\uaca0\uc2b5\ub2c8\uae4c? \uc774 \uc791\uc5c5\uc740 \ub418\ub3cc\ub9b4 \uc218 \uc5c6\uc2b5\ub2c8\ub2e4.",
+    "crud.confirm_regenerate": "\uae30\uc874 \ub370\uc774\ud130\ub97c \ub36e\uc5b4\uc501\ub2c8\ub2e4. \uacc4\uc18d\ud558\uc2dc\uaca0\uc2b5\ub2c8\uae4c?",
+    "crud.selected": "\uac1c \uc120\ud0dd\ub428",
+    "crud.bulk_delete": "\uc120\ud0dd \uc0ad\uc81c",
+    "crud.no_selection": "\uc120\ud0dd\ub41c \ud56d\ubaa9\uc774 \uc5c6\uc2b5\ub2c8\ub2e4",
+
+    // \uc0dd\uc131/\uc7ac\uc0dd\uc131
+    "gen.generate": "\uc0dd\uc131",
+    "gen.regenerate": "\uc7ac\uc0dd\uc131 (\ub36e\uc5b4\uc4f0\uae30)",
+    "gen.new_version": "\uc0c8 \ubc84\uc804 \uc0dd\uc131",
+    "gen.mode_title": "\uc0dd\uc131 \ubaa8\ub4dc",
+    "gen.mode_desc": "\uae30\uc874 \ub370\uc774\ud130 \ucc98\ub9ac \ubc29\ubc95\uc744 \uc120\ud0dd\ud558\uc138\uc694:",
+
+    // \uc2e4\ud589 \uc774\ub825
+    "exec.history": "\uc2e4\ud589 \uc774\ub825",
+    "exec.run_id": "\uc2e4\ud589 ID",
+    "exec.no_runs": "\uc774\uc804 \uc2e4\ud589 \uae30\ub85d \uc5c6\uc74c",
+    "exec.view_run": "\ubcf4\uae30",
+
+    // \ubcf4\uace0\uc11c \uc774\ub825
+    "report.history": "\ubcf4\uace0\uc11c \uc774\ub825",
+    "report.report_id": "\ubcf4\uace0\uc11c ID",
+    "report.no_reports": "\uc774\uc804 \ubcf4\uace0\uc11c \uc5c6\uc74c",
+    "report.view_report": "\ubcf4\uae30",
+
+    // \ud14c\uc774\ube14 \ud5e4\ub354 (\uc2e0\uaddc)
+    "th.run_id": "\uc2e4\ud589 ID",
+    "th.date": "\ub0a0\uc9dc",
+    "th.total": "\uc804\uccb4",
+    "th.passed": "\ud1b5\uacfc",
+    "th.failed": "\uc2e4\ud328",
+    "th.report_id": "\ubcf4\uace0\uc11c ID",
+    "th.format": "\ud615\uc2dd",
+    "th.mapping": "\ub9e4\ud551",
+    "th.mapping_source": "\ucd9c\ucc98",
+
+    // \ub4dc\ub9b4\ub2e4\uc6b4
+    "nav.goto_script": "\uc2a4\ud06c\ub9bd\ud2b8\ub85c \uc774\ub3d9 \u2192",
+    "nav.goto_case": "\ucf00\uc774\uc2a4\ub85c \uc774\ub3d9 \u2192",
+    "nav.goto_run": "\uc2e4\ud589\uc73c\ub85c \uc774\ub3d9 \u2192",
+    "nav.goto_report": "\ubcf4\uace0\uc11c\ub85c \uc774\ub3d9 \u2192",
+
+    // \ud3fc \ub808\uc774\ube14
+    "form.title": "\uc81c\ubaa9",
+    "form.name": "\uc774\ub984",
+    "form.description": "\uc124\uba85",
+    "form.category": "\uce74\ud14c\uace0\ub9ac",
+    "form.priority": "\uc6b0\uc120\uc21c\uc704",
+    "form.type": "\uc720\ud615",
+    "form.tags": "\ud0dc\uadf8 (\uc27c\ud45c\ub85c \uad6c\ubd84)",
+    "form.feature_id": "\uae30\ub2a5 ID",
+    "form.preconditions": "\uc0ac\uc804 \uc870\uac74 (\uc904 \ub2e8\uc704)",
+    "form.expected_result": "\uae30\ub300 \uacb0\uacfc",
+    "form.condition": "\uc870\uac74",
+    "form.expected_behavior": "\uae30\ub300 \ub3d9\uc791",
+    "form.source": "\ucd9c\ucc98",
+    "form.tech_level": "\uae30\uc220 \uc218\uc900",
+    "form.goals": "\ubaa9\ud45c (\uc904 \ub2e8\uc704)",
+    "form.pain_points": "\ubd88\ud3b8 \uc0ac\ud56d (\uc904 \ub2e8\uc704)",
 
     // Misc
     "scripts.count": "{n}\uac1c \uc2a4\ud06c\ub9bd\ud2b8 \uc0dd\uc131\ub428",
@@ -866,6 +1004,69 @@ var translations = {
     "detail.mapped_scripts": "K\u1ECBch b\u1EA3n li\u00EAn k\u1EBFt",
     "detail.mapped_case": "Tr\u01B0\u1EDDng h\u1EE3p li\u00EAn k\u1EBFt",
 
+    // CRUD
+    "crud.add": "+ Th\u00EAm",
+    "crud.add_case": "+ Th\u00EAm tr\u01B0\u1EDDng h\u1EE3p",
+    "crud.edit": "S\u1EEDa",
+    "crud.delete": "X\u00F3a",
+    "crud.save": "L\u01B0u",
+    "crud.cancel": "H\u1EE7y",
+    "crud.confirm": "X\u00E1c nh\u1EADn",
+    "crud.confirm_delete": "X\u00F3a",
+    "crud.confirm_delete_msg": "B\u1EA1n c\u00F3 ch\u1EAFc mu\u1ED1n x\u00F3a \"{name}\"? Thao t\u00E1c n\u00E0y kh\u00F4ng th\u1EC3 ho\u00E0n t\u00E1c.",
+    "crud.confirm_regenerate": "D\u1EEF li\u1EC7u hi\u1EC7n t\u1EA1i s\u1EBD b\u1ECB ghi \u0111\u00E8. Ti\u1EBFp t\u1EE5c?",
+    "crud.selected": "\u0111\u00E3 ch\u1ECDn",
+    "crud.bulk_delete": "X\u00F3a \u0111\u00E3 ch\u1ECDn",
+    "crud.no_selection": "Ch\u01B0a ch\u1ECDn m\u1EE5c n\u00E0o",
+
+    "gen.generate": "T\u1EA1o",
+    "gen.regenerate": "T\u1EA1o l\u1EA1i (ghi \u0111\u00E8)",
+    "gen.new_version": "Phi\u00EAn b\u1EA3n m\u1EDBi",
+    "gen.mode_title": "Ch\u1EBF \u0111\u1ED9 t\u1EA1o",
+    "gen.mode_desc": "Ch\u1ECDn c\u00E1ch x\u1EED l\u00FD d\u1EEF li\u1EC7u hi\u1EC7n c\u00F3:",
+
+    "exec.history": "L\u1ECBch s\u1EED ch\u1EA1y",
+    "exec.run_id": "ID l\u1EA7n ch\u1EA1y",
+    "exec.no_runs": "Ch\u01B0a c\u00F3 l\u1EA7n ch\u1EA1y n\u00E0o",
+    "exec.view_run": "Xem",
+
+    "report.history": "L\u1ECBch s\u1EED b\u00E1o c\u00E1o",
+    "report.report_id": "ID b\u00E1o c\u00E1o",
+    "report.no_reports": "Ch\u01B0a c\u00F3 b\u00E1o c\u00E1o n\u00E0o",
+    "report.view_report": "Xem",
+
+    "th.run_id": "ID l\u1EA7n ch\u1EA1y",
+    "th.date": "Ng\u00E0y",
+    "th.total": "T\u1ED5ng",
+    "th.passed": "\u0110\u1EA1t",
+    "th.failed": "Kh\u00F4ng \u0111\u1EA1t",
+    "th.report_id": "ID b\u00E1o c\u00E1o",
+    "th.format": "\u0110\u1ECBnh d\u1EA1ng",
+    "th.mapping": "\u00C1nh x\u1EA1",
+    "th.mapping_source": "Ngu\u1ED3n",
+
+    "nav.goto_script": "\u0110i \u0111\u1EBFn k\u1ECBch b\u1EA3n \u2192",
+    "nav.goto_case": "\u0110i \u0111\u1EBFn tr\u01B0\u1EDDng h\u1EE3p \u2192",
+    "nav.goto_run": "\u0110i \u0111\u1EBFn l\u1EA7n ch\u1EA1y \u2192",
+    "nav.goto_report": "\u0110i \u0111\u1EBFn b\u00E1o c\u00E1o \u2192",
+
+    "form.title": "Ti\u00EAu \u0111\u1EC1",
+    "form.name": "T\u00EAn",
+    "form.description": "M\u00F4 t\u1EA3",
+    "form.category": "Danh m\u1EE5c",
+    "form.priority": "\u0110\u1ED9 \u01B0u ti\u00EAn",
+    "form.type": "Lo\u1EA1i",
+    "form.tags": "Nh\u00E3n (ph\u00E2n c\u00E1ch b\u1EB1ng d\u1EA5u ph\u1EA9y)",
+    "form.feature_id": "ID t\u00EDnh n\u0103ng",
+    "form.preconditions": "\u0110i\u1EC1u ki\u1EC7n ti\u00EAn quy\u1EBFt (m\u1ED7i d\u00F2ng m\u1ED9t)",
+    "form.expected_result": "K\u1EBFt qu\u1EA3 mong \u0111\u1EE3i",
+    "form.condition": "\u0110i\u1EC1u ki\u1EC7n",
+    "form.expected_behavior": "H\u00E0nh vi mong \u0111\u1EE3i",
+    "form.source": "Ngu\u1ED3n",
+    "form.tech_level": "Tr\u00ECnh \u0111\u1ED9 k\u1EF9 thu\u1EADt",
+    "form.goals": "M\u1EE5c ti\u00EAu (m\u1ED7i d\u00F2ng m\u1ED9t)",
+    "form.pain_points": "\u0110i\u1EC3m kh\u00F3 kh\u0103n (m\u1ED7i d\u00F2ng m\u1ED9t)",
+
     // Misc
     "scripts.count": "\u0110\u00E3 t\u1EA1o {n} k\u1ECBch b\u1EA3n",
     "coverage.pct": "\u0110\u1ED9 bao ph\u1EE7 {n}%",
@@ -890,6 +1091,7 @@ function setLang(lang) {
   try {
     localStorage.setItem("testforge-lang", lang);
   } catch (e) { /* localStorage unavailable */ }
+  document.documentElement.lang = lang;
 }
 
 function t(key, params) {

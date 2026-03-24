@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Literal
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
@@ -11,7 +13,7 @@ router = APIRouter(prefix="/api/projects", tags=["manual"])
 
 
 class CheckItemRequest(BaseModel):
-    status: str = "pass"
+    status: Literal["pass", "fail", "pending"] = "pass"
     note: str = ""
 
 

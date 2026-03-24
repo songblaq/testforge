@@ -52,6 +52,26 @@ def create_app() -> FastAPI:
         import os
         return {"cwd": os.getcwd(), "version": __version__}
 
+    # --- Error handlers ---
+    from fastapi.exceptions import RequestValidationError
+    from fastapi.responses import JSONResponse
+
+    @app.exception_handler(RequestValidationError)
+    async def validation_exception_handler(request, exc):
+        return JSONResponse(
+            status_code=422,
+            content={"detail": str(exc), "type": "validation_error"},
+        )
+
+    @app.exception_handler(Exception)
+    async def general_exception_handler(request, exc):
+        import logging
+        logging.getLogger("testforge.web").exception("Unhandled error: %s", exc)
+        return JSONResponse(
+            status_code=500,
+            content={"detail": "Internal server error", "type": "server_error"},
+        )
+
     # --- Static files ---
     if STATIC_DIR.exists():
         app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")

@@ -247,8 +247,8 @@ def test_get_run_results(web_client, sample_project):
 
 
 def test_get_report_markdown(web_client, sample_project):
-    """GET /api/projects/{path}/report generates markdown report."""
-    resp = web_client.get(f"/api/projects/{sample_project}/report?fmt=markdown")
+    """POST /api/projects/{path}/report generates markdown report."""
+    resp = web_client.post(f"/api/projects/{sample_project}/report?fmt=markdown")
     assert resp.status_code == 200
     data = resp.json()
     assert data["format"] == "markdown"
@@ -256,20 +256,20 @@ def test_get_report_markdown(web_client, sample_project):
 
 
 def test_get_report_html(web_client, sample_project):
-    """GET /api/projects/{path}/report?fmt=html generates HTML report.
+    """POST /api/projects/{path}/report?fmt=html generates HTML report.
 
     Note: HTML renderer has a pre-existing bug (_wrap_html undefined) so
     this test expects the 500 from the upstream module.  When the bug is
     fixed the assertion can be changed to 200.
     """
-    resp = web_client.get(f"/api/projects/{sample_project}/report?fmt=html")
+    resp = web_client.post(f"/api/projects/{sample_project}/report?fmt=html")
     # Upstream html.py has NameError for _wrap_html; accept 500 until fixed
     assert resp.status_code in (200, 500)
 
 
 def test_get_report_invalid_format(web_client, sample_project):
-    """GET /api/projects/{path}/report with invalid format returns 400."""
-    resp = web_client.get(f"/api/projects/{sample_project}/report?fmt=pdf")
+    """POST /api/projects/{path}/report with invalid format returns 400."""
+    resp = web_client.post(f"/api/projects/{sample_project}/report?fmt=pdf")
     assert resp.status_code == 400
 
 

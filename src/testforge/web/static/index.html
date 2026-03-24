@@ -52,15 +52,15 @@
 </div>
 
 <!-- Tab Bar (hidden when no project selected) -->
-<nav class="tab-bar" id="tab-bar" style="display:none;">
-  <button class="tab-btn active" data-tab="overview" data-i18n="tab.overview">Overview</button>
-  <button class="tab-btn" data-tab="inputs" data-i18n="tab.inputs">Inputs</button>
-  <button class="tab-btn" data-tab="analysis" data-i18n="tab.analysis">Analysis</button>
-  <button class="tab-btn" data-tab="cases" data-i18n="tab.cases">Cases</button>
-  <button class="tab-btn" data-tab="scripts" data-i18n="tab.scripts">Scripts</button>
-  <button class="tab-btn" data-tab="execution" data-i18n="tab.execution">Execution</button>
-  <button class="tab-btn" data-tab="manual" data-i18n="tab.manual">Manual QA</button>
-  <button class="tab-btn" data-tab="report" data-i18n="tab.report">Report</button>
+<nav class="tab-bar" id="tab-bar" role="tablist" style="display:none;">
+  <button type="button" class="tab-btn active" role="tab" aria-selected="true" data-tab="overview" data-i18n="tab.overview">Overview</button>
+  <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="inputs" data-i18n="tab.inputs">Inputs</button>
+  <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="analysis" data-i18n="tab.analysis">Analysis</button>
+  <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="cases" data-i18n="tab.cases">Cases</button>
+  <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="scripts" data-i18n="tab.scripts">Scripts</button>
+  <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="execution" data-i18n="tab.execution">Execution</button>
+  <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="manual" data-i18n="tab.manual">Manual QA</button>
+  <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="report" data-i18n="tab.report">Report</button>
 </nav>
 
 <main class="app-main">
@@ -144,19 +144,19 @@
       </div>
       <div id="analysis-content" style="display:none;">
         <div id="analysis-summary-cards" class="stats-row" style="margin-bottom:20px;"></div>
-        <h3 data-i18n="analysis.features">Features</h3>
+        <div class="section-header"><h3 data-i18n="analysis.features">Features</h3><button class="btn btn-secondary btn-sm" id="btn-add-feature" data-i18n="crud.add">+ Add</button></div>
         <table id="features-table" class="data-table">
-          <thead><tr><th data-i18n="th.id">ID</th><th data-i18n="th.name">Name</th><th data-i18n="th.category">Category</th><th data-i18n="th.priority">Priority</th><th data-i18n="th.description">Description</th></tr></thead>
+          <thead><tr><th data-i18n="th.id">ID</th><th data-i18n="th.name">Name</th><th data-i18n="th.category">Category</th><th data-i18n="th.priority">Priority</th><th data-i18n="th.description">Description</th><th data-i18n="th.actions">Actions</th></tr></thead>
           <tbody></tbody>
         </table>
-        <h3 data-i18n="analysis.personas">Personas</h3>
+        <div class="section-header"><h3 data-i18n="analysis.personas">Personas</h3><button class="btn btn-secondary btn-sm" id="btn-add-persona" data-i18n="crud.add">+ Add</button></div>
         <table id="personas-table" class="data-table">
-          <thead><tr><th data-i18n="th.id">ID</th><th data-i18n="th.name">Name</th><th data-i18n="th.tech_level">Tech Level</th><th data-i18n="th.description">Description</th></tr></thead>
+          <thead><tr><th data-i18n="th.id">ID</th><th data-i18n="th.name">Name</th><th data-i18n="th.tech_level">Tech Level</th><th data-i18n="th.description">Description</th><th data-i18n="th.actions">Actions</th></tr></thead>
           <tbody></tbody>
         </table>
-        <h3 data-i18n="analysis.rules">Business Rules</h3>
+        <div class="section-header"><h3 data-i18n="analysis.rules">Business Rules</h3><button class="btn btn-secondary btn-sm" id="btn-add-rule" data-i18n="crud.add">+ Add</button></div>
         <table id="rules-table" class="data-table">
-          <thead><tr><th data-i18n="th.id">ID</th><th data-i18n="th.name">Name</th><th data-i18n="th.condition">Condition</th><th data-i18n="th.expected">Expected</th></tr></thead>
+          <thead><tr><th data-i18n="th.id">ID</th><th data-i18n="th.name">Name</th><th data-i18n="th.condition">Condition</th><th data-i18n="th.expected">Expected</th><th data-i18n="th.actions">Actions</th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
@@ -185,6 +185,11 @@
             <option value="smoke" data-i18n="cases.smoke">Smoke</option>
             <option value="regression" data-i18n="cases.regression">Regression</option>
           </select>
+          <button class="btn btn-secondary" id="btn-add-case" data-i18n="crud.add_case">+ Add Case</button>
+          <select id="case-gen-mode" class="gen-mode-selector">
+            <option value="generate" data-i18n="gen.generate">Generate</option>
+            <option value="regenerate" data-i18n="gen.regenerate">Regenerate</option>
+          </select>
           <button class="btn btn-primary" id="btn-generate" data-i18n="cases.generate">Generate Cases</button>
         </div>
       </div>
@@ -200,8 +205,12 @@
         <div class="filter-row">
           <input type="text" id="case-filter" data-i18n-placeholder="cases.filter" placeholder="Filter cases..." class="filter-input">
         </div>
+        <div class="bulk-actions" id="cases-bulk-actions" style="display:none;">
+          <span id="cases-selected-count">0</span> <span data-i18n="crud.selected">selected</span>
+          <button class="btn btn-danger btn-sm" id="btn-bulk-delete-cases" data-i18n="crud.bulk_delete">Delete Selected</button>
+        </div>
         <table id="cases-table" class="data-table">
-          <thead><tr><th data-i18n="th.id">ID</th><th data-i18n="th.title">Title</th><th data-i18n="th.type">Type</th><th data-i18n="th.tag">Tag</th><th data-i18n="th.priority">Priority</th><th data-i18n="th.feature">Feature</th><th data-i18n="th.status">Status</th></tr></thead>
+          <thead><tr><th><input type="checkbox" id="case-select-all"></th><th data-i18n="th.id">ID</th><th data-i18n="th.title">Title</th><th data-i18n="th.type">Type</th><th data-i18n="th.tag">Tag</th><th data-i18n="th.priority">Priority</th><th data-i18n="th.feature">Feature</th><th data-i18n="th.status">Status</th><th data-i18n="th.actions">Actions</th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
@@ -214,7 +223,13 @@
     <div class="card">
       <div class="card-header">
         <h2 data-i18n="scripts.title">Test Scripts</h2>
-        <button class="btn btn-primary" id="btn-gen-scripts" data-i18n="scripts.generate">Generate Scripts</button>
+        <div class="header-actions">
+          <select id="script-gen-mode" class="gen-mode-selector">
+            <option value="generate" data-i18n="gen.generate">Generate</option>
+            <option value="regenerate" data-i18n="gen.regenerate">Regenerate</option>
+          </select>
+          <button class="btn btn-primary" id="btn-gen-scripts" data-i18n="scripts.generate">Generate Scripts</button>
+        </div>
       </div>
       <div id="scripts-guard" class="guard-message" style="display:none;">
         <p data-i18n="scripts.guard">Generate test cases first in the Cases tab before generating scripts.</p>
@@ -227,7 +242,7 @@
       <div id="scripts-content" style="display:none;">
         <div id="scripts-summary-cards" class="stats-row" style="margin-bottom:16px;"></div>
         <table id="scripts-table" class="data-table">
-          <thead><tr><th data-i18n="th.file">File</th><th data-i18n="th.lines">Lines</th><th data-i18n="th.case_id">Case</th><th data-i18n="th.size">Size</th></tr></thead>
+          <thead><tr><th data-i18n="th.file">File</th><th data-i18n="th.lines">Lines</th><th data-i18n="th.case_id">Case</th><th data-i18n="th.size">Size</th><th data-i18n="th.actions">Actions</th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
@@ -259,6 +274,13 @@
         <div class="progress-bar"><div class="progress-fill" id="exec-progress"></div></div>
         <table id="execution-table" class="data-table">
           <thead><tr><th data-i18n="th.case">Case</th><th data-i18n="th.status">Status</th><th data-i18n="th.duration">Duration</th><th data-i18n="th.output">Output</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div id="run-history" style="display:none;">
+        <h3 data-i18n="exec.history">Run History</h3>
+        <table id="runs-table" class="data-table">
+          <thead><tr><th data-i18n="th.run_id">Run ID</th><th data-i18n="th.date">Date</th><th data-i18n="th.total">Total</th><th data-i18n="th.passed">Passed</th><th data-i18n="th.failed">Failed</th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
@@ -328,6 +350,13 @@
           <div class="stat-card"><div class="stat-value" id="cov-rules">-</div><div class="stat-label" data-i18n="report.rule_cov">Rule Coverage</div></div>
         </div>
       </div>
+      <div id="report-history" style="display:none;">
+        <h3 data-i18n="report.history">Report History</h3>
+        <table id="reports-history-table" class="data-table">
+          <thead><tr><th data-i18n="th.report_id">Report ID</th><th data-i18n="th.date">Date</th><th data-i18n="th.format">Format</th><th data-i18n="th.actions">Actions</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
     </div>
   </section>
   <!-- Detail Panel (shared across tabs) -->
@@ -354,7 +383,31 @@
   </div>
 </div>
 
-<div id="toast-container"></div>
+<!-- CRUD Modal (shared) -->
+<div class="modal-overlay" id="crud-modal" style="display:none;">
+  <div class="modal modal-lg">
+    <div class="modal-header"><h2 id="crud-modal-title">Edit</h2><button class="modal-close" id="crud-modal-close">&times;</button></div>
+    <div class="modal-body" id="crud-modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="crud-modal-cancel" data-i18n="modal.cancel">Cancel</button>
+      <button class="btn btn-primary" id="crud-modal-save" data-i18n="crud.save">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Dialog -->
+<div class="modal-overlay" id="confirm-dialog" style="display:none;">
+  <div class="modal modal-sm">
+    <div class="modal-header"><h2 id="confirm-title" data-i18n="crud.confirm">Confirm</h2></div>
+    <div class="modal-body"><p id="confirm-message"></p></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="confirm-cancel" data-i18n="modal.cancel">Cancel</button>
+      <button class="btn btn-danger" id="confirm-ok" data-i18n="crud.confirm_delete">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container" role="status" aria-live="polite"></div>
 <script src="/static/i18n.js"></script>
 <script src="/static/app.js"></script>
 </body>
