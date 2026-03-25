@@ -29,6 +29,15 @@ var translations = {
     "overview.next": "Next Step",
     "overview.all_done": "All pipeline stages complete!",
 
+    // LLM config panel
+    "llm.config_title": "LLM Configuration",
+    "llm.provider": "Provider",
+    "llm.model": "Model",
+    "llm.save": "Save",
+    "llm.saved": "LLM configuration saved",
+    "llm.test": "Test Connection",
+    "llm.testing": "Testing connection...",
+
     // Pipeline stepper
     "stepper.inputs": "Inputs",
     "stepper.analysis": "Analysis",
@@ -354,6 +363,8 @@ var translations = {
     "form.tech_level": "Tech Level",
     "form.goals": "Goals (one per line)",
     "form.pain_points": "Pain Points (one per line)",
+    "form.steps": "Steps",
+    "form.steps_hint": "action | expected result, one per line",
 
     // Misc
     "scripts.count": "{n} script(s) generated",
@@ -387,6 +398,15 @@ var translations = {
     "overview.quickstats": "\ube60\ub978 \ud1b5\uacc4",
     "overview.next": "\ub2e4\uc74c \ub2e8\uacc4",
     "overview.all_done": "\ubaa8\ub4e0 \ud30c\uc774\ud504\ub77c\uc778 \ub2e8\uacc4 \uc644\ub8cc!",
+
+    // LLM config panel
+    "llm.config_title": "LLM \uc124\uc815",
+    "llm.provider": "\ud504\ub85c\ubc14\uc774\ub354",
+    "llm.model": "\ubaa8\ub378",
+    "llm.save": "\uc800\uc7a5",
+    "llm.saved": "LLM \uc124\uc815\uc774 \uc800\uc7a5\ub418\uc5c8\uc2b5\ub2c8\ub2e4",
+    "llm.test": "\uc5f0\uacb0 \ud14c\uc2a4\ud2b8",
+    "llm.testing": "\uc5f0\uacb0 \ud14c\uc2a4\ud2b8 \uc911...",
 
     // Pipeline stepper
     "stepper.inputs": "\uc785\ub825",
@@ -713,6 +733,8 @@ var translations = {
     "form.tech_level": "\uae30\uc220 \uc218\uc900",
     "form.goals": "\ubaa9\ud45c (\uc904 \ub2e8\uc704)",
     "form.pain_points": "\ubd88\ud3b8 \uc0ac\ud56d (\uc904 \ub2e8\uc704)",
+    "form.steps": "\ud14c\uc2a4\ud2b8 \ub2e8\uacc4",
+    "form.steps_hint": "\uc791\uc5c5 | \uae30\ub300 \uacb0\uacfc, \ud55c \uc904\uc5d0 \ud558\ub098\uc529",
 
     // Misc
     "scripts.count": "{n}\uac1c \uc2a4\ud06c\ub9bd\ud2b8 \uc0dd\uc131\ub428",
@@ -746,6 +768,15 @@ var translations = {
     "overview.quickstats": "Th\u1ED1ng k\u00EA nhanh",
     "overview.next": "B\u01B0\u1EDBc ti\u1EBFp theo",
     "overview.all_done": "T\u1EA5t c\u1EA3 giai \u0111o\u1EA1n \u0111\u00E3 ho\u00E0n th\u00E0nh!",
+
+    // LLM config panel
+    "llm.config_title": "C\u1EA5u h\u00ECnh LLM",
+    "llm.provider": "Nh\u00E0 cung c\u1EA5p",
+    "llm.model": "M\u00F4 h\u00ECnh",
+    "llm.save": "L\u01B0u",
+    "llm.saved": "\u0110\u00E3 l\u01B0u c\u1EA5u h\u00ECnh LLM",
+    "llm.test": "Ki\u1EC3m tra k\u1EBFt n\u1ED1i",
+    "llm.testing": "\u0110ang ki\u1EC3m tra...",
 
     // Pipeline stepper
     "stepper.inputs": "T\u00E0i li\u1EC7u",
@@ -1066,6 +1097,8 @@ var translations = {
     "form.tech_level": "Tr\u00ECnh \u0111\u1ED9 k\u1EF9 thu\u1EADt",
     "form.goals": "M\u1EE5c ti\u00EAu (m\u1ED7i d\u00F2ng m\u1ED9t)",
     "form.pain_points": "\u0110i\u1EC3m kh\u00F3 kh\u0103n (m\u1ED7i d\u00F2ng m\u1ED9t)",
+    "form.steps": "C\u00E1c b\u01B0\u1EDBc ki\u1EC3m th\u1EED",
+    "form.steps_hint": "h\u00E0nh \u0111\u1ED9ng | k\u1EBFt qu\u1EA3 mong \u0111\u1EE3i, m\u1ED7i d\u00F2ng m\u1ED9t b\u01B0\u1EDBc",
 
     // Misc
     "scripts.count": "\u0110\u00E3 t\u1EA1o {n} k\u1ECBch b\u1EA3n",

@@ -97,6 +97,31 @@
       </div>
       <div id="overview-stats" class="stats-row"></div>
     </div>
+    <div class="card" id="llm-config-card" style="display:none;">
+      <div class="card-header">
+        <h2 data-i18n="llm.config_title">LLM Configuration</h2>
+        <button class="btn btn-secondary btn-sm" id="btn-test-llm" data-i18n="llm.test">Test Connection</button>
+      </div>
+      <div id="llm-status-bar" style="display:none;margin-bottom:12px;"></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label data-i18n="llm.provider">Provider</label>
+          <select id="llm-provider-select">
+            <option value="anthropic">Anthropic</option>
+            <option value="openai">OpenAI</option>
+            <option value="ollama">Ollama (local)</option>
+            <option value="google">Google</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label data-i18n="llm.model">Model</label>
+          <input type="text" id="llm-model-input" placeholder="(default)">
+        </div>
+        <div class="form-group" style="flex:0;display:flex;align-items:flex-end;">
+          <button class="btn btn-primary" id="btn-save-llm-config" data-i18n="llm.save">Save</button>
+        </div>
+      </div>
+    </div>
   </section>
 
   <!-- INPUTS TAB -->

@@ -170,6 +170,114 @@ async def get_overview(project_path: str):
     }
 
 
+@router.get("/{project_path:path}/config")
+async def get_project_config(project_path: str):
+    """Get LLM and project configuration."""
+    from testforge.core.config import load_config
+
+    p = _resolve_project(project_path)
+    config = load_config(p)
+    return {
+        "config": {
+            "project_name": config.project_name,
+            "llm_provider": config.llm_provider,
+            "llm_model": config.llm_model,
+            "version": config.version,
+        }
+    }
+
+
+class ConfigUpdate(BaseModel):
+    llm_provider: str | None = None
+    llm_model: str | None = None
+    project_name: str | None = None
+
+
+@router.put("/{project_path:path}/config")
+async def update_project_config(project_path: str, body: ConfigUpdate):
+    """Update LLM provider, model, or project name."""
+    from testforge.core.config import load_config, save_config
+
+    p = _resolve_project(project_path)
+    config = load_config(p)
+
+    SUPPORTED_PROVIDERS = ("anthropic", "openai", "ollama", "google")
+    if body.llm_provider is not None:
+        if body.llm_provider not in SUPPORTED_PROVIDERS:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Unsupported provider '{body.llm_provider}'. Supported: {SUPPORTED_PROVIDERS}",
+            )
+        config.llm_provider = body.llm_provider
+    if body.llm_model is not None:
+        config.llm_model = body.llm_model
+    if body.project_name is not None:
+        if not body.project_name.strip():
+            raise HTTPException(status_code=400, detail="project_name cannot be empty")
+        config.project_name = body.project_name.strip()
+
+    save_config(p, config)
+    return {
+        "config": {
+            "project_name": config.project_name,
+            "llm_provider": config.llm_provider,
+            "llm_model": config.llm_model,
+        }
+    }
+
+
+@router.get("/{project_path:path}/config/test")
+async def test_llm_connection(project_path: str):
+    """Test LLM provider connectivity for a project."""
+    from testforge.core.config import load_config
+
+    p = _resolve_project(project_path)
+    config = load_config(p)
+
+    provider = config.llm_provider
+    model = config.llm_model or "(default)"
+
+    # Lightweight connectivity check per provider
+    try:
+        if provider == "ollama":
+            import urllib.request
+            req = urllib.request.urlopen("http://localhost:11434/api/tags", timeout=3)
+            req.read()
+            status = "connected"
+            message = f"Ollama reachable at localhost:11434 — model: {model}"
+        elif provider == "anthropic":
+            import os
+            key = os.environ.get("ANTHROPIC_API_KEY", "")
+            if not key:
+                status = "warning"
+                message = "ANTHROPIC_API_KEY not set — LLM calls will fail"
+            else:
+                status = "configured"
+                message = f"Anthropic API key found — model: {model or 'claude-3-5-sonnet-latest'}"
+        elif provider == "openai":
+            import os
+            key = os.environ.get("OPENAI_API_KEY", "")
+            if not key:
+                status = "warning"
+                message = "OPENAI_API_KEY not set — LLM calls will fail"
+            else:
+                status = "configured"
+                message = f"OpenAI API key found — model: {model or 'gpt-4o'}"
+        else:
+            status = "unknown"
+            message = f"Provider '{provider}' — manual check required"
+    except Exception as exc:
+        status = "error"
+        message = str(exc)
+
+    return {
+        "provider": provider,
+        "model": model,
+        "status": status,
+        "message": message,
+    }
+
+
 @router.delete("/{project_path:path}")
 async def delete_project(project_path: str):
     """Delete a TestForge project."""

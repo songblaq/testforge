@@ -31,6 +31,7 @@ def create_app() -> FastAPI:
     from testforge.web.routers.scripts import router as scripts_router
     from testforge.web.routers.inputs import router as inputs_router
     from testforge.web.routers.inputs import delete_router as inputs_delete_router
+    from testforge.web.routers.translate import router as translate_router
 
     app.include_router(analysis_router)
     app.include_router(cases_router)
@@ -41,6 +42,7 @@ def create_app() -> FastAPI:
     app.include_router(inputs_router)
     app.include_router(inputs_delete_router)
     app.include_router(projects_router)
+    app.include_router(translate_router)
 
     # --- Health + Config endpoints ---
     @app.get("/api/health")

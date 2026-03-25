@@ -889,6 +889,53 @@ async function loadOverview() {
   } catch (e) {
     document.getElementById("pipeline-stepper").innerHTML = '<p style="color:var(--text-dim);text-align:center;">' + esc(e.message) + '</p>';
   }
+  loadLlmConfig();
+}
+
+async function loadLlmConfig() {
+  if (!currentProject) return;
+  var card = document.getElementById("llm-config-card");
+  if (!card) return;
+  card.style.display = "";
+  try {
+    var data = await api("GET", "/api/projects/" + encodePath(currentProject.path) + "/config");
+    var cfg = data.config || {};
+    var sel = document.getElementById("llm-provider-select");
+    var inp = document.getElementById("llm-model-input");
+    if (sel) sel.value = cfg.llm_provider || "anthropic";
+    if (inp) inp.value = cfg.llm_model || "";
+  } catch (e) {
+    /* ignore — card still visible for setting */
+  }
+}
+
+async function saveLlmConfig() {
+  if (!currentProject) return;
+  var provider = document.getElementById("llm-provider-select").value;
+  var model = document.getElementById("llm-model-input").value.trim();
+  try {
+    await api("PUT", "/api/projects/" + encodePath(currentProject.path) + "/config", {
+      llm_provider: provider,
+      llm_model: model,
+    });
+    toast(t("llm.saved"), "success");
+  } catch (e) {
+    toast(e.message, "error");
+  }
+}
+
+async function testLlmConnection() {
+  if (!currentProject) return;
+  var bar = document.getElementById("llm-status-bar");
+  if (bar) { bar.style.display = ""; bar.textContent = t("llm.testing"); }
+  try {
+    var data = await api("GET", "/api/projects/" + encodePath(currentProject.path) + "/config/test");
+    var icon = data.status === "connected" || data.status === "configured" ? "✓" : data.status === "warning" ? "⚠" : "✗";
+    var color = data.status === "connected" || data.status === "configured" ? "var(--success)" : data.status === "warning" ? "#f0a500" : "var(--danger)";
+    if (bar) { bar.style.display = ""; bar.style.color = color; bar.textContent = icon + " " + data.message; }
+  } catch (e) {
+    if (bar) { bar.style.display = ""; bar.style.color = "var(--danger)"; bar.textContent = "✗ " + e.message; }
+  }
 }
 
 function renderPipelineStepper(data) {
@@ -2256,6 +2303,12 @@ document.addEventListener("click", function(e) {
     uploadFiles(e.dataTransfer.files);
   });
 
+  // LLM config
+  var saveLlmBtn = document.getElementById("btn-save-llm-config");
+  if (saveLlmBtn) saveLlmBtn.addEventListener("click", saveLlmConfig);
+  var testLlmBtn = document.getElementById("btn-test-llm");
+  if (testLlmBtn) testLlmBtn.addEventListener("click", testLlmConnection);
+
   // Tab switching
   document.querySelectorAll(".tab-btn").forEach(function(btn) {
     btn.addEventListener("click", function() {
@@ -2405,6 +2458,7 @@ function buildCrudForm(type, data) {
       '<div class="form-group"><label>' + esc(t("form.feature_id")) + '</label><input id="crud-feature-id" value="' + esc(data.feature_id || "") + '"></div>' +
       '<div class="form-group"><label>' + esc(t("form.tags")) + '</label><input id="crud-tags" value="' + esc((data.tags || []).join(", ")) + '"></div>' +
       '<div class="form-group"><label>' + esc(t("form.preconditions")) + '</label><textarea id="crud-preconditions">' + esc((data.preconditions || []).join("\n")) + '</textarea></div>' +
+      '<div class="form-group"><label>' + esc(t("form.steps")) + ' <small style="color:var(--text-muted)">(' + esc(t("form.steps_hint")) + ')</small></label><textarea id="crud-steps" rows="5">' + esc((data.steps || []).map(function(s) { return typeof s === "string" ? s : (s.action || "") + (s.expected_result ? " | " + s.expected_result : ""); }).join("\n")) + '</textarea></div>' +
       '<div class="form-group"><label>' + esc(t("form.expected_result")) + '</label><textarea id="crud-expected-result">' + esc(data.expected_result || "") + '</textarea></div>';
   }
   if (type === "script") {
@@ -2478,6 +2532,10 @@ async function saveCrudModal() {
         feature_id: document.getElementById("crud-feature-id").value,
         tags: document.getElementById("crud-tags").value.split(",").map(function(s) { return s.trim(); }).filter(Boolean),
         preconditions: document.getElementById("crud-preconditions").value.split("\n").filter(Boolean),
+        steps: document.getElementById("crud-steps").value.split("\n").filter(Boolean).map(function(line, idx) {
+          var parts = line.split("|");
+          return { order: idx + 1, action: parts[0].trim(), expected_result: (parts[1] || "").trim() };
+        }),
         expected_result: document.getElementById("crud-expected-result").value
       };
       if (isEdit) {

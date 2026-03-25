@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import concurrent.futures
 import logging
+import subprocess
+import sys
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -260,19 +262,51 @@ def run_tests(
     if not scripts_dir.exists():
         return []
 
-    scripts = sorted(scripts_dir.glob("*.py"))
+    scripts = sorted(
+        p for p in scripts_dir.glob("*.py") if p.name != "conftest.py"
+    )
 
     # Filter by tags: keep scripts whose stem contains any of the requested tags
     if tags:
         scripts = [s for s in scripts if any(tag in s.stem for tag in tags)]
 
     def _run_one(script: Path) -> dict[str, Any]:
-        from testforge.execution.connectors.shell import ShellConnector
-
-        connector = ShellConnector(cwd=str(project_dir))
-        with connector:
-            raw = connector.execute(str(script))
-        return {"case_id": script.stem, **raw}
+        start = time.monotonic()
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "pytest",
+                str(script),
+                "-v",
+                "--tb=short",
+                "-q",
+                "--no-header",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=120,
+            cwd=str(project_dir),
+        )
+        duration = time.monotonic() - start
+        # pytest exit codes: 0=passed, 1=failed, 2=interrupted, 3=internal error,
+        # 4=command line error, 5=no tests collected
+        if result.returncode == 0:
+            status = "passed"
+        elif result.returncode in (4, 5):
+            status = "skipped"
+        else:
+            status = "failed"
+        return {
+            "case_id": script.stem,
+            "script_name": script.name,
+            "status": status,
+            "output": result.stdout,
+            "stderr": result.stderr,
+            "returncode": result.returncode,
+            "duration": duration,
+            "runner": "pytest",
+        }
 
     results: list[dict[str, Any]] = []
     workers = max(1, parallel)
