@@ -78,7 +78,7 @@ async def add_feature(project_path: str, body: dict[str, Any]):
     p = resolve_project(project_path)
     analysis = load_analysis(p)
     if analysis is None:
-        raise HTTPException(status_code=404, detail="No analysis results found")
+        analysis = AnalysisResult(features=[], personas=[], rules=[])
 
     if not body.get("id"):
         body["id"] = f"F{len(analysis.features)+1:03d}"
@@ -150,7 +150,10 @@ async def add_persona(project_path: str, body: dict[str, Any]):
     p = resolve_project(project_path)
     analysis = load_analysis(p)
     if analysis is None:
-        raise HTTPException(status_code=404, detail="No analysis results found")
+        analysis = AnalysisResult(features=[], personas=[], rules=[])
+
+    if not body.get("name"):
+        raise HTTPException(status_code=400, detail="Persona name is required")
 
     if not body.get("id"):
         body["id"] = f"P{len(analysis.personas)+1:03d}"
@@ -219,7 +222,10 @@ async def add_rule(project_path: str, body: dict[str, Any]):
     p = resolve_project(project_path)
     analysis = load_analysis(p)
     if analysis is None:
-        raise HTTPException(status_code=404, detail="No analysis results found")
+        analysis = AnalysisResult(features=[], personas=[], rules=[])
+
+    if not body.get("name"):
+        raise HTTPException(status_code=400, detail="Rule name is required")
 
     if not body.get("id"):
         body["id"] = f"R{len(analysis.rules)+1:03d}"

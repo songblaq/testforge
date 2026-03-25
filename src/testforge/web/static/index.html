@@ -14,7 +14,7 @@
   </div>
   <div class="header-center">
     <div class="project-selector" id="project-selector">
-      <button class="project-dropdown-btn" id="project-dropdown-btn">
+      <button type="button" class="project-dropdown-btn" id="project-dropdown-btn" aria-expanded="false" aria-haspopup="listbox">
         <span id="selected-project-name" data-i18n="project.select">Select project...</span>
         <span class="chevron">&#9660;</span>
       </button>
@@ -40,15 +40,15 @@
 <div class="context-bar" id="context-bar" style="display:none;">
   <span class="ctx-name" id="ctx-name"></span>
   <span class="ctx-sep">|</span>
-  <span class="ctx-stat ctx-clickable" id="ctx-pipeline" data-tab="overview">0/6 stages</span>
+  <button type="button" class="ctx-stat ctx-clickable" id="ctx-pipeline" data-tab="overview">0/6 stages</button>
   <span class="ctx-sep">|</span>
-  <span class="ctx-stat ctx-clickable" id="ctx-inputs" data-tab="inputs">0 docs</span>
+  <button type="button" class="ctx-stat ctx-clickable" id="ctx-inputs" data-tab="inputs">0 docs</button>
   <span class="ctx-sep">|</span>
-  <span class="ctx-stat ctx-clickable" id="ctx-features" data-tab="analysis">0 features</span>
+  <button type="button" class="ctx-stat ctx-clickable" id="ctx-features" data-tab="analysis">0 features</button>
   <span class="ctx-sep">|</span>
-  <span class="ctx-stat ctx-clickable" id="ctx-cases" data-tab="cases">0 cases</span>
+  <button type="button" class="ctx-stat ctx-clickable" id="ctx-cases" data-tab="cases">0 cases</button>
   <span class="ctx-sep">|</span>
-  <span class="ctx-stat ctx-clickable" id="ctx-coverage" data-tab="report">-</span>
+  <button type="button" class="ctx-stat ctx-clickable" id="ctx-coverage" data-tab="report">-</button>
 </div>
 
 <!-- Tab Bar (hidden when no project selected) -->
@@ -363,7 +363,7 @@
   <div class="detail-panel" id="detail-panel">
     <div class="detail-header">
       <h3 id="detail-title"></h3>
-      <button class="detail-close" id="detail-close">&times;</button>
+      <button type="button" class="detail-close" id="detail-close" aria-label="Close detail panel">&times;</button>
     </div>
     <div class="detail-body" id="detail-body"></div>
   </div>
@@ -371,21 +371,21 @@
 
 <!-- Create Project Modal -->
 <div class="modal-overlay" id="create-modal" style="display:none;">
-  <div class="modal">
-    <div class="modal-header"><h2 data-i18n="modal.title">New Project</h2><button class="modal-close" id="modal-close">&times;</button></div>
-    <div class="form-group"><label data-i18n="modal.name">Project Name</label><input type="text" id="new-project-name" placeholder="my-project"></div>
-    <div class="form-group"><label data-i18n="modal.dir">Directory</label><input type="text" id="new-project-dir" placeholder="." value="."></div>
-    <div class="form-group"><label data-i18n="modal.provider">LLM Provider</label>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="create-modal-title">
+    <div class="modal-header"><h2 id="create-modal-title" data-i18n="modal.title">New Project</h2><button class="modal-close" id="modal-close">&times;</button></div>
+    <div class="form-group"><label for="new-project-name" data-i18n="modal.name">Project Name</label><input type="text" id="new-project-name" placeholder="my-project"></div>
+    <div class="form-group"><label for="new-project-dir" data-i18n="modal.dir">Directory</label><input type="text" id="new-project-dir" placeholder="." value="."></div>
+    <div class="form-group"><label for="new-project-provider" data-i18n="modal.provider">LLM Provider</label>
       <select id="new-project-provider"><option value="anthropic">Anthropic</option><option value="openai">OpenAI</option><option value="ollama">Ollama</option><option value="cli">CLI</option></select>
     </div>
-    <div class="form-group"><label data-i18n="modal.model">Model (optional)</label><input type="text" id="new-project-model" placeholder="default"></div>
+    <div class="form-group"><label for="new-project-model" data-i18n="modal.model">Model (optional)</label><input type="text" id="new-project-model" placeholder="default"></div>
     <div class="modal-footer"><button class="btn btn-secondary" id="modal-cancel" data-i18n="modal.cancel">Cancel</button><button class="btn btn-primary" id="modal-create" data-i18n="modal.create">Create</button></div>
   </div>
 </div>
 
 <!-- CRUD Modal (shared) -->
 <div class="modal-overlay" id="crud-modal" style="display:none;">
-  <div class="modal modal-lg">
+  <div class="modal modal-lg" role="dialog" aria-modal="true" aria-labelledby="crud-modal-title">
     <div class="modal-header"><h2 id="crud-modal-title">Edit</h2><button class="modal-close" id="crud-modal-close">&times;</button></div>
     <div class="modal-body" id="crud-modal-body"></div>
     <div class="modal-footer">
@@ -397,7 +397,7 @@
 
 <!-- Confirm Dialog -->
 <div class="modal-overlay" id="confirm-dialog" style="display:none;">
-  <div class="modal modal-sm">
+  <div class="modal modal-sm" role="dialog" aria-modal="true" aria-label="Confirmation">
     <div class="modal-header"><h2 id="confirm-title" data-i18n="crud.confirm">Confirm</h2></div>
     <div class="modal-body"><p id="confirm-message"></p></div>
     <div class="modal-footer">

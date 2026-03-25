@@ -32,7 +32,6 @@ def create_app() -> FastAPI:
     from testforge.web.routers.inputs import router as inputs_router
     from testforge.web.routers.inputs import delete_router as inputs_delete_router
 
-    app.include_router(projects_router)
     app.include_router(analysis_router)
     app.include_router(cases_router)
     app.include_router(execution_router)
@@ -41,6 +40,7 @@ def create_app() -> FastAPI:
     app.include_router(scripts_router)
     app.include_router(inputs_router)
     app.include_router(inputs_delete_router)
+    app.include_router(projects_router)
 
     # --- Health + Config endpoints ---
     @app.get("/api/health")
@@ -49,8 +49,7 @@ def create_app() -> FastAPI:
 
     @app.get("/api/config")
     async def config():
-        import os
-        return {"cwd": os.getcwd(), "version": __version__}
+        return {"version": __version__}
 
     # --- Error handlers ---
     from fastapi.exceptions import RequestValidationError

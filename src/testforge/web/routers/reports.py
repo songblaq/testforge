@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import uuid
+from pathlib import Path
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, HTTPException, Query
@@ -92,7 +93,10 @@ async def get_report_by_id(project_path: str, report_id: str):
         raise HTTPException(status_code=404, detail=f"Report {report_id} not found")
 
     meta = json.loads(meta_path.read_text())
-    report_file = reports_dir / meta["file"]
+    report_filename = Path(meta["file"]).name
+    report_file = reports_dir / report_filename
+    if not report_file.resolve().is_relative_to(reports_dir.resolve()):
+        raise HTTPException(status_code=403, detail="Access denied")
     if not report_file.exists():
         raise HTTPException(status_code=404, detail="Report file missing")
 

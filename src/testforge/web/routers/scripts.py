@@ -1,11 +1,12 @@
 """Script generation and management endpoints."""
 from __future__ import annotations
 
-import json
 from typing import Literal
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
+
+from testforge.web.deps import load_mappings, save_mappings
 
 router = APIRouter(prefix="/api/projects", tags=["scripts"])
 
@@ -36,7 +37,7 @@ async def list_scripts(project_path: str):
     if not scripts_dir.exists():
         return {"scripts": [], "count": 0}
 
-    mappings = _load_mappings(p)
+    mappings = load_mappings(p)
     script_to_cases = {}
     for m in mappings:
         sn = m.get("script_name", "")
@@ -130,9 +131,9 @@ async def delete_script(project_path: str, script_name: str):
 
     script_path.unlink()
 
-    mappings = _load_mappings(p)
+    mappings = load_mappings(p)
     mappings = [m for m in mappings if m.get("script_name") != script_name]
-    _save_mappings(p, mappings)
+    save_mappings(p, mappings)
 
     return {"deleted": script_name}
 
@@ -158,7 +159,7 @@ async def get_mappings(project_path: str):
     from testforge.web.deps import resolve_project
 
     p = resolve_project(project_path)
-    mappings = _load_mappings(p)
+    mappings = load_mappings(p)
     return {"mappings": mappings, "count": len(mappings)}
 
 
@@ -168,14 +169,14 @@ async def add_mapping(project_path: str, body: MappingEntry):
     from testforge.web.deps import resolve_project
 
     p = resolve_project(project_path)
-    mappings = _load_mappings(p)
+    mappings = load_mappings(p)
 
     for m in mappings:
         if m.get("case_id") == body.case_id and m.get("script_name") == body.script_name:
             raise HTTPException(status_code=409, detail="Mapping already exists")
 
     mappings.append(body.model_dump())
-    _save_mappings(p, mappings)
+    save_mappings(p, mappings)
     return {"mapping": body.model_dump(), "total": len(mappings)}
 
 
@@ -185,7 +186,7 @@ async def remove_mapping(project_path: str, case_id: str, script_name: str):
     from testforge.web.deps import resolve_project
 
     p = resolve_project(project_path)
-    mappings = _load_mappings(p)
+    mappings = load_mappings(p)
 
     original = len(mappings)
     mappings = [m for m in mappings if not (m.get("case_id") == case_id and m.get("script_name") == script_name)]
@@ -193,25 +194,11 @@ async def remove_mapping(project_path: str, case_id: str, script_name: str):
     if len(mappings) == original:
         raise HTTPException(status_code=404, detail="Mapping not found")
 
-    _save_mappings(p, mappings)
+    save_mappings(p, mappings)
     return {"deleted": True, "remaining": len(mappings)}
 
 
 # --- Helpers ---
-
-def _load_mappings(project_dir):
-    mapping_path = project_dir / ".testforge" / "mappings.json"
-    if not mapping_path.exists():
-        return []
-    with open(mapping_path) as f:
-        return json.load(f)
-
-
-def _save_mappings(project_dir, mappings):
-    mapping_path = project_dir / ".testforge" / "mappings.json"
-    mapping_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(mapping_path, "w") as f:
-        json.dump(mappings, f, indent=2, ensure_ascii=False)
 
 
 def _auto_create_mappings(project_dir):
@@ -225,7 +212,7 @@ def _auto_create_mappings(project_dir):
     cases = load_cases(project_dir)
     case_ids = {c.get("id", "").lower().replace("-", "_"): c.get("id", "") for c in cases}
 
-    mappings = _load_mappings(project_dir)
+    mappings = load_mappings(project_dir)
     existing = {(m["case_id"], m["script_name"]) for m in mappings}
 
     for f in scripts_dir.glob("*.py"):
@@ -240,4 +227,4 @@ def _auto_create_mappings(project_dir):
                     })
                     existing.add((original_id, f.name))
 
-    _save_mappings(project_dir, mappings)
+    save_mappings(project_dir, mappings)

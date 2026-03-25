@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, fields
 from pathlib import Path
 from typing import Any
 
@@ -86,11 +86,15 @@ class AnalysisResult:
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "AnalysisResult":
+        def _safe(klass, d):
+            valid = {f.name for f in fields(klass)}
+            return klass(**{k: v for k, v in d.items() if k in valid})
+
         return cls(
-            features=[Feature(**f) for f in data.get("features", [])],
-            screens=[Screen(**s) for s in data.get("screens", [])],
-            personas=[Persona(**p) for p in data.get("personas", [])],
-            rules=[BusinessRule(**r) for r in data.get("rules", [])],
+            features=[_safe(Feature, f) for f in data.get("features", [])],
+            screens=[_safe(Screen, s) for s in data.get("screens", [])],
+            personas=[_safe(Persona, p) for p in data.get("personas", [])],
+            rules=[_safe(BusinessRule, r) for r in data.get("rules", [])],
             raw_sources=data.get("raw_sources", []),
         )
 

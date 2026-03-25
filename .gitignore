@@ -41,3 +41,7 @@ evidence/
 TestForge Self-Test/
 *.testforge-project/
 testforge.yaml
+analysis/
+cases/
+inputs/
+output/

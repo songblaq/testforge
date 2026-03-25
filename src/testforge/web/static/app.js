@@ -235,6 +235,8 @@ function openDetailPanel(title, bodyHtml) {
   document.getElementById("detail-title").textContent = title;
   document.getElementById("detail-body").innerHTML = bodyHtml;
   panel.classList.add("open");
+  var closeBtn = document.getElementById("detail-close");
+  if (closeBtn) closeBtn.focus();
 }
 
 function closeDetailPanel() {
@@ -800,17 +802,24 @@ function resetAllTabs() {
 // ---------------------------------------------------------------------------
 function toggleDropdown() {
   var dd = document.getElementById("project-dropdown");
+  var isOpen;
   if (dd.style.display === "none") {
     dd.style.display = "";
     document.getElementById("project-search").value = "";
     document.getElementById("project-search").focus();
+    isOpen = true;
   } else {
     closeDropdown();
+    isOpen = false;
   }
+  var btn = document.getElementById("project-dropdown-btn");
+  if (btn) btn.setAttribute("aria-expanded", isOpen ? "true" : "false");
 }
 
 function closeDropdown() {
   document.getElementById("project-dropdown").style.display = "none";
+  var btn = document.getElementById("project-dropdown-btn");
+  if (btn) btn.setAttribute("aria-expanded", "false");
 }
 
 // Close dropdown when clicking outside
@@ -974,7 +983,7 @@ function getStageCount(stage) {
       return t("stepper.features", {n: stage.summary.features || 0});
     }
     if (stage.stage === "cases") {
-      return t("stepper.cases", {n: stage.summary.total || 0});
+      return t("stepper.cases_count", {n: stage.summary.total || 0});
     }
     if (stage.stage === "execution") {
       var total = stage.summary.total || 0;
@@ -1003,7 +1012,7 @@ function renderOverviewStats(data) {
       label = t("stepper.features", {n: ""}).replace(/\s*$/, "");
     } else if (stage.stage === "cases" && stage.summary) {
       value = String(stage.summary.total || 0);
-      label = t("stepper.cases", {n: ""}).replace(/\s*$/, "");
+      label = t("stepper.cases_count", {n: ""}).replace(/\s*$/, "");
     } else if (stage.stage === "scripts") {
       value = stage.count !== undefined ? String(stage.count) : "-";
       label = t("stepper.scripts", {n: ""}).replace(/\s*$/, "");
@@ -1205,7 +1214,11 @@ var _analysisData = null;
 
 function renderAnalysis(analysis) {
   _analysisData = analysis;
-  if (!analysis || (!analysis.features && !analysis.personas && !analysis.rules)) {
+  var isEmpty = !analysis ||
+    ((!analysis.features || analysis.features.length === 0) &&
+     (!analysis.personas || analysis.personas.length === 0) &&
+     (!analysis.rules || analysis.rules.length === 0));
+  if (isEmpty) {
     document.getElementById("analysis-empty").style.display = "";
     document.getElementById("analysis-content").style.display = "none";
     document.getElementById("analysis-next-cta").style.display = "none";
@@ -1494,6 +1507,17 @@ async function generateCases() {
   if (!currentProject) { toast(t("toast.select_project"), "error"); return; }
   var caseType = document.getElementById("case-type-select").value;
   var mode = document.getElementById("case-gen-mode") ? document.getElementById("case-gen-mode").value : "generate";
+  if (mode === "regenerate") {
+    var confirmed = await new Promise(function(resolve) {
+      showConfirmDialog(
+        t("crud.confirm_regenerate") || "Regenerate will replace existing cases. Continue?",
+        function() { resolve(true); },
+        function() { resolve(false); },
+        t("gen.regenerate") || "Regenerate"
+      );
+    });
+    if (!confirmed) return;
+  }
   var btn = document.getElementById("btn-generate");
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span> ' + esc(t("common.generating"));
@@ -1620,6 +1644,17 @@ async function loadScripts() {
 async function generateScripts() {
   if (!currentProject) { toast(t("toast.select_project"), "error"); return; }
   var mode = document.getElementById("script-gen-mode") ? document.getElementById("script-gen-mode").value : "generate";
+  if (mode === "regenerate") {
+    var confirmed = await new Promise(function(resolve) {
+      showConfirmDialog(
+        t("crud.confirm_regenerate") || "Regenerate will replace existing scripts. Continue?",
+        function() { resolve(true); },
+        function() { resolve(false); },
+        t("gen.regenerate") || "Regenerate"
+      );
+    });
+    if (!confirmed) return;
+  }
   var btn = document.getElementById("btn-gen-scripts");
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span> ' + esc(t("common.generating"));
@@ -2464,21 +2499,32 @@ async function saveCrudModal() {
 // Confirm Dialog
 // ---------------------------------------------------------------------------
 var _confirmCallback = null;
+var _confirmCancelCallback = null;
 
-function showConfirmDialog(message, callback) {
+function showConfirmDialog(message, onOk, onCancel, okLabel) {
   document.getElementById("confirm-message").textContent = message;
   document.getElementById("confirm-dialog").style.display = "flex";
-  _confirmCallback = callback;
+  _confirmCallback = onOk;
+  _confirmCancelCallback = onCancel || null;
   var okBtn = document.getElementById("confirm-ok");
+  okBtn.textContent = okLabel || t("crud.confirm_delete") || "Delete";
   okBtn.onclick = function() {
-    hideConfirmDialog();
-    if (_confirmCallback) _confirmCallback();
+    document.getElementById("confirm-dialog").style.display = "none";
+    var cb = _confirmCallback;
+    _confirmCallback = null;
+    _confirmCancelCallback = null;
+    if (cb) cb();
   };
 }
 
 function hideConfirmDialog() {
-  document.getElementById("confirm-dialog").style.display = "none";
+  var dlg = document.getElementById("confirm-dialog");
+  if (dlg.style.display !== "flex") return;
+  dlg.style.display = "none";
+  var cancelCb = _confirmCancelCallback;
   _confirmCallback = null;
+  _confirmCancelCallback = null;
+  if (cancelCb) cancelCb();
 }
 
 // ---------------------------------------------------------------------------

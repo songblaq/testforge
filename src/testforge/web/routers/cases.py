@@ -4,12 +4,13 @@ from __future__ import annotations
 
 import json
 import uuid
+from pathlib import PurePosixPath
 from typing import Any, Literal
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-from testforge.web.deps import resolve_project
+from testforge.web.deps import load_mappings, resolve_project, save_mappings
 
 router = APIRouter(prefix="/api/projects", tags=["cases"])
 
@@ -84,7 +85,7 @@ async def get_cases(project_path: str):
     p = resolve_project(project_path)
     cases = load_cases(p)
     if not cases:
-        raise HTTPException(status_code=404, detail="No test cases found")
+        return {"cases": [], "count": 0}
     return {"cases": cases, "count": len(cases)}
 
 
@@ -143,9 +144,9 @@ async def delete_case(project_path: str, case_id: str):
         raise HTTPException(status_code=404, detail=f"Case {case_id} not found")
 
     save_cases(p, cases)
-    mappings = _load_mappings(p)
+    mappings = load_mappings(p)
     filtered = [m for m in mappings if m.get("case_id") != case_id]
-    _save_mappings(p, filtered)
+    save_mappings(p, filtered)
     return {"deleted": case_id, "remaining": len(cases)}
 
 
@@ -153,7 +154,7 @@ async def delete_case(project_path: str, case_id: str):
 async def get_case_scripts(project_path: str, case_id: str):
     """Get scripts mapped to a specific case (authoritative mapping)."""
     p = resolve_project(project_path)
-    mappings = _load_mappings(p)
+    mappings = load_mappings(p)
 
     mapped_script_names = []
     for m in mappings:
@@ -163,24 +164,38 @@ async def get_case_scripts(project_path: str, case_id: str):
     scripts_dir = p / "scripts"
     matched = []
     if scripts_dir.exists():
+        scripts_dir_resolved = scripts_dir.resolve()
         for name in mapped_script_names:
-            f = scripts_dir / name
-            if f.exists():
-                content = f.read_text(errors="replace")
+            if not isinstance(name, str) or not name:
+                continue
+            safe_name = PurePosixPath(name).name
+            if safe_name != name or ".." in name:
+                continue
+            f = scripts_dir / safe_name
+            resolved = f.resolve()
+            if not resolved.is_relative_to(scripts_dir_resolved):
+                continue
+            if resolved.exists() and resolved.is_file():
+                content = resolved.read_text(errors="replace")
                 matched.append({
-                    "name": f.name,
-                    "size": f.stat().st_size,
+                    "name": resolved.name,
+                    "size": resolved.stat().st_size,
                     "lines": len(content.splitlines()),
                     "mapping_source": "authoritative",
                 })
 
         if not matched:
             for f in scripts_dir.glob("*.py"):
-                content = f.read_text(errors="replace")
+                resolved = f.resolve()
+                if not resolved.is_relative_to(scripts_dir_resolved):
+                    continue
+                if not resolved.is_file():
+                    continue
+                content = resolved.read_text(errors="replace")
                 if case_id.lower().replace("-", "_") in f.stem.lower() or case_id in content:
                     matched.append({
-                        "name": f.name,
-                        "size": f.stat().st_size,
+                        "name": resolved.name,
+                        "size": resolved.stat().st_size,
                         "lines": len(content.splitlines()),
                         "mapping_source": "heuristic",
                     })
@@ -211,26 +226,7 @@ async def bulk_delete_cases(project_path: str, body: BulkDeleteRequest):
     deleted_count = len(cases) - len(remaining)
 
     save_cases(p, remaining)
-    mappings = _load_mappings(p)
+    mappings = load_mappings(p)
     filtered = [m for m in mappings if m.get("case_id") not in id_set]
-    _save_mappings(p, filtered)
+    save_mappings(p, filtered)
     return {"deleted_count": deleted_count, "remaining": len(remaining)}
-
-
-# --- Mapping helpers ---
-
-def _load_mappings(project_dir):
-    """Load authoritative case↔script mappings."""
-    mapping_path = project_dir / ".testforge" / "mappings.json"
-    if not mapping_path.exists():
-        return []
-    with open(mapping_path) as f:
-        return json.load(f)
-
-
-def _save_mappings(project_dir, mappings):
-    """Save authoritative case↔script mappings."""
-    mapping_path = project_dir / ".testforge" / "mappings.json"
-    mapping_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(mapping_path, "w") as f:
-        json.dump(mappings, f, indent=2, ensure_ascii=False)

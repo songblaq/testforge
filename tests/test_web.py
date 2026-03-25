@@ -199,11 +199,11 @@ def test_get_cases(web_client, sample_project):
 
 
 def test_get_cases_empty(web_client, tmp_path):
-    """GET /api/projects/{path}/cases with no cases returns 404."""
+    """GET /api/projects/{path}/cases with no cases returns 200 and empty list."""
     project_dir = tmp_path / "no-cases"
     create_project(project_dir)
     resp = web_client.get(f"/api/projects/{project_dir}/cases")
-    assert resp.status_code == 404
+    assert resp.status_code == 200
 
 
 def test_update_cases(web_client, sample_project):
