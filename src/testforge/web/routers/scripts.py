@@ -82,7 +82,7 @@ async def get_script_content(project_path: str, script_name: str):
     script_path = p / "scripts" / script_name
 
     if ".." in script_name or "/" in script_name:
-        raise HTTPException(status_code=403, detail="Invalid script name")
+        raise HTTPException(status_code=400, detail="Invalid script name")
     if not script_path.exists():
         raise HTTPException(status_code=404, detail=f"Script {script_name} not found")
 
@@ -104,7 +104,7 @@ async def update_script(project_path: str, script_name: str, body: ScriptUpdate)
     script_path = p / "scripts" / script_name
 
     if ".." in script_name or "/" in script_name:
-        raise HTTPException(status_code=403, detail="Invalid script name")
+        raise HTTPException(status_code=400, detail="Invalid script name")
     if not script_path.exists():
         raise HTTPException(status_code=404, detail=f"Script {script_name} not found")
 
@@ -125,7 +125,7 @@ async def delete_script(project_path: str, script_name: str):
     script_path = p / "scripts" / script_name
 
     if ".." in script_name or "/" in script_name:
-        raise HTTPException(status_code=403, detail="Invalid script name")
+        raise HTTPException(status_code=400, detail="Invalid script name")
     if not script_path.exists():
         raise HTTPException(status_code=404, detail=f"Script {script_name} not found")
 

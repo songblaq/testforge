@@ -15,7 +15,7 @@ router = APIRouter(prefix="/api/projects", tags=["reports"])
 
 
 @router.post("/{project_path:path}/report")
-async def get_report(project_path: str, fmt: str = Query("markdown", description="markdown or html")):
+async def create_report(project_path: str, fmt: str = Query("markdown", description="markdown or html")):
     """Generate and return a test report, saving immutable copy."""
     from testforge.core.config import load_config
     from testforge.report.generator import generate_report
@@ -86,7 +86,7 @@ async def get_report_by_id(project_path: str, report_id: str):
     reports_dir = p / config.output_dir / "reports"
 
     if ".." in report_id or "/" in report_id:
-        raise HTTPException(status_code=403, detail="Invalid report_id")
+        raise HTTPException(status_code=400, detail="Invalid report_id")
 
     meta_path = reports_dir / f"report_{report_id}.meta.json"
     if not meta_path.exists():

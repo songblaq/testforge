@@ -1062,6 +1062,7 @@ async function loadInputs() {
     renderInputs(files);
   } catch (e) {
     renderInputs([]);
+    if (e.message && !e.message.includes("404")) toast(e.message, "error");
   }
 }
 
@@ -1207,6 +1208,7 @@ async function loadAnalysis() {
     document.getElementById("analysis-empty").style.display = "";
     document.getElementById("analysis-content").style.display = "none";
     document.getElementById("analysis-next-cta").style.display = "none";
+    if (e.message && !e.message.includes("404")) toast(e.message, "error");
   }
 }
 
@@ -1766,8 +1768,12 @@ async function runExecution() {
 var _renderedExecResults = [];
 
 function renderExecution(data) {
-  var summary = data.summary || {};
-  var results = data.results || [];
+  var run = data.run || data;
+  var summary = run.summary || {};
+  if (!summary.total && run.total != null) {
+    summary = { total: run.total, passed: run.passed || 0, failed: run.failed || 0 };
+  }
+  var results = run.results || [];
   _renderedExecResults = results;
 
   document.getElementById("execution-empty").style.display = "none";

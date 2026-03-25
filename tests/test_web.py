@@ -346,6 +346,246 @@ def test_manual_progress_no_session(web_client, tmp_path):
 
 
 # ---------------------------------------------------------------------------
+# Analysis CRUD
+# ---------------------------------------------------------------------------
+
+
+def test_add_feature(web_client, sample_project):
+    """POST /analysis/features adds a feature."""
+    resp = web_client.post(
+        f"/api/projects/{sample_project}/analysis/features",
+        json={"name": "New Feature", "description": "Test", "category": "test"},
+    )
+    assert resp.status_code == 200
+    assert resp.json()["feature"]["name"] == "New Feature"
+
+
+def test_add_feature_no_name(web_client, sample_project):
+    """POST /analysis/features without name returns 400."""
+    resp = web_client.post(
+        f"/api/projects/{sample_project}/analysis/features",
+        json={"description": "No name"},
+    )
+    assert resp.status_code == 400
+
+
+def test_update_feature(web_client, sample_project):
+    """PUT /analysis/features/{id} updates a feature."""
+    resp = web_client.put(
+        f"/api/projects/{sample_project}/analysis/features/F-001",
+        json={"name": "Updated Login"},
+    )
+    assert resp.status_code == 200
+    assert resp.json()["feature"]["name"] == "Updated Login"
+
+
+def test_delete_feature(web_client, sample_project):
+    """DELETE /analysis/features/{id} removes a feature."""
+    resp = web_client.delete(f"/api/projects/{sample_project}/analysis/features/F-001")
+    assert resp.status_code == 200
+
+
+def test_add_persona(web_client, sample_project):
+    """POST /analysis/personas adds a persona."""
+    resp = web_client.post(
+        f"/api/projects/{sample_project}/analysis/personas",
+        json={"name": "Tester", "description": "QA tester", "tech_level": "intermediate"},
+    )
+    assert resp.status_code == 200
+    assert resp.json()["persona"]["name"] == "Tester"
+
+
+def test_add_persona_no_name(web_client, sample_project):
+    """POST /analysis/personas without name returns 400."""
+    resp = web_client.post(
+        f"/api/projects/{sample_project}/analysis/personas",
+        json={"description": "No name"},
+    )
+    assert resp.status_code == 400
+
+
+def test_add_rule(web_client, sample_project):
+    """POST /analysis/rules adds a rule."""
+    resp = web_client.post(
+        f"/api/projects/{sample_project}/analysis/rules",
+        json={"name": "New Rule", "description": "Test rule"},
+    )
+    assert resp.status_code == 200
+    assert resp.json()["rule"]["name"] == "New Rule"
+
+
+def test_add_feature_lazy_init(web_client, tmp_path):
+    """POST /analysis/features works even without prior analysis."""
+    project_dir = tmp_path / "no-analysis"
+    create_project(project_dir)
+    resp = web_client.post(
+        f"/api/projects/{project_dir}/analysis/features",
+        json={"name": "First Feature", "description": "Created from scratch"},
+    )
+    assert resp.status_code == 200
+
+
+# ---------------------------------------------------------------------------
+# Cases CRUD
+# ---------------------------------------------------------------------------
+
+
+def test_create_case(web_client, sample_project):
+    """POST /cases/item creates a single case."""
+    resp = web_client.post(
+        f"/api/projects/{sample_project}/cases/item",
+        json={"title": "New Case", "description": "Test", "priority": "high", "case_type": "functional"},
+    )
+    assert resp.status_code == 200
+    case = resp.json()["case"]
+    assert case["title"] == "New Case"
+    assert case["id"].startswith("TC-")
+
+
+def test_update_case(web_client, sample_project):
+    """PUT /cases/item/{id} updates a case."""
+    resp = web_client.put(
+        f"/api/projects/{sample_project}/cases/item/TC-001",
+        json={"title": "Updated Case"},
+    )
+    assert resp.status_code == 200
+
+
+def test_delete_case(web_client, sample_project):
+    """DELETE /cases/item/{id} removes a case."""
+    resp = web_client.delete(f"/api/projects/{sample_project}/cases/item/TC-001")
+    assert resp.status_code == 200
+    # Verify count decreased
+    resp2 = web_client.get(f"/api/projects/{sample_project}/cases")
+    assert resp2.json()["count"] == 1
+
+
+def test_delete_case_not_found(web_client, sample_project):
+    """DELETE /cases/item/{id} with bad id returns 404."""
+    resp = web_client.delete(f"/api/projects/{sample_project}/cases/item/NONEXISTENT")
+    assert resp.status_code == 404
+
+
+def test_bulk_delete_cases(web_client, sample_project):
+    """POST /cases/bulk-delete removes multiple cases."""
+    resp = web_client.post(
+        f"/api/projects/{sample_project}/cases/bulk-delete",
+        json={"case_ids": ["TC-001", "TC-002"]},
+    )
+    assert resp.status_code == 200
+    assert resp.json()["deleted_count"] == 2
+
+
+def test_get_case_scripts(web_client, sample_project):
+    """GET /cases/{id}/scripts returns scripts for a case."""
+    resp = web_client.get(f"/api/projects/{sample_project}/cases/TC-001/scripts")
+    assert resp.status_code == 200
+    assert "scripts" in resp.json()
+
+
+# ---------------------------------------------------------------------------
+# Scripts & Mappings
+# ---------------------------------------------------------------------------
+
+
+def test_list_scripts_empty(web_client, sample_project):
+    """GET /scripts with no scripts returns empty list."""
+    resp = web_client.get(f"/api/projects/{sample_project}/scripts")
+    assert resp.status_code == 200
+    assert resp.json()["scripts"] == []
+
+
+def test_list_mappings_empty(web_client, sample_project):
+    """GET /mappings with no mappings returns empty list."""
+    resp = web_client.get(f"/api/projects/{sample_project}/mappings")
+    assert resp.status_code == 200
+    assert resp.json()["mappings"] == []
+
+
+def test_script_name_traversal(web_client, sample_project):
+    """GET /scripts/../../etc/passwd is rejected."""
+    resp = web_client.get(f"/api/projects/{sample_project}/scripts/..%2F..%2Fetc%2Fpasswd")
+    # Decoded/normalized path can match DELETE-only project route → 405, or 403/404 from scripts.
+    assert resp.status_code in (403, 404, 405)
+
+
+def test_script_delete_not_found(web_client, sample_project):
+    """DELETE /scripts/nonexistent.py returns 404."""
+    resp = web_client.delete(f"/api/projects/{sample_project}/scripts/nonexistent.py")
+    assert resp.status_code == 404
+
+
+# ---------------------------------------------------------------------------
+# Execution & Run History
+# ---------------------------------------------------------------------------
+
+
+def test_run_execution(web_client, sample_project):
+    """POST /run executes tests and returns results."""
+    web_client.post(f"/api/projects/{sample_project}/scripts", json={"no_llm": True})
+    try:
+        resp = web_client.post(
+            f"/api/projects/{sample_project}/run",
+            json={"tags": [], "parallel": 1},
+        )
+    except FileNotFoundError:
+        pytest.skip("python binary not available in test environment")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "run_id" in data["run"]
+
+
+def test_list_runs(web_client, sample_project):
+    """GET /runs returns run history."""
+    web_client.post(f"/api/projects/{sample_project}/scripts", json={"no_llm": True})
+    try:
+        web_client.post(f"/api/projects/{sample_project}/run", json={"tags": [], "parallel": 1})
+    except FileNotFoundError:
+        pytest.skip("python binary not available in test environment")
+    resp = web_client.get(f"/api/projects/{sample_project}/runs")
+    assert resp.status_code == 200
+    assert len(resp.json()["runs"]) >= 1
+
+
+def test_get_run_not_found(web_client, sample_project):
+    """GET /runs/{id} with bad id returns 404."""
+    resp = web_client.get(f"/api/projects/{sample_project}/runs/nonexistent-id")
+    assert resp.status_code == 404
+
+
+# ---------------------------------------------------------------------------
+# Report History
+# ---------------------------------------------------------------------------
+
+
+def test_list_reports(web_client, sample_project):
+    """GET /reports returns report history."""
+    # Generate a report first
+    web_client.post(f"/api/projects/{sample_project}/report?fmt=markdown")
+    resp = web_client.get(f"/api/projects/{sample_project}/reports")
+    assert resp.status_code == 200
+    reports = resp.json()["reports"]
+    assert len(reports) >= 1
+
+
+def test_get_report_by_id(web_client, sample_project):
+    """GET /reports/{id} returns a specific report."""
+    # Generate and get ID
+    gen = web_client.post(f"/api/projects/{sample_project}/report?fmt=markdown")
+    report_id = gen.json().get("report_id", "")
+    if not report_id:
+        pytest.skip("No report_id in response")
+    resp = web_client.get(f"/api/projects/{sample_project}/reports/{report_id}")
+    assert resp.status_code == 200
+
+
+def test_get_report_not_found(web_client, sample_project):
+    """GET /reports/{id} with bad id returns 404."""
+    resp = web_client.get(f"/api/projects/{sample_project}/reports/nonexistent")
+    assert resp.status_code == 404
+
+
+# ---------------------------------------------------------------------------
 # Static
 # ---------------------------------------------------------------------------
 

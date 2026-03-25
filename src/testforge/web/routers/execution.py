@@ -65,11 +65,7 @@ async def run_tests(project_path: str, body: RunRequest):
     with open(also_latest, "w") as f:
         json.dump(run_record, f, indent=2, ensure_ascii=False)
 
-    return {
-        "run_id": run_id,
-        "results": results,
-        "summary": {"total": len(results), "passed": passed, "failed": failed},
-    }
+    return {"run": run_record}
 
 
 @router.get("/{project_path:path}/runs")
@@ -125,7 +121,7 @@ async def get_run(project_path: str, run_id: str):
     output_dir = p / config.output_dir
 
     if ".." in run_id or "/" in run_id:
-        raise HTTPException(status_code=403, detail="Invalid run_id")
+        raise HTTPException(status_code=400, detail="Invalid run_id")
 
     run_file = output_dir / f"run_{run_id}.json"
     if not run_file.exists():

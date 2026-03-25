@@ -14,7 +14,7 @@
   </div>
   <div class="header-center">
     <div class="project-selector" id="project-selector">
-      <button type="button" class="project-dropdown-btn" id="project-dropdown-btn" aria-expanded="false" aria-haspopup="listbox">
+      <button type="button" class="project-dropdown-btn" id="project-dropdown-btn" aria-expanded="false" aria-haspopup="true">
         <span id="selected-project-name" data-i18n="project.select">Select project...</span>
         <span class="chevron">&#9660;</span>
       </button>
@@ -53,14 +53,14 @@
 
 <!-- Tab Bar (hidden when no project selected) -->
 <nav class="tab-bar" id="tab-bar" role="tablist" style="display:none;">
-  <button type="button" class="tab-btn active" role="tab" aria-selected="true" data-tab="overview" data-i18n="tab.overview">Overview</button>
-  <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="inputs" data-i18n="tab.inputs">Inputs</button>
-  <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="analysis" data-i18n="tab.analysis">Analysis</button>
-  <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="cases" data-i18n="tab.cases">Cases</button>
-  <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="scripts" data-i18n="tab.scripts">Scripts</button>
-  <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="execution" data-i18n="tab.execution">Execution</button>
-  <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="manual" data-i18n="tab.manual">Manual QA</button>
-  <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="report" data-i18n="tab.report">Report</button>
+  <button type="button" class="tab-btn active" role="tab" id="tab-btn-overview" aria-selected="true" aria-controls="tab-overview" data-tab="overview" data-i18n="tab.overview">Overview</button>
+  <button type="button" class="tab-btn" role="tab" id="tab-btn-inputs" aria-selected="false" aria-controls="tab-inputs" data-tab="inputs" data-i18n="tab.inputs">Inputs</button>
+  <button type="button" class="tab-btn" role="tab" id="tab-btn-analysis" aria-selected="false" aria-controls="tab-analysis" data-tab="analysis" data-i18n="tab.analysis">Analysis</button>
+  <button type="button" class="tab-btn" role="tab" id="tab-btn-cases" aria-selected="false" aria-controls="tab-cases" data-tab="cases" data-i18n="tab.cases">Cases</button>
+  <button type="button" class="tab-btn" role="tab" id="tab-btn-scripts" aria-selected="false" aria-controls="tab-scripts" data-tab="scripts" data-i18n="tab.scripts">Scripts</button>
+  <button type="button" class="tab-btn" role="tab" id="tab-btn-execution" aria-selected="false" aria-controls="tab-execution" data-tab="execution" data-i18n="tab.execution">Execution</button>
+  <button type="button" class="tab-btn" role="tab" id="tab-btn-manual" aria-selected="false" aria-controls="tab-manual" data-tab="manual" data-i18n="tab.manual">Manual QA</button>
+  <button type="button" class="tab-btn" role="tab" id="tab-btn-report" aria-selected="false" aria-controls="tab-report" data-tab="report" data-i18n="tab.report">Report</button>
 </nav>
 
 <main class="app-main">
@@ -83,7 +83,7 @@
   </section>
 
   <!-- OVERVIEW TAB -->
-  <section id="tab-overview" class="tab-panel">
+  <section id="tab-overview" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-overview">
     <div class="card">
       <div class="card-header">
         <h2 data-i18n="overview.title">Pipeline Overview</h2>
@@ -100,7 +100,7 @@
   </section>
 
   <!-- INPUTS TAB -->
-  <section id="tab-inputs" class="tab-panel">
+  <section id="tab-inputs" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-inputs">
     <div class="card">
       <div class="card-header">
         <h2 data-i18n="inputs.title">Input Documents</h2>
@@ -128,7 +128,7 @@
   </section>
 
   <!-- ANALYSIS TAB -->
-  <section id="tab-analysis" class="tab-panel">
+  <section id="tab-analysis" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-analysis">
     <div class="card">
       <div class="card-header">
         <h2 data-i18n="analysis.title">Analysis Results</h2>
@@ -165,7 +165,7 @@
   </section>
 
   <!-- CASES TAB -->
-  <section id="tab-cases" class="tab-panel">
+  <section id="tab-cases" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-cases">
     <div class="card">
       <div class="card-header">
         <h2 data-i18n="cases.title">Test Cases</h2>
@@ -219,7 +219,7 @@
   </section>
 
   <!-- SCRIPTS TAB -->
-  <section id="tab-scripts" class="tab-panel">
+  <section id="tab-scripts" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-scripts">
     <div class="card">
       <div class="card-header">
         <h2 data-i18n="scripts.title">Test Scripts</h2>
@@ -251,7 +251,7 @@
   </section>
 
   <!-- EXECUTION TAB -->
-  <section id="tab-execution" class="tab-panel">
+  <section id="tab-execution" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-execution">
     <div class="card">
       <div class="card-header">
         <h2 data-i18n="exec.title">Test Execution</h2>
@@ -289,7 +289,7 @@
   </section>
 
   <!-- MANUAL QA TAB -->
-  <section id="tab-manual" class="tab-panel">
+  <section id="tab-manual" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-manual">
     <div class="card">
       <div class="card-header">
         <h2 data-i18n="manual.title">Manual QA Checklist</h2>
@@ -318,7 +318,7 @@
   </section>
 
   <!-- REPORT TAB -->
-  <section id="tab-report" class="tab-panel">
+  <section id="tab-report" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-report">
     <div class="card">
       <div class="card-header">
         <h2 data-i18n="report.title">Test Report</h2>
@@ -372,7 +372,7 @@
 <!-- Create Project Modal -->
 <div class="modal-overlay" id="create-modal" style="display:none;">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="create-modal-title">
-    <div class="modal-header"><h2 id="create-modal-title" data-i18n="modal.title">New Project</h2><button class="modal-close" id="modal-close">&times;</button></div>
+    <div class="modal-header"><h2 id="create-modal-title" data-i18n="modal.title">New Project</h2><button class="modal-close" id="modal-close" aria-label="Close">&times;</button></div>
     <div class="form-group"><label for="new-project-name" data-i18n="modal.name">Project Name</label><input type="text" id="new-project-name" placeholder="my-project"></div>
     <div class="form-group"><label for="new-project-dir" data-i18n="modal.dir">Directory</label><input type="text" id="new-project-dir" placeholder="." value="."></div>
     <div class="form-group"><label for="new-project-provider" data-i18n="modal.provider">LLM Provider</label>
@@ -386,7 +386,7 @@
 <!-- CRUD Modal (shared) -->
 <div class="modal-overlay" id="crud-modal" style="display:none;">
   <div class="modal modal-lg" role="dialog" aria-modal="true" aria-labelledby="crud-modal-title">
-    <div class="modal-header"><h2 id="crud-modal-title">Edit</h2><button class="modal-close" id="crud-modal-close">&times;</button></div>
+    <div class="modal-header"><h2 id="crud-modal-title">Edit</h2><button class="modal-close" id="crud-modal-close" aria-label="Close">&times;</button></div>
     <div class="modal-body" id="crud-modal-body"></div>
     <div class="modal-footer">
       <button class="btn btn-secondary" id="crud-modal-cancel" data-i18n="modal.cancel">Cancel</button>
