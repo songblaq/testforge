@@ -100,6 +100,15 @@ function formatBytes(bytes) {
   return (bytes / Math.pow(1024, i)).toFixed(i === 0 ? 0 : 1) + " " + units[i];
 }
 
+function formatDuration(ms) {
+  if (ms == null) return "-";
+  if (ms < 1000) return ms + "ms";
+  if (ms < 60000) return (ms / 1000).toFixed(1) + "s";
+  var m = Math.floor(ms / 60000);
+  var s = Math.round((ms % 60000) / 1000);
+  return m + "m " + s + "s";
+}
+
 function simpleMarkdown(text) {
   if (!text) return "";
   var lines = text.split("\n");
@@ -403,13 +412,36 @@ function showScriptDetail(script) {
 // -- Execution tab detail --
 
 function showExecutionDetail(result) {
+  var rc = result.returncode !== undefined ? result.returncode : result.return_code;
+  var durMs = result.duration_ms != null ? result.duration_ms : result.duration;
   var html =
     detailField(t("detail.case_id"), esc(result.case_id || "")) +
     detailField(t("detail.status"), statusBadge(result.status || "unknown")) +
-    detailField(t("detail.duration"), result.duration_ms ? result.duration_ms + "ms" : "-") +
-    detailField(t("detail.output"), result.output ? '<pre>' + esc(result.output) + '</pre>' : "-") +
-    detailField(t("detail.stderr"), result.stderr ? '<pre>' + esc(result.stderr) + '</pre>' : "-") +
-    detailField(t("detail.returncode"), result.return_code !== undefined ? esc(String(result.return_code)) : "-");
+    detailField(t("detail.duration"), formatDuration(durMs)) +
+    detailField(t("detail.output"), result.output ? '<pre>' + esc(result.output) + '</pre>' : "-");
+  if (result.stderr) {
+    html += '<div class="stderr-box"><strong>' + esc(t("detail.stderr")) + ':</strong><pre>' + esc(result.stderr) + "</pre></div>";
+  } else {
+    html += detailField(t("detail.stderr"), "-");
+  }
+  var returncodeVal = "-";
+  if (rc !== undefined && rc !== null) {
+    returncodeVal = rc !== 0
+      ? '<span class="badge badge-danger">exit ' + esc(String(rc)) + "</span>"
+      : esc(String(rc));
+  }
+  html += detailField(t("detail.returncode"), returncodeVal);
+  if (result.script_name) {
+    html += detailField(
+      t("detail.filename"),
+      esc(result.script_name) +
+        ' <a href="#" class="goto-script" data-script="' +
+        esc(result.script_name) +
+        '">' +
+        esc(t("nav.goto_script")) +
+        "</a>"
+    );
+  }
   openDetailPanel(result.case_id || "Result", html);
 }
 
@@ -1455,6 +1487,13 @@ async function runAnalysis() {
 // ---------------------------------------------------------------------------
 // CASES TAB
 // ---------------------------------------------------------------------------
+function updateCasesExportVisibility() {
+  var exportBtn = document.getElementById("btn-export-cases");
+  if (exportBtn) {
+    exportBtn.style.display = allCases && allCases.length > 0 ? "" : "none";
+  }
+}
+
 async function loadCases() {
   if (!currentProject) return;
 
@@ -1464,6 +1503,7 @@ async function loadCases() {
     document.getElementById("cases-content").style.display = "none";
     document.getElementById("btn-generate").disabled = true;
     document.getElementById("cases-next-cta").style.display = "none";
+    updateCasesExportVisibility();
     return;
   }
 
@@ -1479,6 +1519,7 @@ async function loadCases() {
     document.getElementById("cases-empty").style.display = "";
     document.getElementById("cases-content").style.display = "none";
     document.getElementById("cases-next-cta").style.display = "none";
+    updateCasesExportVisibility();
   }
 }
 
@@ -1486,6 +1527,7 @@ var _renderedCases = [];
 
 function renderCases(cases) {
   _renderedCases = cases;
+  updateCasesExportVisibility();
   if (!cases.length) {
     document.getElementById("cases-empty").style.display = "";
     document.getElementById("cases-content").style.display = "none";
@@ -1895,8 +1937,41 @@ function renderExecution(data) {
 // ---------------------------------------------------------------------------
 // MANUAL QA TAB
 // ---------------------------------------------------------------------------
+async function loadManualSessions() {
+  if (!currentProject) return;
+  try {
+    var data = await api("GET", "/api/projects/" + encodePath(currentProject.path) + "/manual/sessions");
+    var sessions = data.sessions || [];
+    var container = document.getElementById("manual-sessions");
+    if (!container) return;
+    if (sessions.length === 0) {
+      container.style.display = "none";
+      return;
+    }
+    container.style.display = "";
+    container.innerHTML = "<h4>" + esc(t("manual.history")) + "</h4>" +
+      '<table class="data-table"><thead><tr>' +
+      "<th>" + esc(t("th.date")) + "</th>" +
+      "<th>" + esc(t("th.total")) + "</th>" +
+      "<th>" + esc(t("th.passed")) + "</th>" +
+      "<th>" + esc(t("th.failed")) + "</th>" +
+      "</tr></thead><tbody>" +
+      sessions.map(function(s) {
+        return "<tr><td>" + (s.started_at ? new Date(s.started_at).toLocaleDateString() : "-") + "</td>" +
+          "<td>" + esc(String(s.total)) + "</td>" +
+          '<td class="text-success">' + esc(String(s.passed)) + "</td>" +
+          '<td class="text-danger">' + esc(String(s.failed)) + "</td></tr>";
+      }).join("") +
+      "</tbody></table>";
+  } catch (e) {
+    // ignore
+  }
+}
+
 async function loadManual() {
   if (!currentProject) return;
+
+  await loadManualSessions();
 
   if (!currentProject.has_cases && !currentProject.has_analysis) {
     document.getElementById("manual-guard").style.display = "";
@@ -2244,6 +2319,14 @@ document.addEventListener("click", function(e) {
     return;
   }
 
+  var gotoScriptLink = e.target.closest("a.goto-script");
+  if (gotoScriptLink && gotoScriptLink.dataset.script) {
+    e.preventDefault();
+    closeDetailPanel();
+    navigateToScript(gotoScriptLink.dataset.script);
+    return;
+  }
+
   // Drill-down: goto case
   var gotoCase = e.target.closest("[data-action='goto-case']");
   if (gotoCase && gotoCase.dataset.caseId) {
@@ -2302,6 +2385,22 @@ document.addEventListener("click", function(e) {
   document.getElementById("project-dropdown-btn").addEventListener("click", toggleDropdown);
   document.getElementById("btn-analyze").addEventListener("click", runAnalysis);
   document.getElementById("btn-generate").addEventListener("click", generateCases);
+  document.getElementById("btn-export-cases")?.addEventListener("click", function() {
+    if (!allCases || allCases.length === 0) return;
+    var projectName = currentProject && currentProject.path ? currentProject.path.split("/").pop() : "testforge";
+    var date = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+    var filename = projectName + "_cases_" + date + ".json";
+    var blob = new Blob([JSON.stringify(allCases, null, 2)], { type: "application/json" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast(t("cases.export") + ": " + filename, "success");
+  });
   document.getElementById("btn-gen-scripts").addEventListener("click", generateScripts);
   document.getElementById("btn-run").addEventListener("click", runExecution);
   document.getElementById("btn-load-report").addEventListener("click", loadReport);

@@ -28,6 +28,8 @@ var translations = {
     "overview.quickstats": "Quick Stats",
     "overview.next": "Next Step",
     "overview.all_done": "All pipeline stages complete!",
+    "overview.last_run": "Last Run",
+    "overview.coverage": "Coverage",
 
     // LLM config panel
     "llm.config_title": "LLM Configuration",
@@ -103,6 +105,7 @@ var translations = {
     "cases.edge": "Edge",
     "cases.smoke": "Smoke",
     "cases.regression": "Regression",
+    "cases.export": "Export JSON",
 
     // Scripts tab
     "scripts.title": "Test Scripts",
@@ -125,6 +128,8 @@ var translations = {
     "exec.total": "Total",
     "exec.passed": "Passed",
     "exec.failed": "Failed",
+    "exec.run_again": "Run Again",
+    "exec.failed_only": "Failed Only",
 
     // Manual QA tab
     "manual.title": "Manual QA Checklist",
@@ -137,6 +142,7 @@ var translations = {
     "manual.pass": "Pass",
     "manual.fail": "Fail",
     "manual.note": "Notes...",
+    "manual.history": "Session History",
 
     // Report tab
     "report.title": "Test Report",
@@ -152,6 +158,7 @@ var translations = {
     "report.total_cases": "Total Cases",
     "report.pass_rate": "Pass Rate",
     "report.last_run": "Last Run",
+    "report.view": "View",
 
     // Guard CTA buttons
     "guard.goto_inputs": "Go to Inputs \u2192",
@@ -318,6 +325,7 @@ var translations = {
     "gen.new_version": "New Version",
     "gen.mode_title": "Generation Mode",
     "gen.mode_desc": "Choose how to handle existing data:",
+    "gen.overwrite_warning": "Current data will be overwritten",
 
     // Run history
     "exec.history": "Run History",
@@ -341,6 +349,11 @@ var translations = {
     "th.format": "Format",
     "th.mapping": "Mapping",
     "th.mapping_source": "Source",
+    "th.started": "Started",
+    "th.environment": "Environment",
+    "mapping.authoritative": "Authoritative",
+    "mapping.heuristic": "Heuristic",
+    "mapping.manual": "Manual",
 
     // Drill-down
     "nav.goto_script": "Go to Script →",
@@ -400,6 +413,8 @@ var translations = {
     "overview.quickstats": "\ube60\ub978 \ud1b5\uacc4",
     "overview.next": "\ub2e4\uc74c \ub2e8\uacc4",
     "overview.all_done": "\ubaa8\ub4e0 \ud30c\uc774\ud504\ub77c\uc778 \ub2e8\uacc4 \uc644\ub8cc!",
+    "overview.last_run": "\ub9c8\uc9c0\ub9c9 \uc2e4\ud589",
+    "overview.coverage": "\ucee4\ubc84\ub9ac\uc9c0",
 
     // LLM config panel
     "llm.config_title": "LLM \uc124\uc815",
@@ -475,6 +490,7 @@ var translations = {
     "cases.edge": "\uc5e3\uc9c0",
     "cases.smoke": "\uc2a4\ubaa8\ud06c",
     "cases.regression": "\ud68c\uadc0",
+    "cases.export": "JSON \ub0b4\ubcf4\ub0b4\uae30",
 
     // Scripts tab
     "scripts.title": "\ud14c\uc2a4\ud2b8 \uc2a4\ud06c\ub9bd\ud2b8",
@@ -497,6 +513,8 @@ var translations = {
     "exec.total": "\uc804\uccb4",
     "exec.passed": "\ud1b5\uacfc",
     "exec.failed": "\uc2e4\ud328",
+    "exec.run_again": "\ub2e4\uc2dc \uc2e4\ud589",
+    "exec.failed_only": "\uc2e4\ud328\ub9cc \ud45c\uc2dc",
 
     // Manual QA tab
     "manual.title": "\uc218\ub3d9 QA \uccb4\ud06c\ub9ac\uc2a4\ud2b8",
@@ -509,6 +527,7 @@ var translations = {
     "manual.pass": "\ud1b5\uacfc",
     "manual.fail": "\uc2e4\ud328",
     "manual.note": "\uba54\ubaa8 \ucd94\uac00...",
+    "manual.history": "\uc138\uc158 \uc774\ub825",
 
     // Report tab
     "report.title": "\ud14c\uc2a4\ud2b8 \ubcf4\uace0\uc11c",
@@ -524,6 +543,7 @@ var translations = {
     "report.total_cases": "\uc804\uccb4 \ucf00\uc774\uc2a4",
     "report.pass_rate": "\ud1b5\uacfc\uc728",
     "report.last_run": "\ub9c8\uc9c0\ub9c9 \uc2e4\ud589",
+    "report.view": "\ubcf4\uae30",
 
     // Guard CTA buttons
     "guard.goto_inputs": "\uc785\ub825 \ud0ed\uc73c\ub85c \uc774\ub3d9 \u2192",
@@ -690,6 +710,7 @@ var translations = {
     "gen.new_version": "\uc0c8 \ubc84\uc804 \uc0dd\uc131",
     "gen.mode_title": "\uc0dd\uc131 \ubaa8\ub4dc",
     "gen.mode_desc": "\uae30\uc874 \ub370\uc774\ud130 \ucc98\ub9ac \ubc29\ubc95\uc744 \uc120\ud0dd\ud558\uc138\uc694:",
+    "gen.overwrite_warning": "\uae30\uc874 \ub370\uc774\ud130\ub97c \ub36e\uc5b4\uc501\ub2c8\ub2e4",
 
     // \uc2e4\ud589 \uc774\ub825
     "exec.history": "\uc2e4\ud589 \uc774\ub825",
@@ -713,6 +734,11 @@ var translations = {
     "th.format": "\ud615\uc2dd",
     "th.mapping": "\ub9e4\ud551",
     "th.mapping_source": "\ucd9c\ucc98",
+    "th.started": "\uc2dc\uc791 \uc2dc\uac04",
+    "th.environment": "\ud658\uacbd",
+    "mapping.authoritative": "\uacf5\uc2dd",
+    "mapping.heuristic": "\uc790\ub3d9",
+    "mapping.manual": "\uc218\ub3d9",
 
     // \ub4dc\ub9b4\ub2e4\uc6b4
     "nav.goto_script": "\uc2a4\ud06c\ub9bd\ud2b8\ub85c \uc774\ub3d9 \u2192",
@@ -772,6 +798,8 @@ var translations = {
     "overview.quickstats": "Th\u1ED1ng k\u00EA nhanh",
     "overview.next": "B\u01B0\u1EDBc ti\u1EBFp theo",
     "overview.all_done": "T\u1EA5t c\u1EA3 giai \u0111o\u1EA1n \u0111\u00E3 ho\u00E0n th\u00E0nh!",
+    "overview.last_run": "L\u1EA7n ch\u1EA1y cu\u1ED1i",
+    "overview.coverage": "\u0110\u1ED9 bao ph\u1EE7",
 
     // LLM config panel
     "llm.config_title": "C\u1EA5u h\u00ECnh LLM",
@@ -847,6 +875,7 @@ var translations = {
     "cases.edge": "Bi\u00EAn",
     "cases.smoke": "Smoke",
     "cases.regression": "H\u1ED3i quy",
+    "cases.export": "Xu\u1EA5t JSON",
 
     // Scripts tab
     "scripts.title": "K\u1ECBch b\u1EA3n ki\u1EC3m th\u1EED",
@@ -869,6 +898,8 @@ var translations = {
     "exec.total": "T\u1ED5ng",
     "exec.passed": "\u0110\u1EA1t",
     "exec.failed": "Kh\u00F4ng \u0111\u1EA1t",
+    "exec.run_again": "Ch\u1EA1y l\u1EA1i",
+    "exec.failed_only": "Ch\u1EC9 hi\u1EC3n th\u1ECB th\u1EA5t b\u1EA1i",
 
     // Manual QA tab
     "manual.title": "Danh s\u00E1ch ki\u1EC3m tra QA th\u1EE7 c\u00F4ng",
@@ -881,6 +912,7 @@ var translations = {
     "manual.pass": "\u0110\u1EA1t",
     "manual.fail": "Kh\u00F4ng \u0111\u1EA1t",
     "manual.note": "Ghi ch\u00FA...",
+    "manual.history": "L\u1ECBch s\u1EED phi\u00EAn",
 
     // Report tab
     "report.title": "B\u00E1o c\u00E1o ki\u1EC3m th\u1EED",
@@ -896,6 +928,7 @@ var translations = {
     "report.total_cases": "T\u1ED5ng tr\u01B0\u1EDDng h\u1EE3p",
     "report.pass_rate": "T\u1EF7 l\u1EC7 \u0111\u1EA1t",
     "report.last_run": "L\u1EA7n ch\u1EA1y cu\u1ED1i",
+    "report.view": "Xem",
 
     // Guard CTA buttons
     "guard.goto_inputs": "\u0110i \u0111\u1EBFn T\u00E0i li\u1EC7u \u2192",
@@ -1061,6 +1094,7 @@ var translations = {
     "gen.new_version": "Phi\u00EAn b\u1EA3n m\u1EDBi",
     "gen.mode_title": "Ch\u1EBF \u0111\u1ED9 t\u1EA1o",
     "gen.mode_desc": "Ch\u1ECDn c\u00E1ch x\u1EED l\u00FD d\u1EEF li\u1EC7u hi\u1EC7n c\u00F3:",
+    "gen.overwrite_warning": "D\u1EEF li\u1EC7u hi\u1EC7n t\u1EA1i s\u1EBD b\u1ECB ghi \u0111\u00E8",
 
     "exec.history": "L\u1ECBch s\u1EED ch\u1EA1y",
     "exec.run_id": "ID l\u1EA7n ch\u1EA1y",
@@ -1081,6 +1115,11 @@ var translations = {
     "th.format": "\u0110\u1ECBnh d\u1EA1ng",
     "th.mapping": "\u00C1nh x\u1EA1",
     "th.mapping_source": "Ngu\u1ED3n",
+    "th.started": "B\u1EAFt \u0111\u1EA7u",
+    "th.environment": "M\u00F4i tr\u01B0\u1EDDng",
+    "mapping.authoritative": "Ch\u00EDnh th\u1EE9c",
+    "mapping.heuristic": "T\u1EF1 \u0111\u1ED9ng",
+    "mapping.manual": "Th\u1EE7 c\u00F4ng",
 
     "nav.goto_script": "\u0110i \u0111\u1EBFn k\u1ECBch b\u1EA3n \u2192",
     "nav.goto_case": "\u0110i \u0111\u1EBFn tr\u01B0\u1EDDng h\u1EE3p \u2192",

@@ -586,6 +586,216 @@ def test_get_report_not_found(web_client, sample_project):
 
 
 # ---------------------------------------------------------------------------
+# Config endpoints
+# ---------------------------------------------------------------------------
+
+
+def test_config_get(web_client, sample_project):
+    """GET /config returns LLM configuration."""
+    resp = web_client.get(f"/api/projects/{sample_project}/config")
+    assert resp.status_code == 200
+    cfg = resp.json()["config"]
+    assert "llm_provider" in cfg
+    assert "llm_model" in cfg
+
+
+def test_config_update(web_client, sample_project):
+    """PUT /config updates LLM provider."""
+    resp = web_client.put(
+        f"/api/projects/{sample_project}/config",
+        json={"llm_provider": "openai"},
+    )
+    assert resp.status_code == 200
+    assert resp.json()["config"]["llm_provider"] == "openai"
+
+
+def test_config_update_bad_provider(web_client, sample_project):
+    """PUT /config with invalid provider returns 400."""
+    resp = web_client.put(
+        f"/api/projects/{sample_project}/config",
+        json={"llm_provider": "invalid_provider"},
+    )
+    assert resp.status_code == 400
+
+
+def test_config_test_connection(web_client, sample_project):
+    """GET /config/test returns connection status."""
+    resp = web_client.get(f"/api/projects/{sample_project}/config/test")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "status" in data
+    assert "provider" in data
+
+
+# ---------------------------------------------------------------------------
+# Translate endpoints
+# ---------------------------------------------------------------------------
+
+
+def test_translate_stub_501(web_client, sample_project):
+    """POST /translate returns 501 (not implemented)."""
+    resp = web_client.post(
+        f"/api/projects/{sample_project}/translate",
+        json={"target_lang": "en", "entity_type": "cases"},
+    )
+    assert resp.status_code == 501
+
+
+def test_translate_status(web_client, sample_project):
+    """GET /translate/status returns translation status."""
+    resp = web_client.get(f"/api/projects/{sample_project}/translate/status")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "supported_languages" in data
+    assert "status" in data
+
+
+# ---------------------------------------------------------------------------
+# Mappings endpoints
+# ---------------------------------------------------------------------------
+
+
+def test_mappings_add(web_client, sample_project):
+    """POST /mappings adds a case-script mapping."""
+    resp = web_client.post(
+        f"/api/projects/{sample_project}/mappings",
+        json={"case_id": "TC-001", "script_name": "test_tc_001.py", "source": "manual"},
+    )
+    assert resp.status_code == 200
+
+
+def test_mappings_add_duplicate(web_client, sample_project):
+    """POST /mappings with duplicate returns 409."""
+    web_client.post(
+        f"/api/projects/{sample_project}/mappings",
+        json={"case_id": "TC-001", "script_name": "test_tc_001.py", "source": "manual"},
+    )
+    resp = web_client.post(
+        f"/api/projects/{sample_project}/mappings",
+        json={"case_id": "TC-001", "script_name": "test_tc_001.py", "source": "manual"},
+    )
+    assert resp.status_code == 409
+
+
+def test_mappings_delete(web_client, sample_project):
+    """DELETE /mappings removes a mapping."""
+    web_client.post(
+        f"/api/projects/{sample_project}/mappings",
+        json={"case_id": "TC-001", "script_name": "test_tc_001.py", "source": "manual"},
+    )
+    resp = web_client.delete(
+        f"/api/projects/{sample_project}/mappings?case_id=TC-001&script_name=test_tc_001.py",
+    )
+    assert resp.status_code == 200
+
+
+# ---------------------------------------------------------------------------
+# Edge case 404s
+# ---------------------------------------------------------------------------
+
+
+def test_report_by_id_not_found(web_client, sample_project):
+    """GET /reports/{bad_id} returns 404."""
+    resp = web_client.get(f"/api/projects/{sample_project}/reports/nonexistent-id")
+    assert resp.status_code == 404
+
+
+def test_case_update_not_found(web_client, sample_project):
+    """PUT /cases/item/{bad_id} returns 404."""
+    resp = web_client.put(
+        f"/api/projects/{sample_project}/cases/item/NONEXISTENT",
+        json={"title": "Updated"},
+    )
+    assert resp.status_code == 404
+
+
+def test_script_get_not_found(web_client, sample_project):
+    """GET /scripts/{bad_name} returns 404."""
+    resp = web_client.get(f"/api/projects/{sample_project}/scripts/nonexistent.py")
+    assert resp.status_code == 404
+
+
+# ---------------------------------------------------------------------------
+# Script CRUD
+# ---------------------------------------------------------------------------
+
+
+def test_script_update_content(web_client, sample_project):
+    """PUT /scripts/{name} updates script content."""
+    # First generate scripts
+    web_client.post(f"/api/projects/{sample_project}/scripts", json={"no_llm": True})
+    # Get script list
+    list_resp = web_client.get(f"/api/projects/{sample_project}/scripts")
+    scripts = list_resp.json().get("scripts", [])
+    if not scripts:
+        pytest.skip("No scripts generated")
+    name = scripts[0]["name"]
+    resp = web_client.put(
+        f"/api/projects/{sample_project}/scripts/{name}",
+        json={"content": "# updated content\nprint('hello')"},
+    )
+    assert resp.status_code == 200
+
+
+def test_script_delete(web_client, sample_project):
+    """DELETE /scripts/{name} removes a script."""
+    web_client.post(f"/api/projects/{sample_project}/scripts", json={"no_llm": True})
+    list_resp = web_client.get(f"/api/projects/{sample_project}/scripts")
+    scripts = list_resp.json().get("scripts", [])
+    if not scripts:
+        pytest.skip("No scripts generated")
+    name = scripts[0]["name"]
+    resp = web_client.delete(f"/api/projects/{sample_project}/scripts/{name}")
+    assert resp.status_code == 200
+
+
+# ---------------------------------------------------------------------------
+# Analysis entity CRUD
+# ---------------------------------------------------------------------------
+
+
+def test_analysis_add_feature_and_verify(web_client, sample_project):
+    """POST /analysis/features adds feature, then GET verifies."""
+    web_client.post(
+        f"/api/projects/{sample_project}/analysis/features",
+        json={"name": "Export", "description": "Export feature", "category": "util"},
+    )
+    resp = web_client.get(f"/api/projects/{sample_project}/analysis")
+    features = resp.json()["analysis"]["features"]
+    names = [f["name"] for f in features]
+    assert "Export" in names
+
+
+def test_analysis_delete_feature_and_verify(web_client, sample_project):
+    """DELETE /analysis/features/{id} removes feature, then GET verifies."""
+    resp = web_client.delete(f"/api/projects/{sample_project}/analysis/features/F-001")
+    assert resp.status_code == 200
+    resp2 = web_client.get(f"/api/projects/{sample_project}/analysis")
+    ids = [f["id"] for f in resp2.json()["analysis"]["features"]]
+    assert "F-001" not in ids
+
+
+def test_analysis_add_persona_and_verify(web_client, sample_project):
+    """POST /analysis/personas adds persona."""
+    resp = web_client.post(
+        f"/api/projects/{sample_project}/analysis/personas",
+        json={"name": "Developer", "description": "Dev user"},
+    )
+    assert resp.status_code == 200
+    assert resp.json()["persona"]["name"] == "Developer"
+
+
+def test_analysis_add_rule_and_verify(web_client, sample_project):
+    """POST /analysis/rules adds rule."""
+    resp = web_client.post(
+        f"/api/projects/{sample_project}/analysis/rules",
+        json={"name": "Input Validation", "description": "All inputs must be validated"},
+    )
+    assert resp.status_code == 200
+    assert resp.json()["rule"]["name"] == "Input Validation"
+
+
+# ---------------------------------------------------------------------------
 # Static
 # ---------------------------------------------------------------------------
 

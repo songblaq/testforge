@@ -116,6 +116,14 @@
       </div>
       <div id="overview-stats" class="stats-row"></div>
     </div>
+    <div id="overview-last-run" class="overview-card" style="display:none">
+      <h4 data-i18n="overview.last_run">Last Run</h4>
+      <div id="overview-run-summary"></div>
+    </div>
+    <div id="overview-coverage" class="overview-card" style="display:none">
+      <h4 data-i18n="overview.coverage">Coverage</h4>
+      <div id="overview-coverage-bars"></div>
+    </div>
     <div class="card" id="llm-config-card" style="display:none;">
       <div class="card-header">
         <h2 data-i18n="llm.config_title">LLM Configuration</h2>
@@ -235,6 +243,7 @@
             <option value="regenerate" data-i18n="gen.regenerate">Regenerate</option>
           </select>
           <button class="btn btn-primary" id="btn-generate" data-i18n="cases.generate">Generate Cases</button>
+          <button type="button" id="btn-export-cases" class="btn btn-secondary" style="display:none" data-i18n="cases.export">Export JSON</button>
         </div>
       </div>
       <div id="cases-guard" class="guard-message" style="display:none;">
@@ -357,6 +366,7 @@
         </div>
         <div id="manual-items"></div>
       </div>
+      <div id="manual-sessions" style="display:none; margin-top: 16px;"></div>
       <div class="tab-bottom-cta" id="manual-next-cta" style="display:none;"></div>
     </div>
   </section>

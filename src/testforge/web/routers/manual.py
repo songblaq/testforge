@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from typing import Literal
 
 from fastapi import APIRouter, HTTPException
@@ -84,3 +85,45 @@ async def finish_session(project_path: str):
         raise HTTPException(status_code=404, detail=str(exc))
 
     return {"report_path": str(report_path)}
+
+
+@router.get("/{project_path:path}/manual/sessions")
+async def list_sessions(project_path: str):
+    """List all completed manual QA sessions."""
+    p = resolve_project(project_path)
+    manual_dir = p / ".testforge" / "manual"
+    sessions = []
+    if manual_dir.exists():
+        for f in sorted(manual_dir.glob("*.json"), reverse=True):
+            if f.name == "active-session.json":
+                continue
+            try:
+                data = json.loads(f.read_text())
+                total = len(data.get("items", []))
+                results = data.get("results", {})
+                passed = sum(1 for r in results.values() if r.get("status") == "pass")
+                failed = sum(1 for r in results.values() if r.get("status") == "fail")
+                sessions.append(
+                    {
+                        "session_id": data.get("session_id", f.stem),
+                        "started_at": data.get("started_at", ""),
+                        "finished_at": data.get("finished_at", ""),
+                        "total": total,
+                        "passed": passed,
+                        "failed": failed,
+                    }
+                )
+            except Exception:
+                continue
+    return {"sessions": sessions}
+
+
+@router.get("/{project_path:path}/manual/sessions/{session_id}")
+async def get_session(project_path: str, session_id: str):
+    """Get a specific completed session."""
+    p = resolve_project(project_path)
+    session_path = p / ".testforge" / "manual" / f"{session_id}.json"
+    if not session_path.exists():
+        raise HTTPException(status_code=404, detail="Session not found")
+    data = json.loads(session_path.read_text())
+    return {"session": data}

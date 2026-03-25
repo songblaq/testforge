@@ -375,6 +375,7 @@ button.ctx-stat.ctx-clickable {
 
 .badge-green { background: rgba(0,184,148,0.15); color: var(--green); }
 .badge-red { background: rgba(225,112,85,0.15); color: var(--red); }
+.badge-danger { background: var(--danger-bg, rgba(239,68,68,0.15)); color: var(--danger, #ef4444); }
 .badge-yellow { background: rgba(253,203,110,0.15); color: var(--yellow); }
 .badge-blue { background: rgba(116,185,255,0.15); color: var(--blue); }
 .badge-dim { background: var(--surface2); color: var(--text-dim); }
@@ -1594,3 +1595,15 @@ select.gen-mode-selector {
 .llm-connected, .llm-configured { background: #d1fae5; color: #065f46; }
 .llm-warning { background: #fef3c7; color: #92400e; }
 .llm-error { background: #fee2e2; color: #991b1b; }
+
+.stderr-box { background: var(--danger-bg, #fee2e2); border-left: 3px solid var(--danger, #ef4444); padding: 12px; border-radius: 6px; margin: 8px 0; }
+.stderr-box pre { margin: 4px 0 0; white-space: pre-wrap; font-size: 0.85rem; color: var(--danger, #991b1b); }
+
+.overview-card { background: var(--surface); border-radius: 12px; padding: 16px 20px; margin-top: 12px; }
+.overview-card h4 { margin: 0 0 8px; font-size: 0.95rem; }
+.run-summary-mini { display: flex; align-items: center; gap: 12px; }
+.coverage-bar-row { display: flex; align-items: center; gap: 8px; margin: 6px 0; font-size: 0.85rem; }
+.coverage-bar-row span:first-child { min-width: 120px; }
+.coverage-bar-row .progress-bar { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; margin: 0; width: auto; }
+.coverage-bar-row .progress-fill { height: 100%; background: var(--primary); border-radius: 4px; transition: width 0.3s; }
+.text-muted { color: var(--text-dim); }
