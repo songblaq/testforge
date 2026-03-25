@@ -77,6 +77,47 @@ def parse(path: str) -> ParsedDocument:
             raw={"type": "markdown", "source": str(p), "text": text},
         )
 
+    # Code files — parsed via AST or regex
+    code_extensions = {".py", ".ts", ".tsx", ".js", ".jsx"}
+    if suffix in code_extensions:
+        from testforge.input.code import parse_javascript, parse_python
+
+        if suffix == ".py":
+            raw = parse_python(p)
+        else:
+            raw = parse_javascript(p)
+        return ParsedDocument(
+            source_type=raw["type"],
+            source_path=str(p),
+            source_format=suffix.lstrip("."),
+            text=raw.get("text", ""),
+            raw=raw,
+        )
+
+    # Plain text files
+    text_extensions = {
+        ".txt",
+        ".rst",
+        ".csv",
+        ".log",
+        ".json",
+        ".yaml",
+        ".yml",
+        ".toml",
+        ".cfg",
+        ".ini",
+        ".env",
+    }
+    if suffix in text_extensions:
+        text = p.read_text(encoding="utf-8", errors="replace")
+        return ParsedDocument(
+            source_type="text",
+            source_path=str(p),
+            source_format=suffix.lstrip("."),
+            text=text,
+            raw={"type": "text", "source": str(p), "text": text},
+        )
+
     parsers: dict[str, str] = {
         ".pdf": "testforge.input.pdf",
         ".pptx": "testforge.input.office",

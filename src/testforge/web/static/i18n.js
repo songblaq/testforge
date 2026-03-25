@@ -31,12 +31,14 @@ var translations = {
 
     // LLM config panel
     "llm.config_title": "LLM Configuration",
+    "llm.setup_title": "\u2699\ufe0f LLM Setup Required",
+    "llm.setup_desc": "TestForge requires an AI model to analyze documents and generate test cases. Configure your LLM provider below.",
     "llm.provider": "Provider",
     "llm.model": "Model",
     "llm.save": "Save",
     "llm.saved": "LLM configuration saved",
     "llm.test": "Test Connection",
-    "llm.testing": "Testing connection...",
+    "llm.testing": "Testing...",
 
     // Pipeline stepper
     "stepper.inputs": "Inputs",
@@ -401,12 +403,14 @@ var translations = {
 
     // LLM config panel
     "llm.config_title": "LLM \uc124\uc815",
+    "llm.setup_title": "\u2699\ufe0f LLM \uc124\uc815 \ud544\uc694",
+    "llm.setup_desc": "TestForge\ub294 \ubb38\uc11c \ubd84\uc11d\uacfc \ud14c\uc2a4\ud2b8 \ucf00\uc774\uc2a4 \uc0dd\uc131\uc744 \uc704\ud574 AI \ubaa8\ub378\uc774 \ud544\uc694\ud569\ub2c8\ub2e4. \uc544\ub798\uc5d0\uc11c LLM \uc81c\uacf5\uc790\ub97c \uc124\uc815\ud558\uc138\uc694.",
     "llm.provider": "\ud504\ub85c\ubc14\uc774\ub354",
     "llm.model": "\ubaa8\ub378",
     "llm.save": "\uc800\uc7a5",
     "llm.saved": "LLM \uc124\uc815\uc774 \uc800\uc7a5\ub418\uc5c8\uc2b5\ub2c8\ub2e4",
     "llm.test": "\uc5f0\uacb0 \ud14c\uc2a4\ud2b8",
-    "llm.testing": "\uc5f0\uacb0 \ud14c\uc2a4\ud2b8 \uc911...",
+    "llm.testing": "\ud14c\uc2a4\ud2b8 \uc911...",
 
     // Pipeline stepper
     "stepper.inputs": "\uc785\ub825",
@@ -771,6 +775,8 @@ var translations = {
 
     // LLM config panel
     "llm.config_title": "C\u1EA5u h\u00ECnh LLM",
+    "llm.setup_title": "\u2699\ufe0f C\u1EA7n c\u1EA5u h\u00ECnh LLM",
+    "llm.setup_desc": "TestForge c\u1EA7n m\u00F4 h\u00ECnh AI \u0111\u1EC3 ph\u00E2n t\u00EDch t\u00E0i li\u1EC7u v\u00E0 t\u1EA1o test case. C\u1EA5u h\u00ECnh nh\u00E0 cung c\u1EA5p LLM b\u00EAn d\u01B0\u1EDBi.",
     "llm.provider": "Nh\u00E0 cung c\u1EA5p",
     "llm.model": "M\u00F4 h\u00ECnh",
     "llm.save": "L\u01B0u",

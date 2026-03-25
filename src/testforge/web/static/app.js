@@ -881,15 +881,38 @@ window.addEventListener("hashchange", function() {
 async function loadOverview() {
   if (!currentProject) return;
 
+  var overviewData = null;
   try {
     var data = await api("GET", "/api/projects/" + encodePath(currentProject.path) + "/overview");
+    overviewData = data;
     _pipelineData = data;
     renderPipelineStepper(data);
     renderOverviewStats(data);
   } catch (e) {
     document.getElementById("pipeline-stepper").innerHTML = '<p style="color:var(--text-dim);text-align:center;">' + esc(e.message) + '</p>';
   }
-  loadLlmConfig();
+  await loadLlmConfig();
+  if (overviewData) await checkLLMSetup(overviewData);
+}
+
+async function checkLLMSetup(overview) {
+  if (!currentProject || !overview) return;
+  try {
+    var pipeline = overview.pipeline || [];
+    var analysisStage = null;
+    for (var i = 0; i < pipeline.length; i++) {
+      if (pipeline[i].stage === "analysis") {
+        analysisStage = pipeline[i];
+        break;
+      }
+    }
+    var ban = document.getElementById("llm-setup-banner");
+    if (ban) {
+      ban.style.display = (analysisStage && analysisStage.status === "empty") ? "" : "none";
+    }
+  } catch (e) {
+    /* ignore */
+  }
 }
 
 async function loadLlmConfig() {
@@ -904,6 +927,10 @@ async function loadLlmConfig() {
     var inp = document.getElementById("llm-model-input");
     if (sel) sel.value = cfg.llm_provider || "anthropic";
     if (inp) inp.value = cfg.llm_model || "";
+    var banProv = document.getElementById("llm-provider");
+    var banModel = document.getElementById("llm-model");
+    if (banProv) banProv.value = cfg.llm_provider || "anthropic";
+    if (banModel) banModel.value = cfg.llm_model || "";
   } catch (e) {
     /* ignore — card still visible for setting */
   }
@@ -918,6 +945,10 @@ async function saveLlmConfig() {
       llm_provider: provider,
       llm_model: model,
     });
+    var banProv = document.getElementById("llm-provider");
+    var banModel = document.getElementById("llm-model");
+    if (banProv) banProv.value = provider;
+    if (banModel) banModel.value = model;
     toast(t("llm.saved"), "success");
   } catch (e) {
     toast(e.message, "error");
@@ -2147,7 +2178,7 @@ function downloadReport() {
 function showCreateModal() {
   document.getElementById("create-modal").style.display = "flex";
   document.getElementById("new-project-name").value = "";
-  document.getElementById("new-project-model").value = "";
+  document.getElementById("create-model").value = "";
   document.getElementById("new-project-name").focus();
 }
 
@@ -2159,8 +2190,8 @@ async function createProject() {
   var name = document.getElementById("new-project-name").value.trim();
   if (!name) { toast(t("toast.name_required"), "error"); return; }
   var dir = document.getElementById("new-project-dir").value || ".";
-  var provider = document.getElementById("new-project-provider").value;
-  var model = document.getElementById("new-project-model").value.trim();
+  var provider = document.getElementById("create-provider").value;
+  var model = document.getElementById("create-model").value.trim();
 
   try {
     await api("POST", "/api/projects", { name: name, directory: dir, provider: provider, model: model });
@@ -2308,6 +2339,46 @@ document.addEventListener("click", function(e) {
   if (saveLlmBtn) saveLlmBtn.addEventListener("click", saveLlmConfig);
   var testLlmBtn = document.getElementById("btn-test-llm");
   if (testLlmBtn) testLlmBtn.addEventListener("click", testLlmConnection);
+
+  var llmTestBanner = document.getElementById("llm-test-btn");
+  if (llmTestBanner) {
+    llmTestBanner.addEventListener("click", async function() {
+      if (!currentProject) return;
+      var statusEl = document.getElementById("llm-status");
+      if (!statusEl) return;
+      statusEl.textContent = t("llm.testing") || "Testing...";
+      statusEl.className = "llm-status";
+      try {
+        var testData = await api("GET", "/api/projects/" + encodePath(currentProject.path) + "/config/test");
+        statusEl.textContent = testData.status + ": " + testData.message;
+        statusEl.className = "llm-status llm-" + testData.status;
+      } catch (err) {
+        statusEl.textContent = "Error: " + err.message;
+        statusEl.className = "llm-status llm-error";
+      }
+    });
+  }
+  var llmSaveBanner = document.getElementById("llm-save-btn");
+  if (llmSaveBanner) {
+    llmSaveBanner.addEventListener("click", async function() {
+      if (!currentProject) return;
+      var provider = document.getElementById("llm-provider").value;
+      var model = document.getElementById("llm-model").value;
+      try {
+        await api("PUT", "/api/projects/" + encodePath(currentProject.path) + "/config", {
+          llm_provider: provider,
+          llm_model: model,
+        });
+        var sel = document.getElementById("llm-provider-select");
+        var inp = document.getElementById("llm-model-input");
+        if (sel) sel.value = provider;
+        if (inp) inp.value = model;
+        toast(t("llm.saved") || "LLM configuration saved", "success");
+      } catch (err) {
+        toast(err.message, "error");
+      }
+    });
+  }
 
   // Tab switching
   document.querySelectorAll(".tab-btn").forEach(function(btn) {

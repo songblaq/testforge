@@ -90,6 +90,25 @@
       </div>
       <div id="pipeline-stepper" class="pipeline-stepper"></div>
       <div id="overview-next-cta" class="overview-next-cta" style="display:none;"></div>
+      <div id="llm-setup-banner" class="llm-setup-banner" style="display:none">
+        <h3 data-i18n="llm.setup_title">⚙️ LLM Setup Required</h3>
+        <p data-i18n="llm.setup_desc">TestForge requires an AI model to analyze documents and generate test cases. Configure your LLM provider below.</p>
+        <div class="llm-setup-form">
+          <label for="llm-provider">Provider</label>
+          <select id="llm-provider">
+            <option value="anthropic">Anthropic (Claude)</option>
+            <option value="openai">OpenAI (GPT)</option>
+            <option value="ollama">Ollama (Local, Free)</option>
+          </select>
+          <label for="llm-model">Model (optional)</label>
+          <input id="llm-model" type="text" placeholder="Leave empty for default">
+          <div class="llm-setup-actions">
+            <button type="button" id="llm-test-btn" class="btn btn-secondary" data-i18n="llm.test">Test Connection</button>
+            <button type="button" id="llm-save-btn" class="btn btn-primary" data-i18n="llm.save">Save</button>
+          </div>
+          <div id="llm-status" class="llm-status"></div>
+        </div>
+      </div>
     </div>
     <div class="card" id="overview-stats-card" style="display:none;">
       <div class="card-header">
@@ -399,11 +418,15 @@
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="create-modal-title">
     <div class="modal-header"><h2 id="create-modal-title" data-i18n="modal.title">New Project</h2><button class="modal-close" id="modal-close" aria-label="Close">&times;</button></div>
     <div class="form-group"><label for="new-project-name" data-i18n="modal.name">Project Name</label><input type="text" id="new-project-name" placeholder="my-project"></div>
-    <div class="form-group"><label for="new-project-dir" data-i18n="modal.dir">Directory</label><input type="text" id="new-project-dir" placeholder="." value="."></div>
-    <div class="form-group"><label for="new-project-provider" data-i18n="modal.provider">LLM Provider</label>
-      <select id="new-project-provider"><option value="anthropic">Anthropic</option><option value="openai">OpenAI</option><option value="ollama">Ollama</option><option value="cli">CLI</option></select>
+    <div class="form-group"><label for="create-provider" data-i18n="modal.provider">LLM Provider</label>
+      <select id="create-provider">
+        <option value="anthropic">Anthropic (Claude)</option>
+        <option value="openai">OpenAI (GPT)</option>
+        <option value="ollama">Ollama (Local, Free)</option>
+      </select>
     </div>
-    <div class="form-group"><label for="new-project-model" data-i18n="modal.model">Model (optional)</label><input type="text" id="new-project-model" placeholder="default"></div>
+    <div class="form-group"><label for="create-model" data-i18n="modal.model">Model (optional)</label><input type="text" id="create-model" placeholder="Default model"></div>
+    <div class="form-group"><label for="new-project-dir" data-i18n="modal.dir">Directory</label><input type="text" id="new-project-dir" placeholder="." value="."></div>
     <div class="modal-footer"><button class="btn btn-secondary" id="modal-cancel" data-i18n="modal.cancel">Cancel</button><button class="btn btn-primary" id="modal-create" data-i18n="modal.create">Create</button></div>
   </div>
 </div>

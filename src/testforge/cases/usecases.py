@@ -37,7 +37,13 @@ class UseCaseScenario:
     tags: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
+        d = asdict(self)
+        # Normalized steps for script generator compatibility
+        d["steps"] = [
+            {"order": i + 1, "action": step, "expected_result": "", "input_data": ""}
+            for i, step in enumerate(self.scenario_steps)
+        ]
+        return d
 
 
 def generate_usecase_tests(project_dir: Path, no_llm: bool = False) -> list[dict[str, Any]]:
@@ -221,6 +227,15 @@ def _generate_crud_usecases(analysis: Any) -> list[dict[str, Any]]:
                 "persona_name": analysis.personas[0].name if analysis.personas else "Default User",
                 "preconditions": [f"{feature.name} has existing data"],
                 "scenario_steps": [s.format(feature=feature.name) for s in pattern["steps"]],
+                "steps": [
+                    {
+                        "order": i + 1,
+                        "action": s.format(feature=feature.name),
+                        "expected_result": "",
+                        "input_data": "",
+                    }
+                    for i, s in enumerate(pattern["steps"])
+                ],
                 "expected_outcome": pattern["expected"],
                 "features_covered": [feature.id],
                 "priority": "high",

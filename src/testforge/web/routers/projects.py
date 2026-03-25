@@ -201,7 +201,7 @@ async def update_project_config(project_path: str, body: ConfigUpdate):
     p = _resolve_project(project_path)
     config = load_config(p)
 
-    SUPPORTED_PROVIDERS = ("anthropic", "openai", "ollama", "google")
+    SUPPORTED_PROVIDERS = ("anthropic", "openai", "ollama", "google", "agent")
     if body.llm_provider is not None:
         if body.llm_provider not in SUPPORTED_PROVIDERS:
             raise HTTPException(
@@ -263,6 +263,18 @@ async def test_llm_connection(project_path: str):
             else:
                 status = "configured"
                 message = f"OpenAI API key found — model: {model or 'gpt-4o'}"
+        elif provider == "agent":
+            from testforge.llm.agent import detect_agent_runtime
+
+            runtime = detect_agent_runtime()
+            if runtime:
+                status = "connected"
+                message = f"Agent runtime detected: {runtime}"
+            else:
+                status = "warning"
+                message = (
+                    "No agent runtime detected. Run TestForge inside Cursor, Claude Code, etc."
+                )
         else:
             status = "unknown"
             message = f"Provider '{provider}' — manual check required"

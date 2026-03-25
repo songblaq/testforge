@@ -6,6 +6,8 @@ import logging
 from pathlib import Path
 from typing import Any
 
+from testforge.scripts.playwright import PLAYWRIGHT_CONFTEST_PY
+
 logger = logging.getLogger(__name__)
 
 
@@ -49,6 +51,11 @@ def generate_scripts(
                 out_path = scripts_dir / filename
                 out_path.write_text(source, encoding="utf-8")
                 logger.info("Wrote script: %s", out_path)
+
+        conftest_path = scripts_dir / "conftest.py"
+        if not conftest_path.exists():
+            conftest_path.write_text(PLAYWRIGHT_CONFTEST_PY, encoding="utf-8")
+            logger.info("Wrote conftest: %s", conftest_path)
 
     return scripts
 

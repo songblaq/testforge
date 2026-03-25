@@ -193,7 +193,17 @@ class ChecklistItem:
     priority: str = "medium"
 
     def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
+        d = asdict(self)
+        d["steps"] = [
+            {
+                "order": i + 1,
+                "action": step,
+                "expected_result": self.pass_criteria,
+                "input_data": "",
+            }
+            for i, step in enumerate(self.check_steps)
+        ]
+        return d
 
 
 def generate_checklist(project_dir: Path, no_llm: bool = False) -> list[dict[str, Any]]:

@@ -159,6 +159,35 @@ def _build_combined_text(parsed_docs: list[Any]) -> str:
     return "\n\n".join(parts)
 
 
+def _analyze_images(adapter: Any, image_docs: list[Any]) -> dict[str, Any]:
+    """Analyze images using vision model to extract UI features and screens."""
+    from testforge.input.parser import ParsedDocument
+
+    images: list[dict[str, str]] = []
+    for doc in image_docs:
+        if isinstance(doc, ParsedDocument) and doc.raw:
+            raw = doc.raw
+            b64 = raw.get("base64") or raw.get("data")
+            if b64:
+                images.append({
+                    "base64": b64 if isinstance(b64, str) else str(b64),
+                    "media_type": raw.get("media_type", "image/png"),
+                })
+
+    if not images:
+        return {"features": [], "screens": []}
+
+    prompt = """Analyze these UI screenshots/mockups. Extract:
+1. "features": UI features visible (name, description, priority)
+2. "screens": screens/pages shown (name, description, url_pattern guess, elements list)
+
+For elements, include: name, type (button/input/link/text/image/nav/form), description.
+Return JSON object with "features" and "screens" arrays."""
+
+    response = adapter.complete_with_images(prompt, images, max_tokens=4096)
+    return parse_llm_json(response.text, expected_type="object")
+
+
 def _llm_analysis(
     adapter: Any,
     combined_text: str,
@@ -226,6 +255,40 @@ def _llm_analysis(
         )
         for i, r in enumerate(data.get("rules", []))
     ]
+
+    # Analyze images with vision if available
+    image_docs = [
+        d for d in parsed_docs
+        if isinstance(d, ParsedDocument) and d.source_type == "image"
+    ]
+    if image_docs and hasattr(adapter, "complete_with_images"):
+        try:
+            image_features = _analyze_images(adapter, image_docs)
+            for f in image_features.get("features", []):
+                features.append(
+                    Feature(
+                        id=f"F-{len(features) + 1:03d}",
+                        name=f.get("name", "UI Element"),
+                        description=f.get("description", ""),
+                        category="ui",
+                        priority=f.get("priority", "medium"),
+                        tags=["vision", "ui"],
+                        source="image-analysis",
+                    )
+                )
+            for s in image_features.get("screens", []):
+                screens.append(
+                    Screen(
+                        id=f"S-{len(screens) + 1:03d}",
+                        name=s.get("name", "Screen"),
+                        description=s.get("description", ""),
+                        url_pattern=s.get("url_pattern", ""),
+                        features=s.get("features", []),
+                        elements=s.get("elements", []),
+                    )
+                )
+        except Exception as exc:
+            logger.warning("Image analysis failed: %s", exc)
 
     return AnalysisResult(
         features=features,

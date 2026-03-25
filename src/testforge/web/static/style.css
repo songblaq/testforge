@@ -1570,3 +1570,27 @@ select.gen-mode-selector {
 .gen-mode-option.selected { border-color: var(--accent); background: rgba(0,122,255,0.08); }
 .gen-mode-option .mode-title { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
 .gen-mode-option .mode-desc { font-size: 12px; color: var(--text-dim); }
+
+/* LLM setup wizard (Overview banner) */
+.llm-setup-banner {
+  background: var(--surface, #f8f9fa);
+  border: 2px dashed var(--primary, #4f46e5);
+  border-radius: 12px;
+  padding: 24px;
+  margin: 16px 0;
+}
+.llm-setup-banner h3 { margin: 0 0 8px; }
+.llm-setup-banner p { color: var(--text-secondary, #6b7280); margin: 0 0 16px; }
+.llm-setup-form { display: flex; flex-direction: column; gap: 8px; max-width: 400px; }
+.llm-setup-form select, .llm-setup-form input {
+  padding: 8px 12px;
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+}
+.llm-setup-actions { display: flex; gap: 8px; margin-top: 8px; }
+.llm-status { margin-top: 8px; padding: 8px; border-radius: 6px; font-size: 0.875rem; }
+.llm-connected, .llm-configured { background: #d1fae5; color: #065f46; }
+.llm-warning { background: #fef3c7; color: #92400e; }
+.llm-error { background: #fee2e2; color: #991b1b; }

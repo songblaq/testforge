@@ -16,6 +16,21 @@ from testforge.llm.utils import parse_llm_json
 logger = logging.getLogger(__name__)
 
 
+def _case_steps(case: dict[str, Any]) -> list[dict[str, Any]]:
+    """Resolve steps for a case, including legacy scenario_steps / check_steps."""
+    steps = case.get("steps", [])
+    if not steps:
+        for alt_key in ("scenario_steps", "check_steps"):
+            alt = case.get(alt_key, [])
+            if alt:
+                steps = [
+                    {"order": i + 1, "action": s, "expected_result": "", "input_data": ""}
+                    for i, s in enumerate(alt)
+                ]
+                break
+    return steps
+
+
 def generate_playwright_scripts(project_dir: Path, no_llm: bool = False) -> list[dict[str, Any]]:
     """Generate Playwright test scripts from test cases.
 
@@ -70,7 +85,7 @@ def _llm_generate_scripts(
     for case in cases:
         case_id = case.get("id", "TC-UNKNOWN")
         title = case.get("title", "Untitled")
-        steps = case.get("steps", [])
+        steps = _case_steps(case)
 
         steps_text = "\n".join(
             f"  {s.get('order', i+1)}. Action: {s.get('action', '')} "
@@ -155,7 +170,7 @@ def _skeleton_script(case: dict[str, Any], base_url: str) -> str:
     title = case.get("title", "Untitled")
     description = case.get("description", "")
     preconditions = case.get("preconditions", [])
-    steps = case.get("steps", [])
+    steps = _case_steps(case)
     expected_result = case.get("expected_result", "")
 
     func_name = f"test_{_sanitize_id(case_id)}"
@@ -214,7 +229,48 @@ def _skeleton_script(case: dict[str, Any], base_url: str) -> str:
     lines.append(f'    page.screenshot(path="evidence/{_sanitize_id(case_id)}.png")')
     lines.append("")
 
+    # Main block for direct execution (pytest collects test_* without this)
+    lines.append("")
+    lines.append("")
+    lines.append('if __name__ == "__main__":')
+    lines.append("    from playwright.sync_api import sync_playwright")
+    lines.append("    with sync_playwright() as pw:")
+    lines.append('        browser = pw.chromium.launch(headless=True)')
+    lines.append("        page = browser.new_page()")
+    lines.append("        try:")
+    lines.append(f"            {func_name}(page)")
+    lines.append('            print("PASSED")')
+    lines.append("        except Exception as e:")
+    lines.append('            print(f"FAILED: {e}")')
+    lines.append("            raise")
+    lines.append("        finally:")
+    lines.append("            browser.close()")
+
     return "\n".join(lines)
+
+
+# Written alongside generated scripts by generator.generate_scripts (if missing).
+PLAYWRIGHT_CONFTEST_PY = '''"""Shared Playwright fixtures for TestForge generated tests."""
+import pytest
+from playwright.sync_api import sync_playwright
+
+
+@pytest.fixture(scope="session")
+def browser():
+    """Launch browser once per test session."""
+    with sync_playwright() as pw:
+        browser = pw.chromium.launch(headless=True)
+        yield browser
+        browser.close()
+
+
+@pytest.fixture
+def page(browser):
+    """Create a new page for each test."""
+    page = browser.new_page()
+    yield page
+    page.close()
+'''
 
 
 def _sanitize_id(case_id: str) -> str:
