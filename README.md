@@ -35,10 +35,10 @@ manual QA checklist workflow for scenarios that require a human eye.
 - **Multi-format input** — PDF, PowerPoint, Word, Excel, images, URLs, GitHub repositories
 - **LLM-powered analysis** — automatic feature extraction, persona derivation, business-rule identification
 - **Smart test generation** — functional tests, use-case scenarios, manual checklists
-- **Script generation** — Playwright browser tests (LLM-powered with skeleton fallback), HTTP API scripts, shell scripts
+- **Script generation**: Playwright browser tests (LLM-powered with skeleton fallback). More frameworks planned.
 - **Dual-track QA** — automated execution track + structured manual-checklist track
-- **Flexible execution** — Browser (Playwright), HTTP, Shell, and SSH connectors
-- **Evidence collection** — screenshots, logs, network HAR traces per test run
+- **Flexible execution** — Browser-based testing via Playwright (HTTP, Shell, SSH connectors planned)
+- **Evidence collection** — screenshots and logs per test run (HAR traces planned)
 - **Rich reports** — Markdown and HTML reports with evidence attachments
 - **TUI interface** — full interactive terminal UI built with Textual
 - **Multi-project management** — `testforge projects` lists all local projects
@@ -234,7 +234,7 @@ See [docs/configuration.md](docs/configuration.md) for the full schema and globa
 | Anthropic Claude | `testforge[anthropic]` | `ANTHROPIC_API_KEY` |
 | OpenAI GPT | `testforge[openai]` | `OPENAI_API_KEY` |
 | CLI tools (claude, codex) | _(none)_ | _(CLI must be in PATH)_ |
-| Ollama (local) | _(none)_ | Configure `llm_model` in config — **Coming in v0.2** |
+| Ollama (local) | _(none)_ | Configure `llm_model` in config |
 
 ## Connectors
 

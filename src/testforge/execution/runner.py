@@ -262,6 +262,14 @@ def run_tests(
     if not scripts_dir.exists():
         return []
 
+    conftest = scripts_dir / "conftest.py"
+    if not conftest.exists():
+        try:
+            from testforge.scripts.playwright import PLAYWRIGHT_CONFTEST_PY
+            conftest.write_text(PLAYWRIGHT_CONFTEST_PY, encoding="utf-8")
+        except ImportError:
+            pass
+
     scripts = sorted(
         p for p in scripts_dir.glob("*.py") if p.name != "conftest.py"
     )

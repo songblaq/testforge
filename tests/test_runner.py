@@ -10,7 +10,7 @@ from testforge.execution.runner import run_tests
 def test_run_tests_with_relative_project_path(tmp_project: Path, monkeypatch) -> None:
     """run_tests resolves relative project paths before invoking scripts."""
     script_path = tmp_project / "scripts" / "test_ok.py"
-    script_path.write_text("print('ok')\n", encoding="utf-8")
+    script_path.write_text("def test_ok():\n    print('ok')\n    assert True\n", encoding="utf-8")
 
     monkeypatch.chdir(tmp_project.parent)
     results = run_tests(Path(tmp_project.name))

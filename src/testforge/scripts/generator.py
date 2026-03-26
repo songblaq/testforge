@@ -30,6 +30,13 @@ def generate_scripts(
     list[dict]:
         Generated script metadata.
     """
+    scripts_dir = project_dir / "scripts"
+    scripts_dir.mkdir(parents=True, exist_ok=True)
+    conftest_path = scripts_dir / "conftest.py"
+    if not conftest_path.exists():
+        conftest_path.write_text(PLAYWRIGHT_CONFTEST_PY, encoding="utf-8")
+        logger.info("Wrote conftest (early): %s", conftest_path)
+
     generators = {
         "playwright": _generate_playwright,
     }

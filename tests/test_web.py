@@ -796,6 +796,99 @@ def test_analysis_add_rule_and_verify(web_client, sample_project):
 
 
 # ---------------------------------------------------------------------------
+# Persona/Rule update/delete (Phase 2A)
+# ---------------------------------------------------------------------------
+
+
+def test_update_persona(web_client, sample_project):
+    r = web_client.put(f"/api/projects/{sample_project}/analysis/personas/P-001",
+                       json={"name": "Updated Admin", "tech_level": "beginner"})
+    assert r.status_code == 200
+    assert r.json()["persona"]["name"] == "Updated Admin"
+
+
+def test_delete_persona(web_client, sample_project):
+    r = web_client.delete(f"/api/projects/{sample_project}/analysis/personas/P-001")
+    assert r.status_code == 200
+
+
+def test_update_rule(web_client, sample_project):
+    r = web_client.put(f"/api/projects/{sample_project}/analysis/rules/R-001",
+                       json={"name": "Updated Rule", "condition": "x > 10"})
+    assert r.status_code == 200
+
+
+def test_delete_rule(web_client, sample_project):
+    r = web_client.delete(f"/api/projects/{sample_project}/analysis/rules/R-001")
+    assert r.status_code == 200
+
+
+def test_delete_persona_not_found(web_client, sample_project):
+    r = web_client.delete(f"/api/projects/{sample_project}/analysis/personas/NOPE")
+    assert r.status_code == 404
+
+
+def test_delete_rule_not_found(web_client, sample_project):
+    r = web_client.delete(f"/api/projects/{sample_project}/analysis/rules/NOPE")
+    assert r.status_code == 404
+
+
+# ---------------------------------------------------------------------------
+# File upload (Phase 2B)
+# ---------------------------------------------------------------------------
+
+
+def test_file_upload(web_client, sample_project):
+    """Test multipart file upload via GUI."""
+    r = web_client.post(
+        f"/api/projects/{sample_project}/inputs",
+        files={"file": ("test-doc.md", b"# Test Document\nSome content.", "text/markdown")},
+    )
+    assert r.status_code == 200
+    r2 = web_client.get(f"/api/projects/{sample_project}/inputs")
+    data = r2.json()
+    files_list = data.get("files", data.get("inputs", []))
+    names = [i["name"] for i in files_list]
+    assert "test-doc.md" in names
+
+
+def test_file_upload_duplicate(web_client, sample_project):
+    """Upload same filename twice should overwrite or error gracefully."""
+    web_client.post(f"/api/projects/{sample_project}/inputs",
+                    files={"file": ("dup.md", b"# First", "text/markdown")})
+    r = web_client.post(f"/api/projects/{sample_project}/inputs",
+                        files={"file": ("dup.md", b"# Second", "text/markdown")})
+    assert r.status_code in (200, 409)
+
+
+# ---------------------------------------------------------------------------
+# Tag filtering + parallel execution (Phase 2C)
+# ---------------------------------------------------------------------------
+
+
+def test_run_with_tags(web_client, sample_project):
+    """Run only scripts matching tag filter."""
+    web_client.post(f"/api/projects/{sample_project}/scripts", json={"no_llm": True})
+    try:
+        r = web_client.post(f"/api/projects/{sample_project}/run",
+                            json={"tags": ["nonexistent_tag"], "parallel": 1})
+    except FileNotFoundError:
+        pytest.skip("python binary not found")
+    assert r.status_code == 200
+
+
+def test_run_parallel(web_client, sample_project):
+    """Run with parallel > 1 doesn't crash."""
+    web_client.post(f"/api/projects/{sample_project}/scripts", json={"no_llm": True})
+    try:
+        r = web_client.post(f"/api/projects/{sample_project}/run",
+                            json={"parallel": 2})
+    except FileNotFoundError:
+        pytest.skip("python binary not found")
+    assert r.status_code == 200
+
+
+# ---------------------------------------------------------------------------
 # Static
 # ---------------------------------------------------------------------------
 

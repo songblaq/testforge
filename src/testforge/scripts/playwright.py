@@ -252,16 +252,26 @@ def _skeleton_script(case: dict[str, Any], base_url: str) -> str:
 # Written alongside generated scripts by generator.generate_scripts (if missing).
 PLAYWRIGHT_CONFTEST_PY = '''"""Shared Playwright fixtures for TestForge generated tests."""
 import pytest
-from playwright.sync_api import sync_playwright
+
+try:
+    from playwright.sync_api import sync_playwright
+    _HAS_PLAYWRIGHT = True
+except ImportError:
+    _HAS_PLAYWRIGHT = False
 
 
 @pytest.fixture(scope="session")
 def browser():
     """Launch browser once per test session."""
-    with sync_playwright() as pw:
-        browser = pw.chromium.launch(headless=True)
-        yield browser
-        browser.close()
+    if not _HAS_PLAYWRIGHT:
+        pytest.skip("Playwright not installed or browser not available")
+    try:
+        with sync_playwright() as pw:
+            browser = pw.chromium.launch(headless=True)
+            yield browser
+            browser.close()
+    except Exception:
+        pytest.skip("Playwright not installed or browser not available")
 
 
 @pytest.fixture

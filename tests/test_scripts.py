@@ -363,11 +363,10 @@ class TestGenerateScriptsWritesFiles:
             assert result.valid, f"Invalid script: {result.errors}"
 
     def test_empty_project_no_files_written(self, project_empty: Path) -> None:
-        """No files written when there are no test cases."""
+        """No test scripts written when there are no test cases (conftest.py is OK)."""
         scripts = generate_scripts(project_empty)
         assert scripts == []
-        # scripts/ dir exists from project creation but should have no .py files
-        py_files = list((project_empty / "scripts").glob("*.py"))
+        py_files = [f for f in (project_empty / "scripts").glob("*.py") if f.name != "conftest.py"]
         assert py_files == []
 
     def test_unsupported_framework_raises(self, project_with_cases: Path) -> None:
