@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import uuid
 from pathlib import Path
 from datetime import datetime, timezone
@@ -10,6 +11,8 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException, Query
 
 from testforge.web.deps import resolve_project
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/projects", tags=["reports"])
 
@@ -70,8 +73,8 @@ async def list_reports(project_path: str):
             try:
                 meta = json.loads(f.read_text())
                 reports.append(meta)
-            except Exception:
-                pass
+            except Exception as e:
+                logger.warning("Skipping corrupt report meta file %s: %s", f.name, e)
 
     return {"reports": reports, "count": len(reports)}
 

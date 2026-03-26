@@ -7,7 +7,11 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
 
-from testforge.core.config import load_config
+from testforge.core.config import (
+    append_locale_user_facing_instruction,
+    effective_locale,
+    load_config,
+)
 from testforge.core.project import load_analysis
 from testforge.llm import create_adapter
 from testforge.llm.utils import parse_llm_json
@@ -84,7 +88,7 @@ def generate_usecase_tests(project_dir: Path, no_llm: bool = False) -> list[dict
         return results
 
     try:
-        return _llm_generate_usecases(adapter, analysis)
+        return _llm_generate_usecases(adapter, analysis, effective_locale(config))
     except Exception as exc:
         logger.warning("LLM generation failed (%s), generating skeleton use cases", exc)
         results = _generate_skeleton_usecases(analysis)
@@ -92,7 +96,9 @@ def generate_usecase_tests(project_dir: Path, no_llm: bool = False) -> list[dict
         return results
 
 
-def _llm_generate_usecases(adapter: Any, analysis: Any) -> list[dict[str, Any]]:
+def _llm_generate_usecases(
+    adapter: Any, analysis: Any, locale: str = "ko"
+) -> list[dict[str, Any]]:
     """Use LLM to generate use case scenarios from personas and features."""
     features_text = "\n".join(
         f"- {f.id}: {f.name} -- {f.description}" for f in analysis.features
@@ -135,6 +141,7 @@ Return a JSON array where each element has:
 - "tags": array of tags (e.g. "e2e", "happy-path", "critical-path")
 
 Return a JSON array only."""
+    prompt = append_locale_user_facing_instruction(prompt, locale)
 
     response = adapter.complete(prompt, max_tokens=4096)
     scenarios_data = parse_llm_json(response.text)

@@ -7,7 +7,11 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
 
-from testforge.core.config import load_config
+from testforge.core.config import (
+    append_locale_user_facing_instruction,
+    effective_locale,
+    load_config,
+)
 from testforge.core.project import load_analysis
 from testforge.llm.utils import parse_llm_json
 
@@ -81,13 +85,15 @@ def generate_functional_cases(project_dir: Path, no_llm: bool = False) -> list[d
         return _generate_skeleton_cases(analysis)
 
     try:
-        return _llm_generate_functional(adapter, analysis)
+        return _llm_generate_functional(adapter, analysis, effective_locale(config))
     except Exception as exc:
         logger.warning("LLM generation failed (%s), generating skeleton cases", exc)
         return _generate_skeleton_cases(analysis)
 
 
-def _llm_generate_functional(adapter: Any, analysis: Any) -> list[dict[str, Any]]:
+def _llm_generate_functional(
+    adapter: Any, analysis: Any, locale: str = "ko"
+) -> list[dict[str, Any]]:
     """Use LLM to generate detailed functional test cases."""
     features_text = "\n".join(
         f"- {f.id}: {f.name} -- {f.description} (priority: {f.priority})"
@@ -119,6 +125,7 @@ For each feature, generate 2-4 test cases. Each test case should have:
 - "tags": array of tags (e.g. "smoke", "regression", "negative")
 
 Include positive, negative, and edge case tests. Return a JSON array only."""
+    prompt = append_locale_user_facing_instruction(prompt, locale)
 
     response = adapter.complete(prompt, max_tokens=4096)
     cases_data = parse_llm_json(response.text)

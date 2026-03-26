@@ -9,7 +9,11 @@ import re
 from pathlib import Path
 from typing import Any
 
-from testforge.core.config import load_config
+from testforge.core.config import (
+    append_locale_user_facing_instruction,
+    effective_locale,
+    load_config,
+)
 from testforge.core.project import load_cases
 from testforge.llm.utils import parse_llm_json
 
@@ -70,14 +74,19 @@ def generate_playwright_scripts(project_dir: Path, no_llm: bool = False) -> list
         return _generate_skeleton_scripts(cases, base_url)
 
     try:
-        return _llm_generate_scripts(adapter, cases, base_url)
+        return _llm_generate_scripts(
+            adapter, cases, base_url, effective_locale(config)
+        )
     except Exception as exc:
         logger.warning("LLM generation failed (%s), generating skeleton scripts", exc)
         return _generate_skeleton_scripts(cases, base_url)
 
 
 def _llm_generate_scripts(
-    adapter: Any, cases: list[dict[str, Any]], base_url: str
+    adapter: Any,
+    cases: list[dict[str, Any]],
+    base_url: str,
+    locale: str = "ko",
 ) -> list[dict[str, Any]]:
     """Use LLM to generate Playwright Python scripts for each test case."""
     results: list[dict[str, Any]] = []
@@ -117,6 +126,7 @@ Requirements:
 - Use `expect()` for assertions where possible
 
 Return ONLY the Python code, no markdown fences or explanation."""
+        prompt = append_locale_user_facing_instruction(prompt, locale)
 
         response = adapter.complete(prompt, max_tokens=2048)
         source = _extract_python_code(response.text)

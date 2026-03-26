@@ -71,10 +71,22 @@ with a single `testforge pipeline` command.
 
 ### Installation
 
+**From PyPI (runtime / end users):**
+
 ```bash
 # Core installation
 pip install testforge
+```
 
+**From a clone (development, running tests, or hacking on the Web GUI):** install the package in editable mode with dev extras so pytest and linters are available:
+
+```bash
+pip install -e ".[dev]"
+```
+
+> **Note:** A production-style install (`pip install testforge` only, without `[dev]`) does **not** pull in the test toolchain — you cannot run this repository’s pytest suite without the dev extra (or equivalent manual installs).
+
+```bash
 # With specific LLM provider
 pip install "testforge[anthropic]"   # Anthropic Claude
 pip install "testforge[openai]"      # OpenAI GPT
@@ -222,15 +234,18 @@ pip install "testforge[web]"
 testforge web
 ```
 
-Opens at `http://127.0.0.1:8000`. Use `--host` and `--port` to customize.
+If you are working from a git checkout, combine dev and web extras, for example `pip install -e ".[dev,web]"` (see Installation above — `[dev]` alone does not install FastAPI/uvicorn).
+
+Opens at `http://127.0.0.1:8000` by default (local-only). Use `--host` and `--port` to customize bind address and port.
 
 The web interface provides:
 
 - Project management with guided pipeline stepper
+- Document upload to `inputs/`, preview, and delete via the API-backed file list
 - Visual test case editor with CRUD operations
 - One-click analysis, generation, and execution
 - Real-time execution results and report viewing
-- Multi-language support (English, Korean, Vietnamese)
+- Manual QA session history and multi-language UI (English, Korean, Vietnamese)
 
 ## Configuration
 

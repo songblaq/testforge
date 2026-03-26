@@ -156,6 +156,7 @@ var translations = {
     "report.load": "Load Report",
     "report.empty": "No report loaded",
     "report.empty.desc": "Generate a report after running tests.",
+    "report.click_to_generate": "Click the button above to generate a report",
     "report.coverage": "Coverage",
     "report.feature_cov": "Feature Coverage",
     "report.rule_cov": "Rule Coverage",
@@ -556,6 +557,7 @@ var translations = {
     "report.load": "\ubcf4\uace0\uc11c \ub85c\ub4dc",
     "report.empty": "\ub85c\ub4dc\ub41c \ubcf4\uace0\uc11c \uc5c6\uc74c",
     "report.empty.desc": "\ud14c\uc2a4\ud2b8 \uc2e4\ud589 \ud6c4 \ubcf4\uace0\uc11c\ub97c \uc0dd\uc131\ud558\uc138\uc694.",
+    "report.click_to_generate": "\ub9ac\ud3ec\ud2b8\ub97c \uc0dd\uc131\ud558\ub824\uba74 \uc704 \ubc84\ud2bc\uc744 \ud074\ub9ad\ud558\uc138\uc694",
     "report.coverage": "\ucee4\ubc84\ub9ac\uc9c0",
     "report.feature_cov": "\uae30\ub2a5 \ucee4\ubc84\ub9ac\uc9c0",
     "report.rule_cov": "\uaddc\uce59 \ucee4\ubc84\ub9ac\uc9c0",
@@ -956,6 +958,7 @@ var translations = {
     "report.load": "T\u1EA3i b\u00E1o c\u00E1o",
     "report.empty": "Ch\u01B0a c\u00F3 b\u00E1o c\u00E1o",
     "report.empty.desc": "T\u1EA1o b\u00E1o c\u00E1o sau khi ch\u1EA1y ki\u1EC3m th\u1EED.",
+    "report.click_to_generate": "Nh\u1EA5n n\u00FAt ph\u00EDa tr\u00EAn \u0111\u1EC3 t\u1EA1o b\u00E1o c\u00E1o",
     "report.coverage": "\u0110\u1ED9 bao ph\u1EE7",
     "report.feature_cov": "\u0110\u1ED9 bao ph\u1EE7 t\u00EDnh n\u0103ng",
     "report.rule_cov": "\u0110\u1ED9 bao ph\u1EE7 quy t\u1EAFc",
@@ -1202,15 +1205,11 @@ function getLang() {
     var stored = localStorage.getItem("testforge-lang");
     if (stored && translations[stored]) return stored;
   } catch (e) { /* localStorage unavailable */ }
-  // Detect from browser
-  var nav = (typeof navigator !== "undefined" && navigator.language) || "en";
-  var prefix = nav.split("-")[0].toLowerCase();
-  if (translations[prefix]) return prefix;
   return "ko";
 }
 
 function setLang(lang) {
-  if (!translations[lang]) lang = "en";
+  if (!translations[lang]) lang = "ko";
   try {
     localStorage.setItem("testforge-lang", lang);
   } catch (e) { /* localStorage unavailable */ }
@@ -1219,7 +1218,12 @@ function setLang(lang) {
 
 function t(key, params) {
   var lang = getLang();
-  var text = (translations[lang] && translations[lang][key]) || translations.en[key] || key;
+  var fromLang = translations[lang] && translations[lang][key];
+  var text =
+    fromLang ||
+    (lang !== "ko" ? translations.ko[key] : undefined) ||
+    translations.en[key] ||
+    key;
   if (params) {
     var keys = Object.keys(params);
     for (var i = 0; i < keys.length; i++) {

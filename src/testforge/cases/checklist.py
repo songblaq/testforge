@@ -10,7 +10,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from testforge.core.config import load_config
+from testforge.core.config import (
+    append_locale_user_facing_instruction,
+    effective_locale,
+    load_config,
+)
 from testforge.core.project import load_analysis
 from testforge.llm import create_adapter
 from testforge.llm.utils import parse_llm_json
@@ -240,13 +244,15 @@ def generate_checklist(project_dir: Path, no_llm: bool = False) -> list[dict[str
         return _generate_skeleton_checklist(analysis)
 
     try:
-        return _llm_generate_checklist(adapter, analysis)
+        return _llm_generate_checklist(adapter, analysis, effective_locale(config))
     except Exception as exc:
         logger.warning("LLM generation failed (%s), generating skeleton checklist", exc)
         return _generate_skeleton_checklist(analysis)
 
 
-def _llm_generate_checklist(adapter: Any, analysis: Any) -> list[dict[str, Any]]:
+def _llm_generate_checklist(
+    adapter: Any, analysis: Any, locale: str = "ko"
+) -> list[dict[str, Any]]:
     """Use LLM to generate a detailed manual test checklist."""
     features_text = "\n".join(
         f"- {f.id}: {f.name} -- {f.description}" for f in analysis.features
@@ -276,6 +282,7 @@ Generate a comprehensive manual test checklist. Each item should be:
 
 Include checks for: UI consistency, accessibility, error handling, edge cases, cross-browser.
 Return a JSON array only."""
+    prompt = append_locale_user_facing_instruction(prompt, locale)
 
     response = adapter.complete(prompt, max_tokens=4096)
     items_data = parse_llm_json(response.text)

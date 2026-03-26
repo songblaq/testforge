@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import uuid
 from datetime import datetime, timezone
 
@@ -10,6 +11,8 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from testforge.web.deps import resolve_project
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/projects", tags=["execution"])
 
@@ -91,8 +94,8 @@ async def list_runs(project_path: str):
                     "result_count": len(data.get("results", [])),
                     "environment": data.get("environment", {}),
                 })
-            except Exception:
-                pass
+            except Exception as e:
+                logger.warning("Skipping corrupt run file %s: %s", f.name, e)
 
         if not runs:
             for f in sorted(output_dir.glob("results*.json"), reverse=True):
@@ -105,8 +108,8 @@ async def list_runs(project_path: str):
                         "summary": data.get("summary", {}),
                         "result_count": len(data.get("results", [])),
                     })
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.warning("Skipping corrupt run file %s: %s", f.name, e)
 
     return {"runs": runs, "count": len(runs)}
 

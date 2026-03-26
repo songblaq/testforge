@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+import logging
 import shutil
 from pathlib import Path
 from typing import Any
 
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/projects", tags=["projects"])
 
@@ -99,7 +102,8 @@ async def list_projects(directory: str = Query(".", description="Base directory 
         project_dir = base / name
         try:
             projects.append(_project_info(project_dir))
-        except Exception:
+        except (OSError, ValueError, KeyError) as e:
+            logger.warning("Skipping project listing detail for %s: %s", project_dir, e)
             projects.append({"name": name, "path": str(project_dir)})
 
     return {"projects": projects}

@@ -862,6 +862,71 @@ def test_file_upload_duplicate(web_client, sample_project):
 
 
 # ---------------------------------------------------------------------------
+# Analysis POST trigger, input file GET/DELETE, manual sessions list (v0.7)
+# ---------------------------------------------------------------------------
+
+
+def test_post_analysis_trigger_no_llm_empty_inputs(web_client, sample_project):
+    """POST /analysis with empty inputs auto-discovers files; no_llm runs offline."""
+    web_client.post(
+        f"/api/projects/{sample_project}/inputs",
+        files={
+            "file": (
+                "analysis-trigger.md",
+                b"# Spec\nMinimal input for analysis trigger.",
+                "text/markdown",
+            ),
+        },
+    )
+    resp = web_client.post(
+        f"/api/projects/{sample_project}/analysis",
+        json={"inputs": [], "no_llm": True},
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "results" in data
+    assert "source_count" in data
+
+
+def test_get_input_file_after_upload(web_client, sample_project):
+    """GET /inputs/{filename} returns uploaded file bytes."""
+    content = b"# Preview file\nunique-marker-xyz\n"
+    web_client.post(
+        f"/api/projects/{sample_project}/inputs",
+        files={"file": ("preview-doc.md", content, "text/markdown")},
+    )
+    resp = web_client.get(f"/api/projects/{sample_project}/inputs/preview-doc.md")
+    assert resp.status_code == 200
+    assert resp.content == content
+
+
+def test_delete_input_file(web_client, sample_project):
+    """DELETE /api/inputs removes an uploaded file."""
+    web_client.post(
+        f"/api/projects/{sample_project}/inputs",
+        files={"file": ("to-delete.md", b"delete me", "text/markdown")},
+    )
+    resp = web_client.delete(
+        "/api/inputs",
+        params={"project_path": str(sample_project), "filename": "to-delete.md"},
+    )
+    assert resp.status_code == 200
+    listed = web_client.get(f"/api/projects/{sample_project}/inputs").json()
+    files_list = listed.get("files", listed.get("inputs", []))
+    names = [i["name"] for i in files_list]
+    assert "to-delete.md" not in names
+
+
+def test_list_manual_sessions_empty(web_client, tmp_path):
+    """GET /manual/sessions returns 200 and empty list when no completed sessions."""
+    project_dir = tmp_path / "no-manual-sessions"
+    create_project(project_dir)
+    resp = web_client.get(f"/api/projects/{project_dir}/manual/sessions")
+    assert resp.status_code == 200
+    assert resp.json()["sessions"] == []
+
+
+# ---------------------------------------------------------------------------
 # Tag filtering + parallel execution (Phase 2C)
 # ---------------------------------------------------------------------------
 
@@ -910,6 +975,43 @@ def test_error_message_no_full_path(web_client):
     detail = r.json().get("detail", "")
     assert "/Users/" not in detail
     assert "/home/" not in detail
+
+
+def test_delete_blocked_with_wrong_token(monkeypatch, tmp_path):
+    """When TESTFORGE_TOKEN is set, DELETE with wrong X-TestForge-Token returns 401."""
+    monkeypatch.setenv("TESTFORGE_TOKEN", "correct-secret")
+    from fastapi.testclient import TestClient
+    from testforge.web.app import create_app
+
+    app = create_app()
+    client = TestClient(app)
+    project_dir = tmp_path / "token-guarded"
+    create_project(project_dir)
+    resp = client.delete(
+        f"/api/projects/{project_dir}",
+        headers={"X-TestForge-Token": "wrong-token"},
+    )
+    assert resp.status_code == 401
+    assert resp.json() == {"detail": "Unauthorized"}
+    assert project_dir.exists()
+
+
+def test_delete_passes_without_token_env(monkeypatch, tmp_path):
+    """When TESTFORGE_TOKEN is unset, DELETE is allowed (no header required).
+
+    Default CI/local runs rely on this; see .omc/v07/verify/security-verified.md.
+    """
+    monkeypatch.delenv("TESTFORGE_TOKEN", raising=False)
+    from fastapi.testclient import TestClient
+    from testforge.web.app import create_app
+
+    app = create_app()
+    client = TestClient(app)
+    project_dir = tmp_path / "no-secret-env"
+    create_project(project_dir)
+    resp = client.delete(f"/api/projects/{project_dir}")
+    assert resp.status_code == 200
+    assert not project_dir.exists()
 
 
 # ---------------------------------------------------------------------------

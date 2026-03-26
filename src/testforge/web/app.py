@@ -2,15 +2,32 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from testforge import __version__
 
 STATIC_DIR = Path(__file__).parent / "static"
+
+
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        response = await call_next(request)
+        response.headers["Content-Security-Policy-Report-Only"] = (
+            "default-src 'self'; "
+            "script-src 'self' 'unsafe-inline'; "
+            "style-src 'self' 'unsafe-inline'; "
+            "connect-src 'self'; "
+            "img-src 'self' data:; "
+        )
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        return response
 
 
 def create_app() -> FastAPI:
@@ -20,6 +37,24 @@ def create_app() -> FastAPI:
         version=__version__,
         description="TestForge Web GUI -- manage projects, cases, and reports.",
     )
+
+    # Destructive ops require X-TestForge-Token only when TESTFORGE_TOKEN is set (see security-verified.md).
+    TESTFORGE_TOKEN = os.environ.get("TESTFORGE_TOKEN", "")
+
+    @app.middleware("http")
+    async def check_destructive_ops(request, call_next):
+        is_destructive = (
+            request.method == "DELETE"
+            or (request.method == "POST" and "/run" in request.url.path)
+            or (request.method == "PUT" and "/scripts/" in request.url.path)
+        )
+        if is_destructive and TESTFORGE_TOKEN:
+            token = request.headers.get("X-TestForge-Token", "")
+            if token != TESTFORGE_TOKEN:
+                from starlette.responses import JSONResponse
+
+                return JSONResponse({"detail": "Unauthorized"}, status_code=401)
+        return await call_next(request)
 
     # --- API routers ---
     from testforge.web.routers.projects import router as projects_router
@@ -43,6 +78,8 @@ def create_app() -> FastAPI:
     app.include_router(inputs_delete_router)
     app.include_router(projects_router)
     app.include_router(translate_router)
+
+    app.add_middleware(SecurityHeadersMiddleware)
 
     # --- Health + Config endpoints ---
     @app.get("/api/health")

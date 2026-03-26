@@ -7,7 +7,11 @@ from pathlib import Path
 import re
 from typing import Any
 
-from testforge.core.config import load_config
+from testforge.core.config import (
+    append_locale_user_facing_instruction,
+    effective_locale,
+    load_config,
+)
 from testforge.core.project import (
     AnalysisResult,
     save_analysis,
@@ -87,7 +91,12 @@ def run_analysis(
 
     # Run LLM-powered analysis
     try:
-        analysis_result = _llm_analysis(adapter, combined_text, parsed_docs)
+        analysis_result = _llm_analysis(
+            adapter,
+            combined_text,
+            parsed_docs,
+            effective_locale(config),
+        )
     except Exception as exc:
         logger.warning("LLM analysis failed (%s), falling back to offline", exc)
         import click as _click
@@ -159,7 +168,9 @@ def _build_combined_text(parsed_docs: list[Any]) -> str:
     return "\n\n".join(parts)
 
 
-def _analyze_images(adapter: Any, image_docs: list[Any]) -> dict[str, Any]:
+def _analyze_images(
+    adapter: Any, image_docs: list[Any], locale: str = "ko"
+) -> dict[str, Any]:
     """Analyze images using vision model to extract UI features and screens."""
     from testforge.input.parser import ParsedDocument
 
@@ -183,6 +194,7 @@ def _analyze_images(adapter: Any, image_docs: list[Any]) -> dict[str, Any]:
 
 For elements, include: name, type (button/input/link/text/image/nav/form), description.
 Return JSON object with "features" and "screens" arrays."""
+    prompt = append_locale_user_facing_instruction(prompt, locale)
 
     response = adapter.complete_with_images(prompt, images, max_tokens=4096)
     return parse_llm_json(response.text, expected_type="object")
@@ -192,6 +204,7 @@ def _llm_analysis(
     adapter: Any,
     combined_text: str,
     parsed_docs: list[Any],
+    locale: str,
 ) -> AnalysisResult:
     """Run full LLM-powered analysis over the combined document text."""
     from testforge.analysis.features import extract_features
@@ -200,7 +213,9 @@ def _llm_analysis(
     from testforge.core.project import Feature, Persona, BusinessRule, Screen
     from testforge.input.parser import ParsedDocument
 
-    prompt = _build_analysis_prompt(combined_text)
+    prompt = append_locale_user_facing_instruction(
+        _build_analysis_prompt(combined_text), locale
+    )
     response = adapter.complete(prompt, max_tokens=4096)
 
     # Parse structured JSON from LLM response
@@ -263,7 +278,7 @@ def _llm_analysis(
     ]
     if image_docs and hasattr(adapter, "complete_with_images"):
         try:
-            image_features = _analyze_images(adapter, image_docs)
+            image_features = _analyze_images(adapter, image_docs, locale)
             for f in image_features.get("features", []):
                 features.append(
                     Feature(

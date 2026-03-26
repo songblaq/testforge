@@ -926,8 +926,24 @@ function switchTab(tabName) {
     case "scripts": loadScripts(); break;
     case "execution": loadExecution(); break;
     case "manual": loadManual(); break;
-    case "report": loadReport(); break;
+    case "report":
+      loadReportHistory();
+      loadCoverage();
+      syncReportGenerateHint();
+      break;
   }
+}
+
+function syncReportGenerateHint() {
+  var emptyEl = document.getElementById("report-empty");
+  if (!emptyEl || emptyEl.style.display === "none") return;
+  var hint = document.getElementById("report-click-to-generate");
+  if (!hint) {
+    hint = document.createElement("p");
+    hint.id = "report-click-to-generate";
+    emptyEl.appendChild(hint);
+  }
+  hint.textContent = t("report.click_to_generate");
 }
 
 // Hash change listener
