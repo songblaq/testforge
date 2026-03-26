@@ -1,0 +1,98 @@
+{
+  "agent": "xss-vector-hunter",
+  "findings": [
+    {
+      "line": 233,
+      "code_snippet": "function safeHref(url) {\n  if (/^(https?:|mailto:|\\/|#|\\.)/i.test(url)) return url;\n  return '#';\n}",
+      "risk": "high",
+      "detail": "safeHref allows any URL whose first character is `/`. Strings like `//evil.com/path` (protocol-relative) therefore pass through unchanged into href/src from inlineFormat link and image handlers. Attacker-controlled markdown in uploaded .md inputs, generated reports, or report history can inject `<a href=\"//evil.com\">` / `<img src=\"//evil.com\">`, enabling phishing and cookie-scoped attacks on the current host scheme.",
+      "fix": "Use a strict allowlist (e.g. only http: and https: with URL parsing), reject protocol-relative URLs explicitly, or normalize with `new URL(url, location.origin)` and verify `protocol` is `http:` or `https:`."
+    },
+    {
+      "line": 537,
+      "code_snippet": "viewer.innerHTML = '<div class=\"doc-viewer\">' + simpleMarkdown(text) + '</div>';",
+      "risk": "high",
+      "detail": "Input file text from `/api/.../inputs/...` is rendered as HTML via simpleMarkdown. Together with permissive safeHref and intentional `<a>`, `<img>`, `<strong>`, etc., this is a stored XSS/phishing vector for anyone who can upload or replace project inputs (e.g. malicious .md).",
+      "fix": "Render markdown in an isolated iframe/sandbox, use a vetted sanitizer (DOMPurify) on the output, or show markdown as plain text / use textContent-only preview."
+    },
+    {
+      "line": 2191,
+      "code_snippet": "viewer.innerHTML = simpleMarkdown(data.report || \"Empty report\");",
+      "risk": "medium",
+      "detail": "Report body from API is inserted as HTML. If report content is influenced by untrusted data (LLM, CI, compromised backend), same markdown+safeHref issues apply. Html format branch uses textContent (safe); md branch uses innerHTML.",
+      "fix": "Sanitize simpleMarkdown output; tighten URL policy; or render markdown server-side to a sanitized fragment."
+    },
+    {
+      "line": 3040,
+      "code_snippet": "viewer.innerHTML = simpleMarkdown(content);",
+      "risk": "medium",
+      "detail": "Historical report content loaded by id is rendered like loadReport() non-html path. Persisted reports could carry malicious markdown if an attacker can influence stored report text.",
+      "fix": "Same as line 2191; validate report provenance and sanitize output."
+    },
+    {
+      "line": 1086,
+      "code_snippet": "html +=\n      '<div class=\"pipeline-step ' + stateClass + '\" data-tab=\"' + (tabMap[stage.stage] || stage.stage) + '\">' +",
+      "risk": "medium",
+      "detail": "stage.stage from API overview is concatenated into a double-quoted HTML attribute without esc(). A malicious or buggy backend could send a stage key containing `\"` to break out of data-tab and inject attributes or close the tag.",
+      "fix": "Use esc() on the attribute value, or build steps with DOM APIs (element.dataset.tab = ...) and textContent for labels."
+    },
+    {
+      "line": 1101,
+      "code_snippet": "ctaContainer.innerHTML = '<button ... data-tab=\"' + nextTab + '\">\\u2192 ' + esc(nextLabel) + '</button>';",
+      "risk": "medium",
+      "detail": "nextTab is derived from tabMap[pipeline[j].stage] || pipeline[j].stage without escaping. Same attribute-injection class as the pipeline stepper loop.",
+      "fix": "Wrap nextTab with esc() or set data-tab via dataset after creating the element."
+    },
+    {
+      "line": 1728,
+      "code_snippet": "'<td>' + (s.lines || \"-\") + '</td>' +\n        '<td>' + caseDisplay + '</td>' +\n        '<td>' + (s.size !== undefined ? formatBytes(s.size) : \"-\") + '</td>' +",
+      "risk": "low",
+      "detail": "s.lines is interpolated without esc(). If the API ever returns a string (e.g. `\"</td><script>...\"`) instead of a number, it becomes HTML injection. formatBytes expects a number; odd types could stringify oddly.",
+      "fix": "Use esc(String(s.lines != null ? s.lines : \"-\")) or coerce to number and reject invalid values."
+    },
+    {
+      "line": 126,
+      "code_snippet": "function simpleMarkdown(text) { ... out.replace(/<script\\b[^<]*(?:(?!<\\/script>)<[^<]*)*<\\/script>/gi, \"\");",
+      "risk": "low",
+      "detail": "Post-hoc regex stripping of script tags and on* attributes is fragile (parser differential, SVG/math, encoding tricks). Primary risk is still intentional markdown HTML plus weak URL policy, not script-tag bypass.",
+      "fix": "Prefer allowlist-based sanitization after markdown parse, or do not emit raw HTML from markdown."
+    },
+    {
+      "line": 246,
+      "code_snippet": "return '<a href=\"' + safeHref(url) + '\" target=\"_blank\" rel=\"noopener\">' + text + '</a>';",
+      "risk": "low",
+      "detail": "Link label `text` is inserted without esc(), but in simpleMarkdown all call sites pass `text` through esc(line) or esc(cell) before inlineFormat, so angle brackets should be entity-encoded. Risk is mainly maintenance: future callers of inlineFormat on raw strings would be vulnerable.",
+      "fix": "Escape `text` in the link replacer (esc(text)) for defense in depth."
+    },
+    {
+      "line": 262,
+      "code_snippet": "document.getElementById(\"detail-body\").innerHTML = bodyHtml;",
+      "risk": "low",
+      "detail": "Generic HTML sink. Current builders (detailField, show*Detail) escape user strings with esc() and inject only known-safe HTML fragments (badges, lists, esc'd pre). Second argument to detailField is often intentional HTML: priorityBadge/statusBadge (esc inside), detailTagList (esc per item), stepsHtml (esc per step), formatBytes/formatDuration (numeric), mapped-script buttons (esc on names/ids).",
+      "fix": "Keep using DOM APIs for dynamic panels or centralize on a single safe HTML builder; continue ensuring every user field uses esc()."
+    },
+    {
+      "line": 1565,
+      "code_snippet": "<input type=\"checkbox\" class=\"case-checkbox\" data-case-id=\"' + esc(c.id) + '\" onclick=\"event.stopPropagation(); updateBulkActions();\">",
+      "risk": "low",
+      "detail": "Inline onclick is static (not user-controlled). data-case-id uses esc(c.id). CSP may still flag inline handlers if enforced.",
+      "fix": "Replace with addEventListener on tbody delegation (pattern already used elsewhere) and drop onclick attribute."
+    },
+    {
+      "line": 2460,
+      "code_snippet": "statusEl.className = \"llm-status llm-\" + testData.status;",
+      "risk": "low",
+      "detail": "Not innerHTML, but testData.status from API is concatenated into className without validation; unusual values could add unexpected classes or spaces (minor UI/confusion, not typical HTML injection).",
+      "fix": "Allowlist status values or use element.classList.toggle with known tokens only."
+    }
+  ],
+  "innerHTML_total": 47,
+  "innerHTML_safe": 41,
+  "innerHTML_unsafe": 6,
+  "notes": {
+    "simpleMarkdown_insertion_lines": [537, 2191, 3040],
+    "detailField_value_html_callers": "Intentional HTML (not plain esc'd text): priorityBadge(), statusBadge(), detailTagList(), '<span class=\"badge\">'+esc(type)+'</span>', steps <ol>/<li> built with esc per field, formatBytes(script.size), String(script.lines), formatDuration, returncodeVal (badge HTML with esc(rc)), mapped script/case drill buttons (esc on attributes and text), '<pre>'+esc(output)+'</pre>'.",
+    "esc_helper_line": 75,
+    "read_only_innerHTML": "Line 53 reads innerHTML for button restore; line 78 reads innerHTML inside esc() implementation (encoding helper)."
+  }
+}

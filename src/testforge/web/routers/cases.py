@@ -7,7 +7,7 @@ import uuid
 from pathlib import PurePosixPath
 from typing import Any, Literal
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 
 from testforge.web.deps import load_mappings, resolve_project, save_mappings
@@ -78,12 +78,25 @@ async def generate_cases(project_path: str, body: GenerateRequest):
 
 
 @router.get("/{project_path:path}/cases")
-async def get_cases(project_path: str):
-    """Get generated test cases."""
+async def get_cases(
+    project_path: str,
+    page: int | None = Query(default=None),
+    per_page: int = Query(default=50),
+):
+    """Get generated test cases. Optional pagination when ``page`` is set."""
     from testforge.core.project import load_cases
 
     p = resolve_project(project_path)
     cases = load_cases(p)
+    total = len(cases)
+
+    if page is not None:
+        page = max(1, page)
+        per_page = min(max(1, per_page), 200)
+        start = (page - 1) * per_page
+        end = start + per_page
+        return {"cases": cases[start:end], "total": total, "page": page, "per_page": per_page}
+
     if not cases:
         return {"cases": [], "count": 0}
     return {"cases": cases, "count": len(cases)}

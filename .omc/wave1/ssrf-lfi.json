@@ -1,0 +1,55 @@
+{
+  "agent": "ssrf-lfi-analyzer",
+  "findings": [
+    {
+      "file": "src/testforge/input/url.py",
+      "line": 12,
+      "vector": "SSRF: httpx.get(user_url) with follow_redirects=True, no private/link-local/metadata IP blocklist or URL allowlist",
+      "risk": "high",
+      "detail": "Any http(s) string in inputs is fetched server-side. Internal targets (127.0.0.1, 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 169.254.0.0/16, RFC1918, cloud metadata) are reachable if the host network allows. Redirects can bypass naive hostname-only checks.",
+      "fix": "Use a safe egress pattern: resolve and validate final URL after redirects, block disallowed hosts/IPs (ipaddress + blocklists), optional allowlist domains, disable redirects or validate each hop, timeouts and size limits."
+    },
+    {
+      "file": "src/testforge/input/parser.py",
+      "line": 60,
+      "vector": "LFI / arbitrary file read: Path(path) opened for any supported extension with no jail under project input_dir",
+      "risk": "high",
+      "detail": "Local branches call Path(path).read_text/read_bytes or pass Path to parsers without resolving relative to config.input_dir or checking .resolve().relative_to(project/input_dir). Attackers can supply absolute paths or traversal (e.g. ../../../...) to any readable file matching allowlisted suffixes (.md, .json, .yaml, .env, .py, .pdf, images, office). /etc/passwd alone fails (no supported suffix) but many sensitive paths use .yaml/.json/.env/.md.",
+      "fix": "Resolve candidate path, require it stays under project_dir / input_dir (or explicit allowlist), reject .. components before open; for API, only accept basenames and join with input_dir."
+    },
+    {
+      "file": "src/testforge/web/routers/analysis.py",
+      "line": 27,
+      "vector": "Unvalidated body.inputs passed to run_analysis → parse() (LFI + SSRF entry)",
+      "risk": "high",
+      "detail": "When body.inputs is non-empty, strings are forwarded unchanged. resolve_project() only hardens the project_path route segment, not inputs. Default empty-input behavior correctly lists input_dir only; explicit inputs bypass that containment.",
+      "fix": "Validate each input: for files, restrict to input_dir (or uploaded file IDs); for URLs, apply same SSRF controls as url.py; reject unknown schemes."
+    },
+    {
+      "file": "src/testforge/input/parser.py",
+      "line": 36,
+      "vector": "file:// and other schemes: not fetched as URL but not path-sandboxed",
+      "risk": "medium",
+      "detail": "Only http:// and https:// use parse_url. file:///etc/passwd does not hit httpx; it falls through to Path('file:///etc/passwd'), which on POSIX is not a normalized open of /etc/passwd. Non-http schemes are not handled as network SSRF here, but odd paths may still behave unexpectedly per OS.",
+      "fix": "Explicitly reject file://, gopher://, dict://, etc. at the API/parser boundary; document allowed schemes."
+    },
+    {
+      "file": "src/testforge/analysis/analyzer.py",
+      "line": 47,
+      "vector": "Orchestrator passes each input string to parse() with no validation",
+      "risk": "medium",
+      "detail": "Same trust boundary as the router: CLI or API callers supply inputs list; analyzer does not enforce input_dir or URL policy. Failures are logged as warnings only; partial success may still exfiltrate one document.",
+      "fix": "Centralize input validation (path jail + URL policy) in one helper used by web and CLI before parse()."
+    },
+    {
+      "file": "src/testforge/input/validator.py",
+      "line": 53,
+      "vector": "validate_parsed checks content quality only, not source path or URL safety",
+      "risk": "low",
+      "detail": "No SSRF/LFI controls; not invoked from analysis flow for security gating.",
+      "fix": "If used, add separate path/URL validation before parse; do not rely on validate_parsed for access control."
+    }
+  ],
+  "lfi_vectors": 2,
+  "ssrf_vectors": 1
+}

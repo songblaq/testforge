@@ -1,0 +1,12 @@
+{
+  "agent": "a11y-reverifier",
+  "checks": [
+    {"item": "Pipeline stepper is keyboard-operable (native <button type=\"button\" class=\"pipeline-step\"> in renderPipelineStepper; CSS resets .pipeline-step as button)", "status": "fixed"},
+    {"item": "Input labels associated via for/id in index.html (e.g. project-search, lang-select, scan-dir, case filters, create modal fields, LLM config card); sr-only labels where controls are visually unlabeled", "status": "fixed"},
+    {"item": "Create project modal focus trap (showCreateModal calls _trapFocus(overlay); Tab cycles first/last focusable; handler removed in hideCreateModal)", "status": "fixed"},
+    {"item": "Error toasts use role=\"alert\" (and aria-live=\"assertive\") when type === \"error\" in toast()", "status": "fixed"},
+    {"item": "Dynamic regions: #pipeline-stepper aria-live=\"polite\"; #toast-container role=\"status\" aria-live=\"polite\"; cases and run history tables aria-live=\"polite\"", "status": "fixed"}
+  ],
+  "level_a_remaining": 0,
+  "verdict": "PASS"
+}

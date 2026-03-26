@@ -27,8 +27,9 @@ TestForge uses that instead. The result is a platform that is both intelligent a
 LLMs handle the hard parts, programmatic code handles the rest.
 
 The full pipeline takes you from raw documents to a shareable HTML or Markdown test report in a
-single session, including Playwright browser scripts, HTTP API tests, shell-command runners, and a
-manual QA checklist workflow for scenarios that require a human eye.
+single session. Generated automation is **Playwright-based Python tests** run via pytest; HTTP API,
+shell-command, and SSH-style execution paths are **planned** as connectors. A manual QA checklist
+workflow covers scenarios that require a human eye.
 
 ## Key Features
 
@@ -43,22 +44,25 @@ manual QA checklist workflow for scenarios that require a human eye.
 - **TUI interface** — full interactive terminal UI built with Textual
 - **Multi-project management** — `testforge projects` lists all local projects
 - **Self-test / dogfooding** — `testforge selftest` runs TestForge against itself
-- **Multiple LLM providers** — Anthropic Claude, OpenAI GPT, CLI tools (claude, codex), Ollama-compatible
+- **Multiple LLM providers** — Anthropic Claude, OpenAI GPT, CLI tools (claude, codex), and **Ollama** (`llm_provider: ollama`)
 
 ## Pipeline
 
 ```
-  Documents        Analysis         Test Cases        Scripts          Execution        Reports
- +---------+     +-----------+     +-----------+     +----------+     +-----------+     +---------+
- | PDF     |     | Features  |     | Functional|     |Playwright|     | Browser   |     |Markdown |
- | PPT     | --> | Personas  | --> | Use Cases | --> | HTTP     | --> | API       | --> | HTML    |
- | Word    |     | Rules     |     | Checklist |     | Shell    |     | Shell     |     | JSON    |
- | Excel   |     | Screens   |     |           |     |          |     | SSH       |     |         |
- | Images  |     |           |     |           |     |          |     |           |     |         |
- | URLs    |     |           |     |           |     |          |     |           |     |         |
- | GitHub  |     |           |     |           |     |          |     |           |     |         |
- +---------+     +-----------+     +-----------+     +----------+     +-----------+     +---------+
+  Documents        Analysis         Test Cases        Scripts              Execution           Reports
+ +---------+     +-----------+     +-----------+     +----------------+     +---------------+     +---------+
+ | PDF     |     | Features  |     | Functional|     | Playwright     |     | pytest +      |     |Markdown |
+ | PPT     | --> | Personas  | --> | Use Cases | --> | (Python tests) | --> | Playwright    | --> | HTML    |
+ | Word    |     | Rules     |     | Checklist |     |                |     | (browser)     |     | JSON    |
+ | Excel   |     | Screens   |     |           |     |                |     |               |     |         |
+ | Images  |     |           |     |           |     |                |     |               |     |         |
+ | URLs    |     |           |     |           |     |                |     |               |     |         |
+ | GitHub  |     |           |     |           |     |                |     |               |     |         |
+ +---------+     +-----------+     +-----------+     +----------------+     +---------------+     +---------+
 ```
+
+_Default `testforge run` executes generated Playwright-based Python tests via pytest. HTTP, shell,
+SSH, and API-style connectors are planned or extension points—not the default generated script path._
 
 Each stage persists its output to disk. You can run stages individually or chain the full pipeline
 with a single `testforge pipeline` command.
@@ -76,6 +80,7 @@ pip install "testforge[anthropic]"   # Anthropic Claude
 pip install "testforge[openai]"      # OpenAI GPT
 pip install "testforge[browser]"     # Browser testing (Playwright)
 pip install "testforge[tui]"         # TUI interface (Textual)
+pip install "testforge[web]"         # Web GUI (FastAPI)
 pip install "testforge[all]"         # Everything
 
 # Install Playwright browsers (required for browser testing)
@@ -148,6 +153,9 @@ See [docs/cli-reference.md](docs/cli-reference.md) for the full command referenc
 | `testforge manual progress PROJECT` | Show checklist session progress |
 | `testforge manual finish PROJECT` | Finish session and save report |
 | `testforge tui [PROJECT]` | Launch TUI interface |
+| `testforge web` | Launch Web GUI (requires `testforge[web]`) |
+| `testforge research PROJECT` | Run AutoResearch loop (iterations, threshold, strategy; supports `--no-llm`) |
+| `testforge coverage PROJECT` | Print feature/rule coverage from `analysis.json` vs `cases.json` |
 | `testforge projects` | List all local TestForge projects |
 | `testforge selftest` | Run built-in self-test suite |
 
@@ -205,6 +213,25 @@ The TUI provides:
 
 Key bindings: `Tab` to switch screens, `q` to quit, `r` to run, `Enter` to inspect.
 
+### Web GUI
+
+Install with web dependencies and launch:
+
+```bash
+pip install "testforge[web]"
+testforge web
+```
+
+Opens at `http://127.0.0.1:8000`. Use `--host` and `--port` to customize.
+
+The web interface provides:
+
+- Project management with guided pipeline stepper
+- Visual test case editor with CRUD operations
+- One-click analysis, generation, and execution
+- Real-time execution results and report viewing
+- Multi-language support (English, Korean, Vietnamese)
+
 ## Configuration
 
 Each project has a `.testforge/config.yaml` file:
@@ -234,11 +261,13 @@ See [docs/configuration.md](docs/configuration.md) for the full schema and globa
 | Anthropic Claude | `testforge[anthropic]` | `ANTHROPIC_API_KEY` |
 | OpenAI GPT | `testforge[openai]` | `OPENAI_API_KEY` |
 | CLI tools (claude, codex) | _(none)_ | _(CLI must be in PATH)_ |
-| Ollama (local) | _(none)_ | Configure `llm_model` in config |
+| Ollama (local) | _(none)_ | Set `llm_provider: ollama` and `llm_model` in config (local Ollama server) |
 
 ## Connectors
 
-TestForge uses connectors for test execution. Each connector maps to a test type:
+TestForge uses connectors for test execution. Default `testforge run` uses the **browser (Playwright)**
+path on generated `.py` tests. HTTP and shell connectors exist in the architecture but are not the
+default generated-script or `run` path today. Each connector maps to a test type:
 
 | Connector | Use case |
 |-----------|----------|
@@ -260,8 +289,8 @@ my-webapp/
     analysis.json        # Extracted features, personas, rules
   cases/
     cases.json           # Generated test cases
-  scripts/               # Generated automation scripts (.py, .sh)
-  evidence/              # Screenshots, logs, HAR files from test runs
+  scripts/               # Generated automation scripts (.py, Playwright/pytest)
+  evidence/              # Screenshots and logs from test runs (HAR capture planned)
   output/                # Generated reports
 ```
 

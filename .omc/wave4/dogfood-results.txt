@@ -1,0 +1,11 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.11, pytest-9.0.2, pluggy-1.6.0
+rootdir: /Users/user/_/workspace/nts-ai/testforge
+configfile: pyproject.toml
+plugins: anyio-4.12.1, cov-7.1.0
+collected 38 items
+
+tests/selftest/test_cli_dogfood.py ..........                            [ 26%]
+tests/selftest/test_gui_dogfood.py ............................          [100%]
+
+============================= 38 passed in 12.84s ==============================

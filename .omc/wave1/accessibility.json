@@ -1,0 +1,78 @@
+{
+  "agent": "accessibility-auditor",
+  "findings": [
+    {
+      "criterion": "WCAG 2.1.1 (Level A)",
+      "element": ".pipeline-step (rendered in #pipeline-stepper)",
+      "severity": "critical",
+      "detail": "Pipeline steps are non-focusable <div> elements activated only via click delegation. Keyboard users cannot move focus to a step or activate it with Enter/Space.",
+      "fix": "Use <button type=\"button\"> per step (or role=\"button\" tabindex=\"0\" with keydown for Enter/Space), preserve visible labels, and wire the same handler."
+    },
+    {
+      "criterion": "WCAG 2.1.1 (Level A)",
+      "element": ".dropdown-item in #project-dropdown-list",
+      "severity": "major",
+      "detail": "Project list entries are <div class=\"dropdown-item\"> with click handlers only; they are not in the tab order and have no keyboard activation.",
+      "fix": "Use <button type=\"button\" class=\"dropdown-item\"> or make each item focusable with tabindex=\"0\" and handle Enter/Space; consider aria-activedescendant pattern on the combobox-style control."
+    },
+    {
+      "criterion": "WCAG 1.3.1 / 3.3.2 / 4.1.2 (Level A)",
+      "element": "#lang-select, #scan-dir, #project-search, #case-type-select, #case-tag-select, #case-gen-mode, #script-gen-mode, #report-fmt, #case-filter, .manual-note",
+      "severity": "major",
+      "detail": "Several inputs and selects lack an associated <label for=\"...\"> (or aria-labelledby). Placeholder alone does not meet programmatic name / label requirements.",
+      "fix": "Add visible <label for=\"id\"> (or aria-label where a visible label is redundant) for each control; ensure i18n covers label text."
+    },
+    {
+      "criterion": "WCAG 1.3.1 / 4.1.2 (Level A)",
+      "element": "CRUD modal fields (buildCrudForm in app.js)",
+      "severity": "major",
+      "detail": "Dynamically generated <label> elements are not associated with inputs: labels do not use for=\"\" matching input id, and labels do not wrap controls.",
+      "fix": "Add for attributes on each label matching the corresponding input/textarea/select id."
+    },
+    {
+      "criterion": "WCAG 1.3.1 / 4.1.2 (Level A)",
+      "element": "#llm-provider-select, #llm-model-input and adjacent labels in #llm-config-card",
+      "severity": "major",
+      "detail": "Provider and model labels are not programmatically tied to the controls (no for/id linkage).",
+      "fix": "Use <label for=\"llm-provider-select\"> and <label for=\"llm-model-input\">."
+    },
+    {
+      "criterion": "WCAG 2.4.3 (Level A)",
+      "element": "#create-modal",
+      "severity": "major",
+      "detail": "New Project modal sets initial focus on the name field but does not trap focus. Tab/Shift+Tab can move focus to interactive elements behind the overlay, unlike #crud-modal and #confirm-dialog which use _trapFocus.",
+      "fix": "Reuse the same focus trap pattern as CRUD/confirm modals on the create overlay; restore focus to the triggering control on close."
+    },
+    {
+      "criterion": "WCAG 2.1.1 (Level A)",
+      "element": "h1.logo",
+      "severity": "minor",
+      "detail": "Returning to the project list is bound to click on the logo only; the heading is not keyboard-focusable, so keyboard users lack an equivalent to deselect the project.",
+      "fix": "Expose a dedicated focusable control (e.g. button with accessible name) or tabindex=\"0\" and keyboard activation for the same action."
+    },
+    {
+      "criterion": "WCAG 4.1.2 (Level A)",
+      "element": "#case-select-all",
+      "severity": "minor",
+      "detail": "Header checkbox for select-all has no accessible name in the table header context.",
+      "fix": "Add aria-label or an associated <label> (visually hidden if needed), e.g. \"Select all test cases\"."
+    },
+    {
+      "criterion": "WCAG 4.1.3 (best practice / AA-adjacent)",
+      "element": "#toast-container, toast()",
+      "severity": "minor",
+      "detail": "Container uses role=\"status\" and aria-live=\"polite\"; individual toasts are plain divs. Error messages are not distinguished with role=\"alert\" or assertive live regions, so urgent feedback may be delayed behind other polite announcements.",
+      "fix": "For type === \"error\", set role=\"alert\" (or aria-live=\"assertive\") on the toast node; keep polite for success/info if desired."
+    },
+    {
+      "criterion": "WCAG 1.4.3 (Level AA)",
+      "element": ".toast-success, .toast-error",
+      "severity": "major",
+      "detail": "Toast text is white (#fff) on #00b894 (success) and #e17055 (error). Contrast ratios are approximately 2.5:1 and 3.2:1, below 4.5:1 for normal text.",
+      "fix": "Darken background colors, use darker text on light toast backgrounds, or increase font size/weight to qualify as large text (3:1) if appropriate."
+    }
+  ],
+  "level_a_violations": 8,
+  "level_aa_violations": 1,
+  "notes": "Contrast checks used CSS variables from style.css; toast ratios computed for #ffffff on #00b894 and #e17055. Tab order in static HTML is generally left-to-right; hidden tab panels use display:none. Detail panel focuses #detail-close on open; no full trap. CRUD and confirm modals implement focus cycling via _trapFocus."
+}

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 
 from fastapi import APIRouter, HTTPException
@@ -33,6 +34,33 @@ async def run_analysis(project_path: str, body: AnalysisRequest):
                 str(f) for f in input_dir.iterdir()
                 if f.is_file() and not f.name.startswith(".")
             ]
+    else:
+        config = load_config(p)
+        validated_inputs: list[str] = []
+        for inp in body.inputs:
+            if inp.startswith(("http://", "https://")):
+                validated_inputs.append(inp)
+            else:
+                inp_path = Path(inp)
+                if ".." in inp_path.parts or inp_path.is_absolute():
+                    raise HTTPException(
+                        status_code=403,
+                        detail="Invalid input path",
+                    )
+                input_dir = p / config.input_dir
+                resolved = (input_dir / inp).resolve()
+                if not resolved.is_relative_to(input_dir.resolve()):
+                    raise HTTPException(
+                        status_code=403,
+                        detail=f"Input path outside allowed directory: {inp_path.name}",
+                    )
+                if not resolved.exists():
+                    raise HTTPException(
+                        status_code=404,
+                        detail=f"Input not found: {inp_path.name}",
+                    )
+                validated_inputs.append(str(resolved))
+        inputs = validated_inputs
 
     if not inputs:
         raise HTTPException(status_code=400, detail="No input files found or specified")

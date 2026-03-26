@@ -20,6 +20,7 @@
       </button>
       <div class="project-dropdown" id="project-dropdown" style="display:none;">
         <div class="dropdown-search">
+          <label for="project-search" class="sr-only" data-i18n="projects.search">Search projects</label>
           <input type="text" id="project-search" placeholder="Search projects...">
         </div>
         <div id="project-dropdown-list"></div>
@@ -27,6 +28,7 @@
     </div>
   </div>
   <div class="header-right">
+    <label for="lang-select" class="sr-only" data-i18n="settings.language">Language</label>
     <select id="lang-select" class="lang-select">
       <option value="ko">한국어</option>
       <option value="vi">Tiếng Việt</option>
@@ -72,6 +74,7 @@
       </div>
       <div class="form-row" style="margin-bottom:16px;">
         <div class="form-group">
+          <label for="scan-dir" data-i18n="projects.dir_label">Directory to scan</label>
           <input type="text" id="scan-dir" placeholder="Directory path to scan">
         </div>
         <div class="form-group" style="flex:0;display:flex;align-items:flex-end;">
@@ -88,7 +91,7 @@
       <div class="card-header">
         <h2 data-i18n="overview.title">Pipeline Overview</h2>
       </div>
-      <div id="pipeline-stepper" class="pipeline-stepper"></div>
+      <div id="pipeline-stepper" class="pipeline-stepper" aria-live="polite"></div>
       <div id="overview-next-cta" class="overview-next-cta" style="display:none;"></div>
       <div id="llm-setup-banner" class="llm-setup-banner" style="display:none">
         <h3 data-i18n="llm.setup_title">⚙️ LLM Setup Required</h3>
@@ -132,7 +135,7 @@
       <div id="llm-status-bar" style="display:none;margin-bottom:12px;"></div>
       <div class="form-row">
         <div class="form-group">
-          <label data-i18n="llm.provider">Provider</label>
+          <label for="llm-provider-select" data-i18n="llm.provider">Provider</label>
           <select id="llm-provider-select">
             <option value="anthropic">Anthropic</option>
             <option value="openai">OpenAI</option>
@@ -141,7 +144,7 @@
           </select>
         </div>
         <div class="form-group">
-          <label data-i18n="llm.model">Model</label>
+          <label for="llm-model-input" data-i18n="llm.model">Model</label>
           <input type="text" id="llm-model-input" placeholder="(default)">
         </div>
         <div class="form-group" style="flex:0;display:flex;align-items:flex-end;">
@@ -156,7 +159,7 @@
     <div class="card">
       <div class="card-header">
         <h2 data-i18n="inputs.title">Input Documents</h2>
-        <label class="btn btn-primary" id="btn-upload-label">
+        <label class="btn btn-primary" id="btn-upload-label" for="file-upload">
           <span data-i18n="inputs.upload">+ Upload</span>
           <input type="file" id="file-upload" multiple style="display:none;" accept=".md,.txt,.pdf,.docx,.pptx,.xlsx,.yaml,.json,.png,.jpg,.jpeg">
         </label>
@@ -230,6 +233,7 @@
       <div class="card-header">
         <h2 data-i18n="cases.title">Test Cases</h2>
         <div class="header-actions">
+          <label for="case-type-select" class="sr-only" data-i18n="cases.filter_type">Case type</label>
           <select id="case-type-select" class="select-sm">
             <option value="all" data-i18n="cases.all">All Types</option>
             <option value="functional" data-i18n="cases.functional">Functional</option>
@@ -237,6 +241,7 @@
             <option value="checklist" data-i18n="cases.checklist">Checklist</option>
             <option value="crud" data-i18n="cases.crud">CRUD</option>
           </select>
+          <label for="case-tag-select" class="sr-only" data-i18n="cases.filter_tag">Tag</label>
           <select id="case-tag-select" class="select-sm">
             <option value="all" data-i18n="cases.all_tags">All Tags</option>
             <option value="positive" data-i18n="cases.positive">Positive</option>
@@ -246,6 +251,7 @@
             <option value="regression" data-i18n="cases.regression">Regression</option>
           </select>
           <button class="btn btn-secondary" id="btn-add-case" data-i18n="crud.add_case">+ Add Case</button>
+          <label for="case-gen-mode" class="sr-only" data-i18n="gen.mode">Mode</label>
           <select id="case-gen-mode" class="gen-mode-selector">
             <option value="generate" data-i18n="gen.generate">Generate</option>
             <option value="regenerate" data-i18n="gen.regenerate">Regenerate</option>
@@ -264,6 +270,7 @@
       </div>
       <div id="cases-content" style="display:none;">
         <div class="filter-row">
+          <label for="case-filter" class="sr-only" data-i18n="cases.filter">Filter cases</label>
           <input type="text" id="case-filter" data-i18n-placeholder="cases.filter" placeholder="Filter cases..." class="filter-input">
         </div>
         <div class="bulk-actions" id="cases-bulk-actions" style="display:none;">
@@ -271,11 +278,12 @@
           <button class="btn btn-danger btn-sm" id="btn-bulk-delete-cases" data-i18n="crud.bulk_delete">Delete Selected</button>
         </div>
         <div class="table-container">
-        <table id="cases-table" class="data-table">
+        <table id="cases-table" class="data-table" aria-live="polite">
           <thead><tr><th><input type="checkbox" id="case-select-all"></th><th data-i18n="th.id">ID</th><th data-i18n="th.title">Title</th><th data-i18n="th.type">Type</th><th data-i18n="th.tag">Tag</th><th data-i18n="th.priority">Priority</th><th data-i18n="th.feature">Feature</th><th data-i18n="th.status">Status</th><th data-i18n="th.actions">Actions</th></tr></thead>
           <tbody></tbody>
         </table>
         </div>
+        <div id="cases-pager" class="cases-pager" style="margin-top:0.75rem;"></div>
       </div>
       <div class="tab-bottom-cta" id="cases-next-cta" style="display:none;"></div>
     </div>
@@ -287,6 +295,7 @@
       <div class="card-header">
         <h2 data-i18n="scripts.title">Test Scripts</h2>
         <div class="header-actions">
+          <label for="script-gen-mode" class="sr-only" data-i18n="gen.mode">Mode</label>
           <select id="script-gen-mode" class="gen-mode-selector">
             <option value="generate" data-i18n="gen.generate">Generate</option>
             <option value="regenerate" data-i18n="gen.regenerate">Regenerate</option>
@@ -347,7 +356,7 @@
       <div id="run-history" style="display:none;">
         <h3 data-i18n="exec.history">Run History</h3>
         <div class="table-container">
-        <table id="runs-table" class="data-table">
+        <table id="runs-table" class="data-table" aria-live="polite">
           <thead><tr><th data-i18n="th.run_id">Run ID</th><th data-i18n="th.date">Date</th><th data-i18n="th.total">Total</th><th data-i18n="th.passed">Passed</th><th data-i18n="th.failed">Failed</th></tr></thead>
           <tbody></tbody>
         </table>
@@ -393,6 +402,7 @@
       <div class="card-header">
         <h2 data-i18n="report.title">Test Report</h2>
         <div class="header-actions">
+          <label for="report-fmt" class="sr-only" data-i18n="report.format">Format</label>
           <select id="report-fmt" class="select-sm">
             <option value="markdown">Markdown</option>
             <option value="html">HTML</option>

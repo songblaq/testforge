@@ -1,0 +1,25 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.11, pytest-9.0.2, pluggy-1.6.0
+rootdir: /Users/user/_/workspace/nts-ai/testforge
+configfile: pyproject.toml
+plugins: anyio-4.12.1, cov-7.1.0
+collected 288 items
+
+tests/selftest/test_cli_dogfood.py ..........                            [  3%]
+tests/selftest/test_gui_dogfood.py ............................          [ 13%]
+tests/test_assertions.py ......................                          [ 20%]
+tests/test_checklist.py ..........................                       [ 29%]
+tests/test_cli.py ........                                               [ 32%]
+tests/test_coverage.py ..........                                        [ 36%]
+tests/test_e2e.py ................................                       [ 47%]
+tests/test_ollama.py ................                                    [ 52%]
+tests/test_pipeline.py ....                                              [ 54%]
+tests/test_research.py .....                                             [ 55%]
+tests/test_runner.py .                                                   [ 56%]
+tests/test_scripts.py .............................                      [ 66%]
+tests/test_tui.py ssss.                                                  [ 68%]
+tests/test_usecases.py ...............                                   [ 73%]
+tests/test_web.py ...................................................... [ 92%]
+.......................                                                  [100%]
+
+======================= 284 passed, 4 skipped in 14.58s ========================

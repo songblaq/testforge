@@ -1,0 +1,77 @@
+{
+  "agent": "performance-profiler",
+  "findings": [
+    {
+      "area": "backend",
+      "function": "execution.list_runs",
+      "complexity": "O(R) full-file reads; each file O(bytes of entire run JSON)",
+      "threshold": "R>20 or any run file >~500KB (many results per run); multi-MB histories become slow quickly",
+      "impact": "Every GET /runs reads and json.loads the complete body of each run_*.json (including full results arrays). Listing history does not need per-result payloads, so CPU, memory, and latency scale with total stored history size, not row count shown.",
+      "fix": "Store sidecar metadata files (e.g. run_{id}.meta.json) written at run end, or read only first N KB / stream-parse top-level keys; alternatively SQLite/index for list view and load full run only on GET /runs/{id}."
+    },
+    {
+      "area": "backend",
+      "function": "scripts.list_scripts",
+      "complexity": "O(N) sequential read_text per script; O(total bytes) memory for content strings",
+      "threshold": "N>~50 or scripts >~20KB each; noticeable API latency on HDD or large repos",
+      "impact": "For each *.py file the handler reads the entire file to compute lines, preview[:500], and heuristic case_id scan. One list request triggers N full disk reads; response payload also embeds previews for all scripts.",
+      "fix": "Use f.stat() for size; read only first ~2–4KB for header/heuristic; omit preview from list and fetch on row expand or GET /scripts/{name}; optional asyncio.gather or thread pool for parallel stat/head reads."
+    },
+    {
+      "area": "frontend",
+      "function": "renderCases",
+      "complexity": "O(N) string concat via map+join; single innerHTML write; esc() is O(N*fields) extra DOM createElement churn",
+      "threshold": "N>~300–800 rows typical for main-thread jank; 1000+ often causes visible freeze on mid devices",
+      "impact": "Assigning a huge HTML string to tbody.innerHTML blocks the main thread during parse and layout. filterCases calls renderCases on filtered set so large datasets re-render whole tables. esc() allocates a temporary DOM node per field per row.",
+      "fix": "Virtualize the table (e.g. windowed rows), paginate server-side, or use DocumentFragment incremental updates; replace esc with a string-only escape for hot paths; yield chunk rendering via requestAnimationFrame."
+    },
+    {
+      "area": "frontend",
+      "function": "loadScripts",
+      "complexity": "O(N) for table innerHTML + O(N) summary loop; no per-file fetch in browser",
+      "threshold": "N>~500 rows or very wide mapped_cases cells; usually network-bound from list_scripts payload size",
+      "impact": "The SPA does not read script files locally; it calls GET /scripts once. Cost is dominated by backend full-file reads and JSON size (previews), then one large innerHTML assign for the table.",
+      "fix": "Backend slim list response; frontend virtualization if row count grows; lazy script detail fetch (already partial via editScript GET)."
+    },
+    {
+      "area": "frontend",
+      "function": "loadRunHistory",
+      "complexity": "O(1) HTTP + O(R) DOM rows from map+join innerHTML",
+      "threshold": "DOM side: R>~200 rows; real cost usually server list_runs reading huge JSON files",
+      "impact": "Client does not parse run files; it only renders the run list returned by the API. Sequential file parsing happens on the server in list_runs.",
+      "fix": "Same as list_runs backend fix; optionally cap displayed runs or paginate the API."
+    },
+    {
+      "area": "frontend",
+      "function": "loadRunDetail",
+      "complexity": "O(M) innerHTML for M results in one selected run",
+      "threshold": "M>~1000 test results in a single run",
+      "impact": "After one GET /runs/{id}, builds a large results table in one innerHTML assignment; can freeze UI for huge single-run payloads.",
+      "fix": "Virtualize execution result rows or paginate result list in the API."
+    },
+    {
+      "area": "backend",
+      "function": "cases.get_case_scripts",
+      "complexity": "O(S) read_text over all scripts in heuristic fallback path",
+      "threshold": "S>~30 when mappings empty and heuristic scans whole scripts dir",
+      "impact": "If no authoritative mappings match, every *.py is read fully to search for case_id in content.",
+      "fix": "Prefer mappings only; constrain heuristic to filename/stem; or index case_id in metadata files at generation time."
+    },
+    {
+      "area": "backend",
+      "function": "reports.list_reports",
+      "complexity": "O(K) small meta JSON reads",
+      "threshold": "K>~500 report entries",
+      "impact": "Reads one small meta file per report; generally acceptable compared to run/script full reads.",
+      "fix": "Pagination or single index file if K grows very large."
+    },
+    {
+      "area": "frontend",
+      "function": "filterCases",
+      "complexity": "O(N) filter + full renderCases re-run",
+      "threshold": "N>~2000 with rapid typing",
+      "impact": "Each filter pass allocates a new filtered array and rebuilds entire table HTML.",
+      "fix": "Debounce input; virtual list; or server-side query parameters."
+    }
+  ]
+}

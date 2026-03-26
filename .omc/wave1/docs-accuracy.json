@@ -1,0 +1,76 @@
+{
+  "agent": "docs-accuracy-auditor",
+  "findings": [
+    {
+      "file": "README.md",
+      "line": 133,
+      "issue": "CLI Reference table and Quick Start omit implemented commands: `testforge web` (Web GUI), `testforge research`, and `testforge coverage`, all present in `src/testforge/cli.py` and `testforge --help`.",
+      "severity": "high",
+      "fix": "Add rows for `web`, `research`, and `coverage`; document `pip install \"testforge[web]\"` and `testforge web [--host/--port]` alongside the TUI section."
+    },
+    {
+      "file": "docs/cli-reference.md",
+      "line": 1,
+      "issue": "Claims to be the full CLI reference but has no sections for `coverage`, `research`, or `web`, while the installed CLI lists those commands.",
+      "severity": "high",
+      "fix": "Add sections mirroring Click options/help for `coverage`, `research`, and `web` (including `[web]` extra requirement)."
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 20,
+      "issue": "States script generation includes 'HTTP API scripts, and shell scripts', but `testforge.scripts.generator.generate_scripts` only registers `playwright` (`src/testforge/scripts/generator.py`).",
+      "severity": "high",
+      "fix": "Change bullet to Playwright-only script generation, or implement HTTP/shell generators before claiming them."
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 24,
+      "issue": "Claims 'HAR traces per test run' as shipped; runner uses pytest/subprocess and log evidence—no automatic HAR capture in execution path (only `EvidenceCollector.capture_network` helper in `evidence.py`). README line 41 correctly says HAR is planned.",
+      "severity": "medium",
+      "fix": "Align CHANGELOG with README: HAR as planned/plumbing only, or wire HAR into browser runs and then document."
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 36,
+      "issue": "Notes say 'Ollama local-inference support is coming in v0.2' but `OllamaAdapter` exists (`src/testforge/llm/ollama.py`, `create_adapter` for `ollama`), and configuration/README document `llm_provider: ollama`.",
+      "severity": "medium",
+      "fix": "Remove or rewrite the v0.2 note to reflect current Ollama support; fix `ollama.py` error message that references non-existent `testforge[ollama]` extra in `pyproject.toml`."
+    },
+    {
+      "file": "docs/configuration.md",
+      "line": 219,
+      "issue": "SSH example imports `SSHConnector` and uses `key_path`, but the implementation is `SshConnector` in `ssh.py` with `NotImplementedError` and a different constructor surface (`host`, `user`, `port` only).",
+      "severity": "medium",
+      "fix": "Rename to `SshConnector`, mark section as placeholder/not implemented, and match the real signature or defer docs until implemented."
+    },
+    {
+      "file": "docs/getting-started.md",
+      "line": 112,
+      "issue": "Input table lists 'GitHub repo' as a generic inputs/ option; parsing only treats `github:owner/repo` or `gh:owner/repo` (`input/parser.py`), not a normal `https://github.com/...` URL.",
+      "severity": "medium",
+      "fix": "Document the required `github:` / `gh:` prefix and a concrete `testforge analyze` example."
+    },
+    {
+      "file": "README.md",
+      "line": 48,
+      "issue": "Pipeline ASCII diagram shows HTTP/Shell/SSH execution columns; default `testforge run` executes `*.py` scripts via pytest (`runner.py`), not connector-based HTTP/Shell/SSH tracks.",
+      "severity": "low",
+      "fix": "Clarify that connectors are for custom/extension use and the default CLI path is Playwright/pytest scripts."
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 6,
+      "issue": "Says TestForge uses calendar versioning (calver.org) while the project uses semantic-style `0.1.0` and a `v0.1.0` release link.",
+      "severity": "low",
+      "fix": "Switch wording to SemVer or remove the calver claim."
+    },
+    {
+      "file": "CHANGELOG.md",
+      "line": 40,
+      "issue": "Release URL `https://github.com/songblaq/testforge/releases/tag/v0.1.0` may 404 if the tag was never published (not verified in this audit).",
+      "severity": "low",
+      "fix": "Publish the tag or link to PyPI/commit until releases exist."
+    }
+  ],
+  "accuracy_score": "5/10"
+}

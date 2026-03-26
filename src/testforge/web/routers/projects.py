@@ -62,6 +62,9 @@ async def create_project(body: ProjectCreate):
     from testforge.core.config import TestForgeConfig, save_config
     from testforge.core.project import create_project as _create
 
+    if ".." in body.name or "/" in body.name or "\\" in body.name:
+        raise HTTPException(status_code=400, detail="Invalid project name")
+
     project_dir = Path(body.directory) / body.name
     if project_dir.exists():
         raise HTTPException(status_code=409, detail=f"Directory already exists: {project_dir}")
@@ -84,7 +87,9 @@ async def list_projects(directory: str = Query(".", description="Base directory 
     """List TestForge projects in a directory."""
     from testforge.core.project import list_projects as _list
 
-    base = Path(directory)
+    if ".." in Path(directory).parts:
+        raise HTTPException(status_code=400, detail="Invalid directory path")
+    base = Path(directory).resolve()
     if not base.exists():
         raise HTTPException(status_code=404, detail=f"Directory not found: {directory}")
 

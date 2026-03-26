@@ -1,0 +1,64 @@
+{
+  "agent": "path-traversal-hunter",
+  "methodology": "Counted path constructions where request data influences filesystem paths (path params, query, body). Safe: resolve_project anchor, Path().name basename-only, allowlisted segments, server-generated IDs with ..// rejection, or resolve+is_relative_to. Unsafe: user strings joined into paths without those controls.",
+  "findings": [
+    {
+      "file": "src/testforge/web/routers/projects.py",
+      "line": 83,
+      "param": "directory (query)",
+      "risk": "high",
+      "detail": "list_projects builds base = Path(directory) with no resolve_project or traversal checks. Caller can point at arbitrary filesystem roots to discover/list TestForge projects and obtain paths/metadata.",
+      "fix": "Validate directory the same way as project roots (reject .. in parts, optionally require allowlisted base or resolve+is_relative_to a configured scan root)."
+    },
+    {
+      "file": "src/testforge/web/routers/projects.py",
+      "line": 65,
+      "param": "body.directory, body.name",
+      "risk": "high",
+      "detail": "create_project uses Path(body.directory) / body.name without traversal checks. Values like name '..' or directory containing '..' can resolve outside the intended parent; creates/deletes real directories on the server.",
+      "fix": "Reject .. in Path(directory).parts and Path(name).parts (or use a single controlled parent from config and restrict name to a safe charset)."
+    },
+    {
+      "file": "src/testforge/web/routers/analysis.py",
+      "line": 40,
+      "param": "body.inputs",
+      "risk": "high",
+      "detail": "When body.inputs is non-empty, strings are passed to run_analysis -> testforge.input.parser.parse(), which treats non-URL strings as local Path(path) and reads files (e.g. read_text). No confinement to project input_dir; enables arbitrary local file read.",
+      "fix": "Resolve each path under resolve_project(p) / config.input_dir using .resolve() and is_relative_to(input_dir.resolve()), or only allow basenames matched against files already in input_dir."
+    },
+    {
+      "file": "src/testforge/web/routers/manual.py",
+      "line": 125,
+      "param": "session_id",
+      "risk": "high",
+      "detail": "session_path = p / '.testforge' / 'manual' / f'{session_id}.json' with no sanitization. Path segments containing '..' or separators escape the manual directory after join/normalization.",
+      "fix": "Reject .., /, and \\ in session_id; or use Path(session_id).name and a strict allowlist (e.g. UUID/alphanumeric); verify resolved path stays under manual_dir."
+    },
+    {
+      "file": "src/testforge/web/routers/scripts.py",
+      "line": 84,
+      "param": "script_name",
+      "risk": "medium",
+      "detail": "Validation only tests '\"..\" in script_name or \"/\" in script_name'. Backslash-separated paths are not rejected on Windows; prefer basename equality or resolve+is_relative_to(scripts_dir).",
+      "fix": "Require Path(script_name).name == script_name and reject os.sep or use resolved path under p/'scripts' with is_relative_to."
+    },
+    {
+      "file": "src/testforge/web/routers/reports.py",
+      "line": 88,
+      "param": "report_id",
+      "risk": "medium",
+      "detail": "Same pattern as script_name: only .. and / rejected. report_file uses Path(meta['file']).name which limits poisoned meta, but report_id itself should use stricter single-segment rules for consistency across platforms.",
+      "fix": "Allow only safe ID charset (e.g. [A-Za-z0-9_-]+) or resolve reports_dir / f'report_{id}.meta.json' and verify file is under reports_dir."
+    },
+    {
+      "file": "src/testforge/web/routers/execution.py",
+      "line": 123,
+      "param": "run_id",
+      "risk": "medium",
+      "detail": "run_id allows characters beyond .. and /; backslash may bypass on Windows. run_file is output_dir / f'run_{run_id}.json'.",
+      "fix": "Align with report_id: strict charset or resolve+is_relative_to(output_dir)."
+    }
+  ],
+  "safe_count": 55,
+  "unsafe_count": 7
+}

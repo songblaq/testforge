@@ -1,0 +1,90 @@
+{
+  "agent": "security-reverifier",
+  "checks": [
+    {
+      "area": "path_traversal/manual_session_id",
+      "payload": "session_id=../../../etc/passwd",
+      "expected": "blocked",
+      "actual": "blocked",
+      "pass": true
+    },
+    {
+      "area": "path_traversal/manual_session_id",
+      "payload": "session_id=valid-id",
+      "expected": "allowed",
+      "actual": "allowed",
+      "pass": true
+    },
+    {
+      "area": "path_traversal/list_projects",
+      "payload": "directory query with .. in Path.parts (e.g. ../outside)",
+      "expected": "blocked",
+      "actual": "blocked",
+      "pass": true
+    },
+    {
+      "area": "path_traversal/list_projects",
+      "payload": "directory=/etc (absolute, no ..)",
+      "expected": "allowed",
+      "actual": "allowed",
+      "pass": true
+    },
+    {
+      "area": "path_traversal/create_project_name",
+      "payload": "body.name=../evil",
+      "expected": "blocked",
+      "actual": "blocked",
+      "pass": true
+    },
+    {
+      "area": "xss/safeHref",
+      "payload": "safeHref(\"//evil.com\")",
+      "expected": "blocked",
+      "actual": "blocked",
+      "pass": true
+    },
+    {
+      "area": "xss/safeHref",
+      "payload": "safeHref(\"https://good.com\")",
+      "expected": "allowed",
+      "actual": "allowed",
+      "pass": true
+    },
+    {
+      "area": "xss/simpleMarkdown_image",
+      "payload": "![\"><img onerror=alert(1)>](https://example.com/x.png)",
+      "expected": "blocked",
+      "actual": "blocked",
+      "pass": true
+    },
+    {
+      "area": "lfi/analysis_inputs",
+      "payload": "input=/etc/passwd",
+      "expected": "blocked",
+      "actual": "blocked",
+      "pass": true
+    },
+    {
+      "area": "lfi/analysis_inputs",
+      "payload": "input=../../etc/passwd",
+      "expected": "blocked",
+      "actual": "blocked",
+      "pass": true
+    },
+    {
+      "area": "ssrf/url_fetch",
+      "payload": "http://127.0.0.1/admin",
+      "expected": "blocked",
+      "actual": "blocked",
+      "pass": true
+    }
+  ],
+  "remaining_risks": [
+    "list_projects: Any base path without '..' components (including absolute paths like /etc) is accepted; this can disclose directory layout anywhere the server process can read. Mitigation is operational trust, not an allowlist in code.",
+    "URL SSRF defense lives in testforge.input.url.parse_url (private IP checks, follow_redirects=False), not in analysis.py; http(s) strings bypass path validation but still fail closed on fetch for 127.0.0.1/private targets.",
+    "_is_private_url uses IPv4-only getaddrinfo(AF_INET); unusual IPv6 or resolution edge cases should be reviewed if IPv6 URLs are expected.",
+    "DNS rebinding between pre-check resolution and fetch is a known class of bypass for hostname-based SSRF guards; follow_redirects=False reduces redirect-based bypass only.",
+    "safeHref allows relative URLs starting with /, ., or #; same-origin implications depend on deployment; javascript: and data: are rejected by the allowlist."
+  ],
+  "verdict": "PASS"
+}

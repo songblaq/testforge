@@ -6,6 +6,9 @@
 var currentProject = null;
 var allProjects = [];
 var allCases = [];
+var casesPage = 1;
+var casesPerPage = 50;
+var casesTotal = 0;
 var manualSession = null;
 var _pipelineData = null;
 var _lastReportContent = null;
@@ -67,6 +70,10 @@ function toast(message, type) {
   var el = document.createElement("div");
   el.className = "toast toast-" + type;
   el.textContent = message;
+  if (type === "error") {
+    el.setAttribute("role", "alert");
+    el.setAttribute("aria-live", "assertive");
+  }
   container.appendChild(el);
   var delay = type === "error" ? 6000 : 4000;
   setTimeout(function() { el.remove(); }, delay);
@@ -231,8 +238,11 @@ function renderMarkdownTable(rows) {
 }
 
 function safeHref(url) {
-  if (/^(https?:|mailto:|\/|#|\.)/i.test(url)) return url;
-  return '#';
+  if (!url) return "";
+  url = url.trim();
+  if (url.startsWith("//")) return "";  // block protocol-relative
+  if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("mailto:") || url.startsWith("/") || url.startsWith("#") || url.startsWith(".")) return url;
+  return "";
 }
 
 function inlineFormat(text) {
@@ -248,7 +258,7 @@ function inlineFormat(text) {
   });
   // Images: ![alt](url)
   text = text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, function(_, alt, url) {
-    return '<img src="' + safeHref(url) + '" alt="' + alt + '">';
+    return '<img src="' + safeHref(url) + '" alt="' + esc(alt) + '">';
   });
   return text;
 }
@@ -695,6 +705,8 @@ function renderProjectDropdown(projects) {
 function selectProject(proj) {
   currentProject = proj;
   allCases = [];
+  casesPage = 1;
+  casesTotal = 0;
   manualSession = null;
   _pipelineData = null;
 
@@ -736,6 +748,8 @@ function selectProject(proj) {
 function deselectProject() {
   currentProject = null;
   allCases = [];
+  casesPage = 1;
+  casesTotal = 0;
   manualSession = null;
   _pipelineData = null;
 
@@ -1074,13 +1088,13 @@ function renderPipelineStepper(data) {
     var countText = getStageCount(stage);
 
     html +=
-      '<div class="pipeline-step ' + stateClass + '" data-tab="' + (tabMap[stage.stage] || stage.stage) + '">' +
-        '<div class="pipeline-step-connector"></div>' +
-        '<div class="pipeline-step-icon">' + icon + '</div>' +
-        '<div class="pipeline-step-label">' + esc(stageLabels[stage.stage] || stage.stage) + '</div>' +
-        '<div class="pipeline-step-count">' + esc(countText) + '</div>' +
-        '<div class="pipeline-step-status">' + esc(statusText) + '</div>' +
-      '</div>';
+      '<button type="button" class="pipeline-step ' + stateClass + '" data-tab="' + (tabMap[stage.stage] || stage.stage) + '">' +
+        '<span class="pipeline-step-connector" aria-hidden="true"></span>' +
+        '<span class="pipeline-step-icon" aria-hidden="true">' + icon + '</span>' +
+        '<span class="pipeline-step-label">' + esc(stageLabels[stage.stage] || stage.stage) + '</span>' +
+        '<span class="pipeline-step-count">' + esc(countText) + '</span>' +
+        '<span class="pipeline-step-status">' + esc(statusText) + '</span>' +
+      '</button>';
   }
 
   container.innerHTML = html;
@@ -1108,7 +1122,7 @@ function renderPipelineStepper(data) {
 function getStageCount(stage) {
   if (stage.count !== undefined) {
     if (stage.stage === "inputs") return t("stepper.docs", {n: stage.count});
-    if (stage.stage === "scripts") return t("stepper.scripts", {n: stage.count});
+    if (stage.stage === "scripts") return t("stepper.scripts_count", {n: stage.count});
     return String(stage.count);
   }
   if (stage.summary) {
@@ -1148,7 +1162,7 @@ function renderOverviewStats(data) {
       label = t("stepper.cases_count", {n: ""}).replace(/\s*$/, "");
     } else if (stage.stage === "scripts") {
       value = stage.count !== undefined ? String(stage.count) : "-";
-      label = t("stepper.scripts", {n: ""}).replace(/\s*$/, "");
+      label = t("stepper.scripts");
     } else if (stage.stage === "execution" && stage.summary && stage.summary.total) {
       value = String(stage.summary.passed || 0) + "/" + String(stage.summary.total || 0);
       label = t("exec.passed");
@@ -1509,8 +1523,61 @@ async function runAnalysis() {
 function updateCasesExportVisibility() {
   var exportBtn = document.getElementById("btn-export-cases");
   if (exportBtn) {
-    exportBtn.style.display = allCases && allCases.length > 0 ? "" : "none";
+    exportBtn.style.display = casesTotal > 0 || (allCases && allCases.length > 0) ? "" : "none";
   }
+}
+
+function isCasesFilterActive() {
+  var filterInput = document.getElementById("case-filter");
+  var q = (filterInput && filterInput.value || "").trim().toLowerCase();
+  var typeVal = document.getElementById("case-type-select").value;
+  var tagVal = document.getElementById("case-tag-select").value;
+  return !!(q || typeVal !== "all" || tagVal !== "all");
+}
+
+function applyCasesFiltersToList(list) {
+  var filterInput = document.getElementById("case-filter");
+  var q = (filterInput && filterInput.value || "").trim().toLowerCase();
+  var typeVal = document.getElementById("case-type-select").value;
+  var tagVal = document.getElementById("case-tag-select").value;
+
+  return list.filter(function(c) {
+    if (q) {
+      var match = (c.id || "").toLowerCase().indexOf(q) >= 0 ||
+             (c.title || c.name || "").toLowerCase().indexOf(q) >= 0 ||
+             (c.feature_id || "").toLowerCase().indexOf(q) >= 0 ||
+             (c.description || "").toLowerCase().indexOf(q) >= 0;
+      if (!match) return false;
+    }
+    if (typeVal !== "all") {
+      var caseType = c.type || c.case_type || "functional";
+      if (caseType !== typeVal) return false;
+    }
+    if (tagVal !== "all") {
+      var cTag = classifyTag(c.tags);
+      if (tagVal === "positive" && cTag !== "positive") return false;
+      if (tagVal === "negative" && cTag !== "negative") return false;
+      if (tagVal === "edge" && cTag !== "edge") return false;
+      if (tagVal === "smoke" && (!c.tags || c.tags.indexOf("smoke") < 0)) return false;
+      if (tagVal === "regression" && (!c.tags || c.tags.indexOf("regression") < 0)) return false;
+    }
+    return true;
+  });
+}
+
+function renderCasesPager() {
+  var pager = document.getElementById("cases-pager");
+  if (!pager) return;
+  if (isCasesFilterActive() || casesTotal <= casesPerPage) {
+    pager.innerHTML = "";
+    return;
+  }
+  var totalPages = Math.ceil(casesTotal / casesPerPage);
+  pager.innerHTML = '<button type="button" class="btn btn-sm" ' + (casesPage <= 1 ? "disabled" : "") +
+    ' onclick="casesPage--; loadCases();">&laquo; ' + esc(t("pager.prev")) + "</button>" +
+    " <span>" + casesPage + " / " + totalPages + "</span> " +
+    '<button type="button" class="btn btn-sm" ' + (casesPage >= totalPages ? "disabled" : "") +
+    ' onclick="casesPage++; loadCases();">' + esc(t("pager.next")) + " &raquo;</button>";
 }
 
 async function loadCases() {
@@ -1522,6 +1589,9 @@ async function loadCases() {
     document.getElementById("cases-content").style.display = "none";
     document.getElementById("btn-generate").disabled = true;
     document.getElementById("cases-next-cta").style.display = "none";
+    casesTotal = 0;
+    var pgGuard = document.getElementById("cases-pager");
+    if (pgGuard) pgGuard.innerHTML = "";
     updateCasesExportVisibility();
     return;
   }
@@ -1530,14 +1600,34 @@ async function loadCases() {
   document.getElementById("btn-generate").disabled = false;
 
   try {
-    var data = await api("GET", "/api/projects/" + encodePath(currentProject.path) + "/cases");
-    allCases = data.cases || [];
-    renderCases(allCases);
+    var base = "/api/projects/" + encodePath(currentProject.path) + "/cases";
+    var data;
+    if (isCasesFilterActive()) {
+      data = await api("GET", base);
+      allCases = data.cases || [];
+      casesTotal = data.count != null ? data.count : allCases.length;
+      renderCases(applyCasesFiltersToList(allCases));
+    } else {
+      var qs = "?page=" + encodeURIComponent(casesPage) + "&per_page=" + encodeURIComponent(casesPerPage);
+      data = await api("GET", base + qs);
+      allCases = data.cases || [];
+      casesTotal = data.total != null ? data.total : allCases.length;
+      var totalPages = Math.max(1, Math.ceil(casesTotal / casesPerPage) || 1);
+      if (casesPage > totalPages && casesTotal > 0) {
+        casesPage = totalPages;
+        return loadCases();
+      }
+      renderCases(allCases);
+    }
+    updateCasesExportVisibility();
   } catch (e) {
     allCases = [];
+    casesTotal = 0;
     document.getElementById("cases-empty").style.display = "";
     document.getElementById("cases-content").style.display = "none";
     document.getElementById("cases-next-cta").style.display = "none";
+    var pgErr = document.getElementById("cases-pager");
+    if (pgErr) pgErr.innerHTML = "";
     updateCasesExportVisibility();
   }
 }
@@ -1551,6 +1641,7 @@ function renderCases(cases) {
     document.getElementById("cases-empty").style.display = "";
     document.getElementById("cases-content").style.display = "none";
     document.getElementById("cases-next-cta").style.display = "none";
+    renderCasesPager();
     return;
   }
 
@@ -1609,39 +1700,27 @@ function renderCases(cases) {
 
   // Bottom CTA
   showTabBottomCta("cases", t("cta.done_cases"), t("cta.next_scripts"), "scripts");
+  renderCasesPager();
 }
 
-function filterCases() {
-  var q = document.getElementById("case-filter").value.toLowerCase();
-  var typeVal = document.getElementById("case-type-select").value;
-  var tagVal = document.getElementById("case-tag-select").value;
-
-  var filtered = allCases.filter(function(c) {
-    // Text filter
-    if (q) {
-      var match = (c.id || "").toLowerCase().indexOf(q) >= 0 ||
-             (c.title || c.name || "").toLowerCase().indexOf(q) >= 0 ||
-             (c.feature_id || "").toLowerCase().indexOf(q) >= 0 ||
-             (c.description || "").toLowerCase().indexOf(q) >= 0;
-      if (!match) return false;
+async function filterCases() {
+  if (!currentProject) return;
+  if (!isCasesFilterActive()) {
+    casesPage = 1;
+    await loadCases();
+    return;
+  }
+  try {
+    if (casesTotal > 0 && allCases.length < casesTotal) {
+      var data = await api("GET", "/api/projects/" + encodePath(currentProject.path) + "/cases");
+      allCases = data.cases || [];
+      casesTotal = data.count != null ? data.count : allCases.length;
     }
-    // Type filter
-    if (typeVal !== "all") {
-      var caseType = c.type || c.case_type || "functional";
-      if (caseType !== typeVal) return false;
-    }
-    // Tag filter
-    if (tagVal !== "all") {
-      var cTag = classifyTag(c.tags);
-      if (tagVal === "positive" && cTag !== "positive") return false;
-      if (tagVal === "negative" && cTag !== "negative") return false;
-      if (tagVal === "edge" && cTag !== "edge") return false;
-      if (tagVal === "smoke" && (!c.tags || c.tags.indexOf("smoke") < 0)) return false;
-      if (tagVal === "regression" && (!c.tags || c.tags.indexOf("regression") < 0)) return false;
-    }
-    return true;
-  });
-  renderCases(filtered);
+    var filtered = applyCasesFiltersToList(allCases);
+    renderCases(filtered);
+  } catch (e) {
+    toast(e.message, "error");
+  }
 }
 
 async function generateCases() {
@@ -1662,8 +1741,8 @@ async function generateCases() {
   return withLoading("btn-generate", async function() {
     try {
       var data = await api("POST", "/api/projects/" + encodePath(currentProject.path) + "/cases", { case_type: caseType, mode: mode });
-      allCases = data.cases || [];
-      renderCases(allCases);
+      casesPage = 1;
+      await loadCases();
       toast(t("toast.generated_cases", {n: data.count || 0}), "success");
       try {
         var info = await api("GET", "/api/projects/" + encodePath(currentProject.path) + "/info");
@@ -2258,14 +2337,18 @@ function downloadReport() {
 // Create Project Modal
 // ---------------------------------------------------------------------------
 function showCreateModal() {
-  document.getElementById("create-modal").style.display = "flex";
+  var overlay = document.getElementById("create-modal");
+  overlay.style.display = "flex";
   document.getElementById("new-project-name").value = "";
   document.getElementById("create-model").value = "";
+  _trapFocus(overlay);
   document.getElementById("new-project-name").focus();
 }
 
 function hideCreateModal() {
-  document.getElementById("create-modal").style.display = "none";
+  var overlay = document.getElementById("create-modal");
+  if (overlay._trapHandler) overlay.removeEventListener("keydown", overlay._trapHandler);
+  overlay.style.display = "none";
 }
 
 async function createProject() {
@@ -2392,12 +2475,23 @@ document.addEventListener("click", function(e) {
   document.getElementById("project-dropdown-btn").addEventListener("click", toggleDropdown);
   document.getElementById("btn-analyze").addEventListener("click", runAnalysis);
   document.getElementById("btn-generate").addEventListener("click", generateCases);
-  document.getElementById("btn-export-cases")?.addEventListener("click", function() {
-    if (!allCases || allCases.length === 0) return;
+  document.getElementById("btn-export-cases")?.addEventListener("click", async function() {
+    if (!currentProject) return;
+    var toExport = allCases;
+    try {
+      if (casesTotal > 0 && (!allCases || allCases.length < casesTotal)) {
+        var full = await api("GET", "/api/projects/" + encodePath(currentProject.path) + "/cases");
+        toExport = full.cases || [];
+      }
+    } catch (e) {
+      toast(e.message, "error");
+      return;
+    }
+    if (!toExport || toExport.length === 0) return;
     var projectName = currentProject && currentProject.path ? currentProject.path.split("/").pop() : "testforge";
     var date = new Date().toISOString().slice(0, 10).replace(/-/g, "");
     var filename = projectName + "_cases_" + date + ".json";
-    var blob = new Blob([JSON.stringify(allCases, null, 2)], { type: "application/json" });
+    var blob = new Blob([JSON.stringify(toExport, null, 2)], { type: "application/json" });
     var url = URL.createObjectURL(blob);
     var a = document.createElement("a");
     a.href = url;

@@ -1,0 +1,7 @@
+{
+  "agent": "i18n-reverifier",
+  "key_counts": {"en": 338, "ko": 338, "vi": 338},
+  "duplicate_fixed": true,
+  "missing_keys": [],
+  "verdict": "PASS"
+}

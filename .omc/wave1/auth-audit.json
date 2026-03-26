@@ -1,0 +1,213 @@
+{
+  "agent": "auth-access-auditor",
+  "default_host": "127.0.0.1",
+  "default_port": 8000,
+  "auth_mechanism": "none",
+  "dangerous_endpoints": [
+    {
+      "method": "DELETE",
+      "path": "/api/projects/{project_path}",
+      "risk": "critical",
+      "detail": "Unauthenticated shutil.rmtree on resolved TestForge project directory; complete project destruction.",
+      "mitigation": "Add authentication (token/API key), optional localhost-only middleware, or disable in production builds."
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/projects/{project_path}/cases/item/{case_id}",
+      "risk": "high",
+      "detail": "Removes a test case and related mappings from project JSON; data loss.",
+      "mitigation": "Require auth; audit log; backups."
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects/{project_path}/cases/bulk-delete",
+      "risk": "high",
+      "detail": "Bulk deletion of cases and mapping cleanup; large-scale data loss.",
+      "mitigation": "Same as single-case delete."
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/projects/{project_path}/scripts/{script_name}",
+      "risk": "high",
+      "detail": "Deletes script file under project scripts/ and updates mappings.",
+      "mitigation": "Auth; confirm destructive actions in UI with re-auth."
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/projects/{project_path}/mappings",
+      "risk": "medium",
+      "detail": "Query params case_id and script_name; removes mapping entries from .testforge/mappings.json.",
+      "mitigation": "Auth."
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/inputs",
+      "risk": "high",
+      "detail": "Query project_path and filename; unlinks file in project input_dir after Path(filename).name sanitization.",
+      "mitigation": "Auth."
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/projects/{project_path}/analysis/features/{feature_id}",
+      "risk": "medium",
+      "detail": "Mutates analysis.json; removes feature.",
+      "mitigation": "Auth."
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/projects/{project_path}/analysis/personas/{persona_id}",
+      "risk": "medium",
+      "detail": "Mutates analysis.json; removes persona.",
+      "mitigation": "Auth."
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/projects/{project_path}/analysis/rules/{rule_id}",
+      "risk": "medium",
+      "detail": "Mutates analysis.json; removes rule.",
+      "mitigation": "Auth."
+    },
+    {
+      "method": "PUT",
+      "path": "/api/projects/{project_path}/scripts/{script_name}",
+      "risk": "critical",
+      "detail": "Overwrites arbitrary existing .py under scripts/ (basename only; no ..). Combined with POST .../run this is an indirect code-execution path: attacker writes malicious pytest module then triggers runner subprocess (python -m pytest <script>). Not generic OS RCE from raw HTTP body alone without a prior PUT or generated script.",
+      "mitigation": "Auth; signed scripts; run in sandbox; disallow remote script PUT without strong controls."
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects/{project_path}/run",
+      "risk": "critical",
+      "detail": "Runs pytest via subprocess on each scripts/*.py (except conftest.py), cwd=project root, timeout 120s. Executes whatever Python is on disk in those files; does not accept arbitrary shell commands in the request, but executes project scripts en masse.",
+      "mitigation": "Auth; isolate runner (container/VM); restrict who can modify scripts/."
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects",
+      "risk": "medium",
+      "detail": "Creates new project directory under user-supplied directory/name; filesystem write anywhere the server user can write.",
+      "mitigation": "Auth; allowlist parent directories."
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects/{project_path}/inputs",
+      "risk": "medium",
+      "detail": "Upload up to 10MB into project inputs/; can overwrite same-named file.",
+      "mitigation": "Auth; virus scanning; content policy."
+    },
+    {
+      "method": "PUT",
+      "path": "/api/projects/{project_path}/cases",
+      "risk": "high",
+      "detail": "Bulk replace cases.json body.",
+      "mitigation": "Auth."
+    },
+    {
+      "method": "PUT",
+      "path": "/api/projects/{project_path}/cases/item/{case_id}",
+      "risk": "medium",
+      "detail": "Partial update of single case in cases.json.",
+      "mitigation": "Auth."
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects/{project_path}/cases",
+      "risk": "medium",
+      "detail": "Regenerate/generate cases; LLM or offline path; can overwrite cases with backup on regenerate mode.",
+      "mitigation": "Auth; rate limits for LLM cost."
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects/{project_path}/cases/item",
+      "risk": "medium",
+      "detail": "Appends new case to cases.json.",
+      "mitigation": "Auth."
+    },
+    {
+      "method": "PUT",
+      "path": "/api/projects/{project_path}/analysis",
+      "risk": "high",
+      "detail": "Full replace of analysis artifact from JSON body.",
+      "mitigation": "Auth."
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects/{project_path}/analysis",
+      "risk": "medium",
+      "detail": "Runs document analysis pipeline; reads/writes analysis outputs; may invoke LLM.",
+      "mitigation": "Auth; resource limits."
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects/{project_path}/analysis/features|personas|rules",
+      "risk": "medium",
+      "detail": "Appends entities to analysis (three POST routes under .../analysis/).",
+      "mitigation": "Auth."
+    },
+    {
+      "method": "PUT",
+      "path": "/api/projects/{project_path}/analysis/features/{feature_id}|personas/{persona_id}|rules/{rule_id}",
+      "risk": "medium",
+      "detail": "Updates single entity in analysis.json (three PUT route families).",
+      "mitigation": "Auth."
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects/{project_path}/scripts",
+      "risk": "high",
+      "detail": "Generates Python scripts into scripts/ via generator (may use LLM); new executable test code on disk.",
+      "mitigation": "Auth; review generated code before run."
+    },
+    {
+      "method": "PUT",
+      "path": "/api/projects/{project_path}/config",
+      "risk": "medium",
+      "detail": "Changes LLM provider/model and project_name in config.yaml.",
+      "mitigation": "Auth."
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects/{project_path}/mappings",
+      "risk": "low",
+      "detail": "Adds case-script mapping to .testforge/mappings.json.",
+      "mitigation": "Auth for consistency."
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects/{project_path}/report",
+      "risk": "low",
+      "detail": "Generates report and writes immutable copies under output/reports/.",
+      "mitigation": "Auth; disk quotas."
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects/{project_path}/manual/start",
+      "risk": "medium",
+      "detail": "Starts manual checklist session; writes session state under .testforge/manual/.",
+      "mitigation": "Auth."
+    },
+    {
+      "method": "PUT",
+      "path": "/api/projects/{project_path}/manual/check/{item_id}",
+      "risk": "medium",
+      "detail": "Records pass/fail for checklist item; mutates session state.",
+      "mitigation": "Auth."
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects/{project_path}/manual/finish",
+      "risk": "medium",
+      "detail": "Finalizes manual session and writes report path.",
+      "mitigation": "Auth."
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/{project_path}/config/test",
+      "risk": "low",
+      "detail": "Not destructive but leaks whether API keys exist in process env (ANTHROPIC_API_KEY / OPENAI_API_KEY presence messages) and probes localhost Ollama — side-channel / reconnaissance for any local caller.",
+      "mitigation": "Auth; avoid echoing key presence to unauthenticated clients."
+    }
+  ],
+  "realistic_threat_level": "low",
+  "threat_assessment": "The web app has no authentication or authorization layer in create_app(); every router endpoint is reachable by anyone who can open a TCP connection to the bound address. Default CLI binding is 127.0.0.1:8000, so remote Internet hosts cannot reach the service unless the user passes --host 0.0.0.0 or equivalent. In that typical localhost scenario, the main risks are: (1) other processes or users on the same machine invoking the API; (2) cross-site request forgery from a malicious page in the user’s browser while the GUI is running (browser may send cookies for same-site cases but here there are no cookies — still, simple cross-origin POST/DELETE from malicious sites to 127.0.0.1 is historically browser-dependent and often mitigated by CORS for reads, but destructive POST/DELETE may still be triggerable in some configurations); (3) accidental exposure if the user forwards the port or runs in a shared environment. Impact is high for integrity and confidentiality of TestForge projects (delete project, overwrite scripts, run pytest) because that equals full control over project files and arbitrary code execution as the server user via PUT script + POST run. For a single-developer local tool on loopback, practical remote exploitation is low; threat rises to medium or high if the server is bound to all interfaces, exposed via tunnel, or used on a multi-user host without additional network controls."
+}

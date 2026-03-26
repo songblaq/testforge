@@ -6,6 +6,7 @@ var translations = {
     "app.title": "TestForge",
     "project.select": "Select project...",
     "project.new": "+ New Project",
+    "settings.language": "Language",
     "welcome.title": "Welcome to TestForge",
     "welcome.desc": "Select or create a project to begin your QA workflow.",
     "welcome.create": "Create Project",
@@ -58,7 +59,7 @@ var translations = {
     "stepper.docs": "{n} docs",
     "stepper.features": "{n} features",
     "stepper.cases_count": "{n} cases",
-    "stepper.scripts": "{n} scripts",
+    "stepper.scripts_count": "{n} scripts",
     "stepper.runs": "{n} runs",
     "stepper.no_data": "-",
 
@@ -97,6 +98,8 @@ var translations = {
     "cases.empty": "No test cases",
     "cases.empty.desc": "Generate test cases after running analysis.",
     "cases.filter": "Filter cases...",
+    "cases.filter_type": "Case type",
+    "cases.filter_tag": "Tag",
     "cases.all": "All Types",
     "cases.functional": "Functional",
     "cases.usecase": "Use Case",
@@ -149,6 +152,7 @@ var translations = {
 
     // Report tab
     "report.title": "Test Report",
+    "report.format": "Format",
     "report.load": "Load Report",
     "report.empty": "No report loaded",
     "report.empty.desc": "Generate a report after running tests.",
@@ -194,6 +198,8 @@ var translations = {
 
     // Project list
     "projects.title": "Projects",
+    "projects.dir_label": "Directory to scan",
+    "projects.search": "Search projects",
     "projects.scan": "Scan",
     "projects.empty": "No projects found",
     "projects.empty.desc": "Create a new project or check the directory path.",
@@ -325,12 +331,16 @@ var translations = {
     "crud.no_selection": "No items selected",
 
     // Generate/Regenerate
+    "gen.mode": "Mode",
     "gen.generate": "Generate",
     "gen.regenerate": "Regenerate (overwrite)",
     "gen.new_version": "New Version",
     "gen.mode_title": "Generation Mode",
     "gen.mode_desc": "Choose how to handle existing data:",
     "gen.overwrite_warning": "Current data will be overwritten",
+
+    "pager.prev": "Previous",
+    "pager.next": "Next",
 
     // Run history
     "exec.history": "Run History",
@@ -396,6 +406,7 @@ var translations = {
     "app.title": "TestForge",
     "project.select": "\ud504\ub85c\uc81d\ud2b8 \uc120\ud0dd...",
     "project.new": "+ \uc0c8 \ud504\ub85c\uc81d\ud2b8",
+    "settings.language": "\uc5b8\uc5b4",
     "welcome.title": "TestForge\uc5d0 \uc624\uc2e0 \uac83\uc744 \ud658\uc601\ud569\ub2c8\ub2e4",
     "welcome.desc": "\ud504\ub85c\uc81d\ud2b8\ub97c \uc120\ud0dd\ud558\uac70\ub098 \uc0dd\uc131\ud558\uc5ec QA \uc6cc\ud06c\ud50c\ub85c\uc6b0\ub97c \uc2dc\uc791\ud558\uc138\uc694.",
     "welcome.create": "\ud504\ub85c\uc81d\ud2b8 \ub9cc\ub4e4\uae30",
@@ -448,7 +459,7 @@ var translations = {
     "stepper.docs": "{n}\uac1c \ubb38\uc11c",
     "stepper.features": "{n}\uac1c \uae30\ub2a5",
     "stepper.cases_count": "{n}\uac1c \ucf00\uc774\uc2a4",
-    "stepper.scripts": "{n}\uac1c \uc2a4\ud06c\ub9bd\ud2b8",
+    "stepper.scripts_count": "{n}\uac1c \uc2a4\ud06c\ub9bd\ud2b8",
     "stepper.runs": "{n}\ud68c \uc2e4\ud589",
     "stepper.no_data": "-",
 
@@ -487,6 +498,8 @@ var translations = {
     "cases.empty": "\ud14c\uc2a4\ud2b8 \ucf00\uc774\uc2a4 \uc5c6\uc74c",
     "cases.empty.desc": "\ubd84\uc11d \ud6c4 \ud14c\uc2a4\ud2b8 \ucf00\uc774\uc2a4\ub97c \uc0dd\uc131\ud558\uc138\uc694.",
     "cases.filter": "\ucf00\uc774\uc2a4 \uac80\uc0c9...",
+    "cases.filter_type": "\uc720\ud615",
+    "cases.filter_tag": "\ud0dc\uadf8",
     "cases.all": "\uc804\uccb4",
     "cases.functional": "\uae30\ub2a5 \ud14c\uc2a4\ud2b8",
     "cases.usecase": "\uc720\uc2a4\ucf00\uc774\uc2a4",
@@ -539,6 +552,7 @@ var translations = {
 
     // Report tab
     "report.title": "\ud14c\uc2a4\ud2b8 \ubcf4\uace0\uc11c",
+    "report.format": "\ud615\uc2dd",
     "report.load": "\ubcf4\uace0\uc11c \ub85c\ub4dc",
     "report.empty": "\ub85c\ub4dc\ub41c \ubcf4\uace0\uc11c \uc5c6\uc74c",
     "report.empty.desc": "\ud14c\uc2a4\ud2b8 \uc2e4\ud589 \ud6c4 \ubcf4\uace0\uc11c\ub97c \uc0dd\uc131\ud558\uc138\uc694.",
@@ -584,6 +598,8 @@ var translations = {
 
     // Project list
     "projects.title": "\ud504\ub85c\uc81d\ud2b8",
+    "projects.dir_label": "\uc2a4\uce94\ud560 \ub514\ub809\ud1a0\ub9ac",
+    "projects.search": "\ud504\ub85c\uc81d\ud2b8 \uac80\uc0c9",
     "projects.scan": "\uc2a4\uce94",
     "projects.empty": "\ud504\ub85c\uc81d\ud2b8\ub97c \ucc3e\uc744 \uc218 \uc5c6\uc2b5\ub2c8\ub2e4",
     "projects.empty.desc": "\uc0c8 \ud504\ub85c\uc81d\ud2b8\ub97c \ub9cc\ub4e4\uac70\ub098 \ub514\ub809\ud1a0\ub9ac \uacbd\ub85c\ub97c \ud655\uc778\ud558\uc138\uc694.",
@@ -715,12 +731,16 @@ var translations = {
     "crud.no_selection": "\uc120\ud0dd\ub41c \ud56d\ubaa9\uc774 \uc5c6\uc2b5\ub2c8\ub2e4",
 
     // \uc0dd\uc131/\uc7ac\uc0dd\uc131
+    "gen.mode": "\ubaa8\ub4dc",
     "gen.generate": "\uc0dd\uc131",
     "gen.regenerate": "\uc7ac\uc0dd\uc131 (\ub36e\uc5b4\uc4f0\uae30)",
     "gen.new_version": "\uc0c8 \ubc84\uc804 \uc0dd\uc131",
     "gen.mode_title": "\uc0dd\uc131 \ubaa8\ub4dc",
     "gen.mode_desc": "\uae30\uc874 \ub370\uc774\ud130 \ucc98\ub9ac \ubc29\ubc95\uc744 \uc120\ud0dd\ud558\uc138\uc694:",
     "gen.overwrite_warning": "\uae30\uc874 \ub370\uc774\ud130\ub97c \ub36e\uc5b4\uc501\ub2c8\ub2e4",
+
+    "pager.prev": "\uc774\uc804",
+    "pager.next": "\ub2e4\uc74c",
 
     // \uc2e4\ud589 \uc774\ub825
     "exec.history": "\uc2e4\ud589 \uc774\ub825",
@@ -786,6 +806,7 @@ var translations = {
     "app.title": "TestForge",
     "project.select": "Ch\u1ECDn d\u1EF1 \u00E1n...",
     "project.new": "+ D\u1EF1 \u00E1n m\u1EDBi",
+    "settings.language": "Ng\u00F4n ng\u1EEF",
     "welcome.title": "Ch\u00E0o m\u1EEBng \u0111\u1EBFn TestForge",
     "welcome.desc": "Ch\u1ECDn ho\u1EB7c t\u1EA1o d\u1EF1 \u00E1n \u0111\u1EC3 b\u1EAFt \u0111\u1EA7u.",
     "welcome.create": "T\u1EA1o d\u1EF1 \u00E1n",
@@ -838,7 +859,7 @@ var translations = {
     "stepper.docs": "{n} t\u00E0i li\u1EC7u",
     "stepper.features": "{n} t\u00EDnh n\u0103ng",
     "stepper.cases_count": "{n} tr\u01B0\u1EDDng h\u1EE3p",
-    "stepper.scripts": "{n} k\u1ECBch b\u1EA3n",
+    "stepper.scripts_count": "{n} k\u1ECBch b\u1EA3n",
     "stepper.runs": "{n} l\u1EA7n ch\u1EA1y",
     "stepper.no_data": "-",
 
@@ -877,6 +898,8 @@ var translations = {
     "cases.empty": "Ch\u01B0a c\u00F3 tr\u01B0\u1EDDng h\u1EE3p ki\u1EC3m th\u1EED",
     "cases.empty.desc": "T\u1EA1o tr\u01B0\u1EDDng h\u1EE3p ki\u1EC3m th\u1EED sau khi ch\u1EA1y ph\u00E2n t\u00EDch.",
     "cases.filter": "L\u1ECDc tr\u01B0\u1EDDng h\u1EE3p...",
+    "cases.filter_type": "Lo\u1EA1i tr\u01B0\u1EDDng h\u1EE3p",
+    "cases.filter_tag": "Nh\u00E3n",
     "cases.all": "T\u1EA5t c\u1EA3",
     "cases.functional": "Ch\u1EE9c n\u0103ng",
     "cases.usecase": "Use Case",
@@ -929,6 +952,7 @@ var translations = {
 
     // Report tab
     "report.title": "B\u00E1o c\u00E1o ki\u1EC3m th\u1EED",
+    "report.format": "\u0110\u1ECBnh d\u1EA1ng",
     "report.load": "T\u1EA3i b\u00E1o c\u00E1o",
     "report.empty": "Ch\u01B0a c\u00F3 b\u00E1o c\u00E1o",
     "report.empty.desc": "T\u1EA1o b\u00E1o c\u00E1o sau khi ch\u1EA1y ki\u1EC3m th\u1EED.",
@@ -974,6 +998,8 @@ var translations = {
 
     // Project list
     "projects.title": "D\u1EF1 \u00E1n",
+    "projects.dir_label": "Th\u01B0 m\u1EE5c c\u1EA7n qu\u00E9t",
+    "projects.search": "T\u00ECm d\u1EF1 \u00E1n",
     "projects.scan": "Qu\u00E9t",
     "projects.empty": "Kh\u00F4ng t\u00ECm th\u1EA5y d\u1EF1 \u00E1n",
     "projects.empty.desc": "T\u1EA1o d\u1EF1 \u00E1n m\u1EDBi ho\u1EB7c ki\u1EC3m tra \u0111\u01B0\u1EDDng d\u1EABn th\u01B0 m\u1EE5c.",
@@ -1104,12 +1130,16 @@ var translations = {
     "crud.bulk_delete": "X\u00F3a \u0111\u00E3 ch\u1ECDn",
     "crud.no_selection": "Ch\u01B0a ch\u1ECDn m\u1EE5c n\u00E0o",
 
+    "gen.mode": "Ch\u1EBF \u0111\u1ED9",
     "gen.generate": "T\u1EA1o",
     "gen.regenerate": "T\u1EA1o l\u1EA1i (ghi \u0111\u00E8)",
     "gen.new_version": "Phi\u00EAn b\u1EA3n m\u1EDBi",
     "gen.mode_title": "Ch\u1EBF \u0111\u1ED9 t\u1EA1o",
     "gen.mode_desc": "Ch\u1ECDn c\u00E1ch x\u1EED l\u00FD d\u1EEF li\u1EC7u hi\u1EC7n c\u00F3:",
     "gen.overwrite_warning": "D\u1EEF li\u1EC7u hi\u1EC7n t\u1EA1i s\u1EBD b\u1ECB ghi \u0111\u00E8",
+
+    "pager.prev": "Tr\u01B0\u1EDBc",
+    "pager.next": "Sau",
 
     "exec.history": "L\u1ECBch s\u1EED ch\u1EA1y",
     "exec.run_id": "ID l\u1EA7n ch\u1EA1y",

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 from typing import Literal
 
 from fastapi import APIRouter, HTTPException
@@ -91,14 +92,17 @@ async def finish_session(project_path: str):
 async def list_sessions(project_path: str):
     """List all completed manual QA sessions."""
     p = resolve_project(project_path)
-    manual_dir = p / ".testforge" / "manual"
+    manual_root = (p / ".testforge" / "manual").resolve()
     sessions = []
-    if manual_dir.exists():
-        for f in sorted(manual_dir.glob("*.json"), reverse=True):
+    if manual_root.exists() and manual_root.is_dir():
+        for f in sorted(manual_root.glob("*.json"), reverse=True):
             if f.name == "active-session.json":
                 continue
             try:
-                data = json.loads(f.read_text())
+                real = f.resolve()
+                if not real.is_relative_to(manual_root):
+                    continue
+                data = json.loads(real.read_text())
                 total = len(data.get("items", []))
                 results = data.get("results", {})
                 passed = sum(1 for r in results.values() if r.get("status") == "pass")
@@ -121,8 +125,13 @@ async def list_sessions(project_path: str):
 @router.get("/{project_path:path}/manual/sessions/{session_id}")
 async def get_session(project_path: str, session_id: str):
     """Get a specific completed session."""
+    if not re.match(r"^[a-zA-Z0-9_-]{1,64}$", session_id):
+        raise HTTPException(status_code=400, detail="Invalid session ID")
     p = resolve_project(project_path)
-    session_path = p / ".testforge" / "manual" / f"{session_id}.json"
+    manual_root = (p / ".testforge" / "manual").resolve()
+    session_path = (manual_root / f"{session_id}.json").resolve()
+    if not session_path.is_relative_to(manual_root):
+        raise HTTPException(status_code=400, detail="Invalid session ID")
     if not session_path.exists():
         raise HTTPException(status_code=404, detail="Session not found")
     data = json.loads(session_path.read_text())
