@@ -6,6 +6,9 @@ var translations = {
     "app.title": "TestForge",
     "project.select": "Select project...",
     "project.new": "+ New Project",
+    "welcome.title": "Welcome to TestForge",
+    "welcome.desc": "Select or create a project to begin your QA workflow.",
+    "welcome.create": "Create Project",
 
     // Context bar
     "ctx.docs": "{n} docs",
@@ -268,6 +271,8 @@ var translations = {
     "toast.delete_error": "Delete error: {msg}",
     "toast.select_project": "Select a project first",
     "toast.name_required": "Project name is required",
+    "validation.name_required": "Name is required",
+    "validation.title_required": "Title is required",
     "toast.timeout": "Request timed out after 30s",
     "toast.network_error": "Network error: {msg}",
     "toast.invalid_json": "Invalid JSON response (status {status})",
@@ -391,6 +396,9 @@ var translations = {
     "app.title": "TestForge",
     "project.select": "\ud504\ub85c\uc81d\ud2b8 \uc120\ud0dd...",
     "project.new": "+ \uc0c8 \ud504\ub85c\uc81d\ud2b8",
+    "welcome.title": "TestForge\uc5d0 \uc624\uc2e0 \uac83\uc744 \ud658\uc601\ud569\ub2c8\ub2e4",
+    "welcome.desc": "\ud504\ub85c\uc81d\ud2b8\ub97c \uc120\ud0dd\ud558\uac70\ub098 \uc0dd\uc131\ud558\uc5ec QA \uc6cc\ud06c\ud50c\ub85c\uc6b0\ub97c \uc2dc\uc791\ud558\uc138\uc694.",
+    "welcome.create": "\ud504\ub85c\uc81d\ud2b8 \ub9cc\ub4e4\uae30",
 
     // Context bar
     "ctx.docs": "{n}\uac1c \ubb38\uc11c",
@@ -653,6 +661,8 @@ var translations = {
     "toast.delete_error": "\uc0ad\uc81c \uc624\ub958: {msg}",
     "toast.select_project": "\uba3c\uc800 \ud504\ub85c\uc81d\ud2b8\ub97c \uc120\ud0dd\ud558\uc138\uc694",
     "toast.name_required": "\ud504\ub85c\uc81d\ud2b8 \uc774\ub984\uc740 \ud544\uc218\uc785\ub2c8\ub2e4",
+    "validation.name_required": "\uc774\ub984\uc740 \ud544\uc218\uc785\ub2c8\ub2e4",
+    "validation.title_required": "\uc81c\ubaa9\uc740 \ud544\uc218\uc785\ub2c8\ub2e4",
     "toast.timeout": "30\ucd08 \ud6c4 \uc694\uccad \uc2dc\uac04 \ucd08\uacfc",
     "toast.network_error": "\ub124\ud2b8\uc6cc\ud06c \uc624\ub958: {msg}",
     "toast.invalid_json": "\uc798\ubabb\ub41c JSON \uc751\ub2f5 (\uc0c1\ud0dc {status})",
@@ -776,6 +786,9 @@ var translations = {
     "app.title": "TestForge",
     "project.select": "Ch\u1ECDn d\u1EF1 \u00E1n...",
     "project.new": "+ D\u1EF1 \u00E1n m\u1EDBi",
+    "welcome.title": "Ch\u00E0o m\u1EEBng \u0111\u1EBFn TestForge",
+    "welcome.desc": "Ch\u1ECDn ho\u1EB7c t\u1EA1o d\u1EF1 \u00E1n \u0111\u1EC3 b\u1EAFt \u0111\u1EA7u.",
+    "welcome.create": "T\u1EA1o d\u1EF1 \u00E1n",
 
     // Context bar
     "ctx.docs": "{n} t\u00E0i li\u1EC7u",
@@ -1038,6 +1051,8 @@ var translations = {
     "toast.delete_error": "L\u1ED7i x\u00F3a: {msg}",
     "toast.select_project": "Vui l\u00F2ng ch\u1ECDn d\u1EF1 \u00E1n tr\u01B0\u1EDBc",
     "toast.name_required": "T\u00EAn d\u1EF1 \u00E1n l\u00E0 b\u1EAFt bu\u1ED9c",
+    "validation.name_required": "T\u00EAn l\u00E0 b\u1EAFt bu\u1ED9c",
+    "validation.title_required": "Ti\u00EAu \u0111\u1EC1 l\u00E0 b\u1EAFt bu\u1ED9c",
     "toast.timeout": "Y\u00EAu c\u1EA7u h\u1EBFt th\u1EDDi gian ch\u1EDD sau 30 gi\u00E2y",
     "toast.network_error": "L\u1ED7i m\u1EA1ng: {msg}",
     "toast.invalid_json": "Ph\u1EA3n h\u1ED3i JSON kh\u00F4ng h\u1EE3p l\u1EC7 (tr\u1EA1ng th\u00E1i {status})",

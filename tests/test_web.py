@@ -889,6 +889,30 @@ def test_run_parallel(web_client, sample_project):
 
 
 # ---------------------------------------------------------------------------
+# Security (Phase 4A)
+# ---------------------------------------------------------------------------
+
+
+def test_upload_size_limit(web_client, sample_project):
+    """File upload rejects files over 10MB."""
+    huge = b"x" * (11 * 1024 * 1024)
+    r = web_client.post(
+        f"/api/projects/{sample_project}/inputs",
+        files={"file": ("huge.bin", huge, "application/octet-stream")},
+    )
+    assert r.status_code == 413
+
+
+def test_error_message_no_full_path(web_client):
+    """Error messages should not expose full filesystem paths."""
+    r = web_client.get("/api/projects/nonexistent-project/info")
+    assert r.status_code in (400, 404)
+    detail = r.json().get("detail", "")
+    assert "/Users/" not in detail
+    assert "/home/" not in detail
+
+
+# ---------------------------------------------------------------------------
 # Static
 # ---------------------------------------------------------------------------
 

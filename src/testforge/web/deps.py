@@ -14,7 +14,7 @@ def resolve_project(project_path: str) -> Path:
         raise HTTPException(status_code=403, detail="Access denied: path traversal not allowed")
     p = Path(project_path).resolve()
     if not p.exists():
-        raise HTTPException(status_code=404, detail=f"Project not found: {project_path}")
+        raise HTTPException(status_code=404, detail=f"Project not found: {Path(project_path).name}")
     if not (p / ".testforge" / "config.yaml").exists():
         raise HTTPException(status_code=400, detail=f"Not a TestForge project: {project_path}")
     return p

@@ -47,6 +47,20 @@ function encodePath(p) {
   return p.split("/").map(function(s) { return encodeURIComponent(s); }).join("/");
 }
 
+async function withLoading(buttonId, asyncFn) {
+  var btn = document.getElementById(buttonId);
+  if (!btn) return asyncFn();
+  var original = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> ' + btn.textContent.trim();
+  try {
+    return await asyncFn();
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = original;
+  }
+}
+
 function toast(message, type) {
   type = type || "info";
   var container = document.getElementById("toast-container");
@@ -194,7 +208,10 @@ function simpleMarkdown(text) {
   if (inCode) html.push("</code></pre>");
   if (inList) html.push("</ul>");
   if (inTable) html.push(renderMarkdownTable(tableRows));
-  return html.join("\n");
+  var out = html.join("\n");
+  out = out.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
+  out = out.replace(/on\w+\s*=\s*["'][^"']*["']/gi, "");
+  return out;
 }
 
 function renderMarkdownTable(rows) {
@@ -911,7 +928,13 @@ window.addEventListener("hashchange", function() {
 // OVERVIEW TAB
 // ---------------------------------------------------------------------------
 async function loadOverview() {
-  if (!currentProject) return;
+  if (!currentProject) {
+    document.getElementById("pipeline-stepper").innerHTML =
+      '<div class="welcome-state"><h2>' + esc(t("welcome.title")) + '</h2>' +
+      '<p>' + esc(t("welcome.desc")) + '</p>' +
+      '<button class="btn btn-primary" onclick="document.getElementById(\'btn-new-project\').click()">' + esc(t("welcome.create")) + '</button></div>';
+    return;
+  }
 
   var overviewData = null;
   try {
@@ -1464,24 +1487,20 @@ function renderAnalysis(analysis) {
 
 async function runAnalysis() {
   if (!currentProject) { toast(t("toast.select_project"), "error"); return; }
-  var btn = document.getElementById("btn-analyze");
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> ' + esc(t("common.analyzing"));
-  try {
-    await api("POST", "/api/projects/" + encodePath(currentProject.path) + "/analysis", {});
-    toast(t("toast.analysis_complete"), "success");
+  return withLoading("btn-analyze", async function() {
     try {
-      var info = await api("GET", "/api/projects/" + encodePath(currentProject.path) + "/info");
-      Object.assign(currentProject, info.project);
-    } catch (e) { /* ignore */ }
-    loadAnalysis();
-    updateContextBar();
-  } catch (e) {
-    toast(t("toast.analysis_error", {msg: e.message}), "error");
-  } finally {
-    btn.disabled = false;
-    btn.textContent = t("analysis.run");
-  }
+      await api("POST", "/api/projects/" + encodePath(currentProject.path) + "/analysis", {});
+      toast(t("toast.analysis_complete"), "success");
+      try {
+        var info = await api("GET", "/api/projects/" + encodePath(currentProject.path) + "/info");
+        Object.assign(currentProject, info.project);
+      } catch (e) { /* ignore */ }
+      loadAnalysis();
+      updateContextBar();
+    } catch (e) {
+      toast(t("toast.analysis_error", {msg: e.message}), "error");
+    }
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -1640,25 +1659,21 @@ async function generateCases() {
     });
     if (!confirmed) return;
   }
-  var btn = document.getElementById("btn-generate");
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> ' + esc(t("common.generating"));
-  try {
-    var data = await api("POST", "/api/projects/" + encodePath(currentProject.path) + "/cases", { case_type: caseType, mode: mode });
-    allCases = data.cases || [];
-    renderCases(allCases);
-    toast(t("toast.generated_cases", {n: data.count || 0}), "success");
+  return withLoading("btn-generate", async function() {
     try {
-      var info = await api("GET", "/api/projects/" + encodePath(currentProject.path) + "/info");
-      Object.assign(currentProject, info.project);
-    } catch (e) { /* ignore */ }
-    updateContextBar();
-  } catch (e) {
-    toast(t("toast.generation_error", {msg: e.message}), "error");
-  } finally {
-    btn.disabled = false;
-    btn.textContent = t("cases.generate");
-  }
+      var data = await api("POST", "/api/projects/" + encodePath(currentProject.path) + "/cases", { case_type: caseType, mode: mode });
+      allCases = data.cases || [];
+      renderCases(allCases);
+      toast(t("toast.generated_cases", {n: data.count || 0}), "success");
+      try {
+        var info = await api("GET", "/api/projects/" + encodePath(currentProject.path) + "/info");
+        Object.assign(currentProject, info.project);
+      } catch (e) { /* ignore */ }
+      updateContextBar();
+    } catch (e) {
+      toast(t("toast.generation_error", {msg: e.message}), "error");
+    }
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -1777,25 +1792,21 @@ async function generateScripts() {
     });
     if (!confirmed) return;
   }
-  var btn = document.getElementById("btn-gen-scripts");
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> ' + esc(t("common.generating"));
-  try {
-    var data = await api("POST", "/api/projects/" + encodePath(currentProject.path) + "/scripts", { force: false, mode: mode });
-    var scripts = data.scripts || [];
-    _renderedScripts = scripts;
-    toast(t("toast.generated_scripts", {n: scripts.length}), "success");
+  return withLoading("btn-gen-scripts", async function() {
     try {
-      var info = await api("GET", "/api/projects/" + encodePath(currentProject.path) + "/info");
-      Object.assign(currentProject, info.project);
-    } catch (e) { /* ignore */ }
-    loadScripts();
-  } catch (e) {
-    toast(t("toast.script_error", {msg: e.message}), "error");
-  } finally {
-    btn.disabled = false;
-    btn.textContent = t("scripts.generate");
-  }
+      var data = await api("POST", "/api/projects/" + encodePath(currentProject.path) + "/scripts", { force: false, mode: mode });
+      var scripts = data.scripts || [];
+      _renderedScripts = scripts;
+      toast(t("toast.generated_scripts", {n: scripts.length}), "success");
+      try {
+        var info = await api("GET", "/api/projects/" + encodePath(currentProject.path) + "/info");
+        Object.assign(currentProject, info.project);
+      } catch (e) { /* ignore */ }
+      loadScripts();
+    } catch (e) {
+      toast(t("toast.script_error", {msg: e.message}), "error");
+    }
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -1870,19 +1881,15 @@ async function loadExecution() {
 
 async function runExecution() {
   if (!currentProject) { toast(t("toast.select_project"), "error"); return; }
-  var btn = document.getElementById("btn-run");
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> ' + esc(t("common.running"));
-  try {
-    var data = await api("POST", "/api/projects/" + encodePath(currentProject.path) + "/run", { tags: [], parallel: 1 });
-    renderExecution(data);
-    toast(t("toast.tests_complete"), "success");
-  } catch (e) {
-    toast(t("toast.execution_error", {msg: e.message}), "error");
-  } finally {
-    btn.disabled = false;
-    btn.textContent = t("exec.run");
-  }
+  return withLoading("btn-run", async function() {
+    try {
+      var data = await api("POST", "/api/projects/" + encodePath(currentProject.path) + "/run", { tags: [], parallel: 1 });
+      renderExecution(data);
+      toast(t("toast.tests_complete"), "success");
+    } catch (e) {
+      toast(t("toast.execution_error", {msg: e.message}), "error");
+    }
+  });
 }
 
 var _renderedExecResults = [];
@@ -2574,6 +2581,24 @@ async function editScript(script) {
 // ---------------------------------------------------------------------------
 var _crudContext = null;
 
+function _trapFocus(modal) {
+  if (modal._trapHandler) {
+    modal.removeEventListener("keydown", modal._trapHandler);
+  }
+  var focusable = modal.querySelectorAll('input, textarea, select, button:not([disabled]), [tabindex]:not([tabindex="-1"])');
+  if (focusable.length === 0) return;
+  var first = focusable[0];
+  var last = focusable[focusable.length - 1];
+  first.focus();
+  modal._trapHandler = function(e) {
+    if (e.key === "Tab") {
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  };
+  modal.addEventListener("keydown", modal._trapHandler);
+}
+
 function showCrudModal(entityType, existingData) {
   _crudContext = { type: entityType, data: existingData || null };
   var modal = document.getElementById("crud-modal");
@@ -2586,13 +2611,13 @@ function showCrudModal(entityType, existingData) {
 
   body.innerHTML = buildCrudForm(entityType, existingData);
   modal.style.display = "flex";
-
-  var firstInput = body.querySelector("input, textarea, select");
-  if (firstInput) firstInput.focus();
+  _trapFocus(modal);
 }
 
 function hideCrudModal() {
-  document.getElementById("crud-modal").style.display = "none";
+  var modal = document.getElementById("crud-modal");
+  if (modal._trapHandler) modal.removeEventListener("keydown", modal._trapHandler);
+  modal.style.display = "none";
   _crudContext = null;
 }
 
@@ -2642,6 +2667,21 @@ async function saveCrudModal() {
   var type = _crudContext.type;
   var isEdit = !!_crudContext.data;
   var basePath = "/api/projects/" + encodePath(currentProject.path);
+
+  // Client-side validation
+  var errors = [];
+  if (type === "feature" || type === "persona" || type === "rule") {
+    var nameEl = document.getElementById("crud-name");
+    if (nameEl && !nameEl.value.trim()) errors.push(t("validation.name_required"));
+  }
+  if (type === "case") {
+    var titleEl = document.getElementById("crud-title");
+    if (titleEl && !titleEl.value.trim()) errors.push(t("validation.title_required"));
+  }
+  if (errors.length > 0) {
+    toast(errors.join(", "), "error");
+    return;
+  }
 
   try {
     if (type === "feature") {
@@ -2736,23 +2776,26 @@ var _confirmCallback = null;
 var _confirmCancelCallback = null;
 
 function showConfirmDialog(message, onOk, onCancel, okLabel) {
+  var dlg = document.getElementById("confirm-dialog");
   document.getElementById("confirm-message").textContent = message;
-  document.getElementById("confirm-dialog").style.display = "flex";
+  dlg.style.display = "flex";
   _confirmCallback = onOk;
   _confirmCancelCallback = onCancel || null;
   var okBtn = document.getElementById("confirm-ok");
   okBtn.textContent = okLabel || t("crud.confirm_delete") || "Delete";
   okBtn.onclick = function() {
-    document.getElementById("confirm-dialog").style.display = "none";
+    dlg.style.display = "none";
     var cb = _confirmCallback;
     _confirmCallback = null;
     _confirmCancelCallback = null;
     if (cb) cb();
   };
+  _trapFocus(dlg);
 }
 
 function hideConfirmDialog() {
   var dlg = document.getElementById("confirm-dialog");
+  if (dlg._trapHandler) dlg.removeEventListener("keydown", dlg._trapHandler);
   if (dlg.style.display !== "flex") return;
   dlg.style.display = "none";
   var cancelCb = _confirmCancelCallback;

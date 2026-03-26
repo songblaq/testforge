@@ -8,6 +8,8 @@ from fastapi import APIRouter, HTTPException, UploadFile, File, Query
 from testforge.web.deps import resolve_project
 from testforge.core.config import load_config
 
+MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10MB
+
 # Two routers to avoid Starlette greedy-path-param routing conflicts:
 #   - router: GET/POST  on /api/projects/{project_path:path}/inputs
 #   - delete_router: DELETE on /api/inputs  (project_path as query param)
@@ -49,9 +51,11 @@ async def upload_input(project_path: str, file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="Invalid filename")
 
     dest = input_dir / safe_name
+    contents = await file.read()
+    if len(contents) > MAX_UPLOAD_SIZE:
+        raise HTTPException(status_code=413, detail="File too large (max 10MB)")
     with open(dest, "wb") as out:
-        content = await file.read()
-        out.write(content)
+        out.write(contents)
 
     return {
         "name": safe_name,

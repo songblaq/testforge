@@ -168,10 +168,12 @@
           <p class="drop-hint" data-i18n="inputs.formats">Supports: .md, .txt, .pdf, .docx, .pptx, .xlsx, .yaml, .json, images</p>
         </div>
       </div>
+      <div class="table-container">
       <table id="inputs-table" class="data-table" style="display:none;">
         <thead><tr><th data-i18n="th.type">Type</th><th data-i18n="th.name">Name</th><th data-i18n="th.size">Size</th><th data-i18n="th.actions">Actions</th></tr></thead>
         <tbody></tbody>
       </table>
+      </div>
       <div class="action-bar" id="inputs-action" style="display:none;">
         <button class="btn btn-accent" id="btn-run-analysis-from-inputs" data-i18n="inputs.analyze">&rarr; Run Analysis with these documents</button>
       </div>
@@ -197,20 +199,26 @@
       <div id="analysis-content" style="display:none;">
         <div id="analysis-summary-cards" class="stats-row" style="margin-bottom:20px;"></div>
         <div class="section-header"><h3 data-i18n="analysis.features">Features</h3><button class="btn btn-secondary btn-sm" id="btn-add-feature" data-i18n="crud.add">+ Add</button></div>
+        <div class="table-container">
         <table id="features-table" class="data-table">
           <thead><tr><th data-i18n="th.id">ID</th><th data-i18n="th.name">Name</th><th data-i18n="th.category">Category</th><th data-i18n="th.priority">Priority</th><th data-i18n="th.description">Description</th><th data-i18n="th.actions">Actions</th></tr></thead>
           <tbody></tbody>
         </table>
+        </div>
         <div class="section-header"><h3 data-i18n="analysis.personas">Personas</h3><button class="btn btn-secondary btn-sm" id="btn-add-persona" data-i18n="crud.add">+ Add</button></div>
+        <div class="table-container">
         <table id="personas-table" class="data-table">
           <thead><tr><th data-i18n="th.id">ID</th><th data-i18n="th.name">Name</th><th data-i18n="th.tech_level">Tech Level</th><th data-i18n="th.description">Description</th><th data-i18n="th.actions">Actions</th></tr></thead>
           <tbody></tbody>
         </table>
+        </div>
         <div class="section-header"><h3 data-i18n="analysis.rules">Business Rules</h3><button class="btn btn-secondary btn-sm" id="btn-add-rule" data-i18n="crud.add">+ Add</button></div>
+        <div class="table-container">
         <table id="rules-table" class="data-table">
           <thead><tr><th data-i18n="th.id">ID</th><th data-i18n="th.name">Name</th><th data-i18n="th.condition">Condition</th><th data-i18n="th.expected">Expected</th><th data-i18n="th.actions">Actions</th></tr></thead>
           <tbody></tbody>
         </table>
+        </div>
       </div>
       <div class="tab-bottom-cta" id="analysis-next-cta" style="display:none;"></div>
     </div>
@@ -262,10 +270,12 @@
           <span id="cases-selected-count">0</span> <span data-i18n="crud.selected">selected</span>
           <button class="btn btn-danger btn-sm" id="btn-bulk-delete-cases" data-i18n="crud.bulk_delete">Delete Selected</button>
         </div>
+        <div class="table-container">
         <table id="cases-table" class="data-table">
           <thead><tr><th><input type="checkbox" id="case-select-all"></th><th data-i18n="th.id">ID</th><th data-i18n="th.title">Title</th><th data-i18n="th.type">Type</th><th data-i18n="th.tag">Tag</th><th data-i18n="th.priority">Priority</th><th data-i18n="th.feature">Feature</th><th data-i18n="th.status">Status</th><th data-i18n="th.actions">Actions</th></tr></thead>
           <tbody></tbody>
         </table>
+        </div>
       </div>
       <div class="tab-bottom-cta" id="cases-next-cta" style="display:none;"></div>
     </div>
@@ -294,10 +304,12 @@
       </div>
       <div id="scripts-content" style="display:none;">
         <div id="scripts-summary-cards" class="stats-row" style="margin-bottom:16px;"></div>
+        <div class="table-container">
         <table id="scripts-table" class="data-table">
           <thead><tr><th data-i18n="th.file">File</th><th data-i18n="th.lines">Lines</th><th data-i18n="th.case_id">Case</th><th data-i18n="th.size">Size</th><th data-i18n="th.actions">Actions</th></tr></thead>
           <tbody></tbody>
         </table>
+        </div>
       </div>
       <div class="tab-bottom-cta" id="scripts-next-cta" style="display:none;"></div>
     </div>
@@ -325,17 +337,21 @@
           <div class="stat-card stat-fail"><div class="stat-value" id="exec-failed">0</div><div class="stat-label" data-i18n="exec.failed">Failed</div></div>
         </div>
         <div class="progress-bar"><div class="progress-fill" id="exec-progress"></div></div>
+        <div class="table-container">
         <table id="execution-table" class="data-table">
           <thead><tr><th data-i18n="th.case">Case</th><th data-i18n="th.status">Status</th><th data-i18n="th.duration">Duration</th><th data-i18n="th.output">Output</th></tr></thead>
           <tbody></tbody>
         </table>
+        </div>
       </div>
       <div id="run-history" style="display:none;">
         <h3 data-i18n="exec.history">Run History</h3>
+        <div class="table-container">
         <table id="runs-table" class="data-table">
           <thead><tr><th data-i18n="th.run_id">Run ID</th><th data-i18n="th.date">Date</th><th data-i18n="th.total">Total</th><th data-i18n="th.passed">Passed</th><th data-i18n="th.failed">Failed</th></tr></thead>
           <tbody></tbody>
         </table>
+        </div>
       </div>
       <div class="tab-bottom-cta" id="execution-next-cta" style="display:none;"></div>
     </div>
@@ -406,10 +422,12 @@
       </div>
       <div id="report-history" style="display:none;">
         <h3 data-i18n="report.history">Report History</h3>
+        <div class="table-container">
         <table id="reports-history-table" class="data-table">
           <thead><tr><th data-i18n="th.report_id">Report ID</th><th data-i18n="th.date">Date</th><th data-i18n="th.format">Format</th><th data-i18n="th.actions">Actions</th></tr></thead>
           <tbody></tbody>
         </table>
+        </div>
       </div>
     </div>
   </section>
