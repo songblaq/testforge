@@ -38,10 +38,14 @@ reports/
 evidence/
 
 # TestForge runtime artifacts
-TestForge Self-Test/
 *.testforge-project/
-testforge.yaml
 analysis/
 cases/
 inputs/
-output/
+
+# Dogfooding project data (user-generated, not part of source)
+AgentHive QA/
+Health Device QA/
+TestForge Self-Test/
+testforge.yaml
+scripts/
