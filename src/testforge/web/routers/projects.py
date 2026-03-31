@@ -68,7 +68,18 @@ async def create_project(body: ProjectCreate):
     if ".." in body.name or "/" in body.name or "\\" in body.name:
         raise HTTPException(status_code=400, detail="Invalid project name")
 
-    project_dir = Path(body.directory) / body.name
+    if ".." in Path(body.directory).parts:
+        raise HTTPException(status_code=400, detail="Invalid directory path")
+
+    project_dir = (Path(body.directory) / body.name).resolve()
+
+    import os as _os
+    if _os.environ.get("TESTFORGE_PROJECTS_ROOT"):
+        from testforge.web.deps import get_projects_root
+        try:
+            project_dir.relative_to(get_projects_root())
+        except ValueError:
+            raise HTTPException(status_code=403, detail="Directory outside allowed project root")
     if project_dir.exists():
         raise HTTPException(status_code=409, detail=f"Directory already exists: {project_dir}")
 

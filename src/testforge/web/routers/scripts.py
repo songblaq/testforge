@@ -48,8 +48,12 @@ async def list_scripts(project_path: str):
             "source": m.get("source", "unknown"),
         })
 
+    _RESERVED = {"conftest.py", "__init__.py"}
+
     scripts = []
     for f in sorted(scripts_dir.glob("*.py")):
+        if f.name in _RESERVED:
+            continue
         content = f.read_text(errors='replace')
         case_id = ""
         for line in content.split('\n')[:10]:
@@ -103,8 +107,10 @@ async def update_script(project_path: str, script_name: str, body: ScriptUpdate)
     p = resolve_project(project_path)
     script_path = p / "scripts" / script_name
 
-    if ".." in script_name or "/" in script_name:
+    if ".." in script_name or "/" in script_name or "\\" in script_name:
         raise HTTPException(status_code=400, detail="Invalid script name")
+    if script_name.lower() in ("conftest.py", "__init__.py"):
+        raise HTTPException(status_code=400, detail="Cannot modify reserved file")
     if not script_path.exists():
         raise HTTPException(status_code=404, detail=f"Script {script_name} not found")
 
@@ -124,8 +130,10 @@ async def delete_script(project_path: str, script_name: str):
     p = resolve_project(project_path)
     script_path = p / "scripts" / script_name
 
-    if ".." in script_name or "/" in script_name:
+    if ".." in script_name or "/" in script_name or "\\" in script_name:
         raise HTTPException(status_code=400, detail="Invalid script name")
+    if script_name.lower() in ("conftest.py", "__init__.py"):
+        raise HTTPException(status_code=400, detail="Cannot delete reserved file")
     if not script_path.exists():
         raise HTTPException(status_code=404, detail=f"Script {script_name} not found")
 

@@ -27,21 +27,44 @@ def _is_private_url(url: str) -> bool:
         return True  # fail closed
 
 
+_MAX_RESPONSE_SIZE = 5 * 1024 * 1024  # 5MB
+
+
 def parse_url(url: str) -> dict[str, Any]:
-    """Fetch a URL and extract text content."""
+    """Fetch a URL and extract text content with SSRF protection."""
     import httpx
+
+    parsed = urlparse(url)
+    if parsed.scheme not in ("http", "https"):
+        raise ValueError(f"Unsupported URL scheme: {parsed.scheme}")
 
     if _is_private_url(url):
         raise ValueError("URL resolves to a private or disallowed address")
 
-    response = httpx.get(url, follow_redirects=True, timeout=30)
+    # Disable auto-redirects; validate each hop manually
+    response = httpx.get(url, follow_redirects=False, timeout=30)
+    hops = 0
+    while response.is_redirect and hops < 5:
+        hops += 1
+        redirect_url = str(response.next_request.url) if response.next_request else ""
+        if not redirect_url:
+            break
+        redirect_parsed = urlparse(redirect_url)
+        if redirect_parsed.scheme not in ("http", "https"):
+            raise ValueError(f"Redirect to disallowed scheme: {redirect_parsed.scheme}")
+        if _is_private_url(redirect_url):
+            raise ValueError("Redirect target resolves to a private or disallowed address")
+        response = httpx.get(redirect_url, follow_redirects=False, timeout=30)
+
     response.raise_for_status()
+
+    text = response.text[:_MAX_RESPONSE_SIZE]
 
     return {
         "type": "url",
         "source": url,
         "status_code": response.status_code,
         "content_type": response.headers.get("content-type", ""),
-        "text": response.text,
-        "content_length": len(response.text),
+        "text": text,
+        "content_length": len(text),
     }

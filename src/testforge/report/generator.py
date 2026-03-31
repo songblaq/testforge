@@ -50,7 +50,7 @@ class ReportRun:
 
     @property
     def failed(self) -> int:
-        return sum(1 for r in self.results if r.status == "failed")
+        return sum(1 for r in self.results if r.status in ("failed", "error"))
 
     @property
     def skipped(self) -> int:
@@ -64,15 +64,20 @@ class ReportRun:
 
         results = []
         for item in data.get("results", data if isinstance(data, list) else []):
-            # Normalize field names across CLI/pipeline/web result schemas
-            item_id = item.get("id") or item.get("case_id", "")
+            raw_id = item.get("id") or item.get("case_id", "")
+            if raw_id == "__cross_validation__":
+                continue
+
+            item_id = raw_id
             item_name = item.get("name") or item.get("script_name") or item_id
 
-            # duration may be seconds (runner) or ms (web); normalize to ms
-            dur = item.get("duration_ms") or item.get("duration", 0)
-            dur_ms = float(dur)
-            if dur_ms > 0 and dur_ms < 300 and "duration_ms" not in item:
-                dur_ms *= 1000  # likely seconds, convert to ms
+            if "duration_ms" in item:
+                dur_ms = float(item["duration_ms"])
+            elif "duration" in item:
+                dur_val = float(item["duration"])
+                dur_ms = dur_val * 1000  # runner always stores seconds
+            else:
+                dur_ms = 0.0
 
             error_msg = (
                 item.get("error_message")

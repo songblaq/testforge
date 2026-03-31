@@ -18,12 +18,14 @@ STATIC_DIR = Path(__file__).parent / "static"
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request, call_next):
         response = await call_next(request)
-        response.headers["Content-Security-Policy-Report-Only"] = (
+        response.headers["Content-Security-Policy"] = (
             "default-src 'self'; "
             "script-src 'self' 'unsafe-inline'; "
             "style-src 'self' 'unsafe-inline'; "
             "connect-src 'self'; "
             "img-src 'self' data:; "
+            "frame-ancestors 'none'; "
+            "form-action 'self'; "
         )
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
@@ -32,28 +34,41 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
 def create_app() -> FastAPI:
     """Build the FastAPI app with all routers and static serving."""
+    disable_docs = os.environ.get("TESTFORGE_DISABLE_DOCS", "").lower() in ("1", "true", "yes")
     app = FastAPI(
         title="TestForge",
         version=__version__,
         description="TestForge Web GUI -- manage projects, cases, and reports.",
+        docs_url=None if disable_docs else "/docs",
+        redoc_url=None if disable_docs else "/redoc",
+        openapi_url=None if disable_docs else "/openapi.json",
     )
 
-    # Destructive ops require X-TestForge-Token only when TESTFORGE_TOKEN is set (see security-verified.md).
+    import secrets as _secrets
+
     TESTFORGE_TOKEN = os.environ.get("TESTFORGE_TOKEN", "")
 
-    @app.middleware("http")
-    async def check_destructive_ops(request, call_next):
-        is_destructive = (
-            request.method == "DELETE"
-            or (request.method == "POST" and "/run" in request.url.path)
-            or (request.method == "PUT" and "/scripts/" in request.url.path)
-        )
-        if is_destructive and TESTFORGE_TOKEN:
-            token = request.headers.get("X-TestForge-Token", "")
-            if token != TESTFORGE_TOKEN:
-                from starlette.responses import JSONResponse
+    _PUBLIC_PATHS = {"/api/health", "/api/config", "/", "/static"}
 
+    @app.middleware("http")
+    async def check_auth(request, call_next):
+        if not TESTFORGE_TOKEN:
+            return await call_next(request)
+
+        path = request.url.path
+        is_safe_read = request.method == "GET" and any(
+            path == p or path.startswith(p + "/") for p in _PUBLIC_PATHS
+        )
+        if is_safe_read:
+            return await call_next(request)
+
+        is_mutating = request.method in ("POST", "PUT", "DELETE", "PATCH")
+        if is_mutating:
+            token = request.headers.get("X-TestForge-Token", "")
+            if len(token) != len(TESTFORGE_TOKEN) or not _secrets.compare_digest(token, TESTFORGE_TOKEN):
+                from starlette.responses import JSONResponse
                 return JSONResponse({"detail": "Unauthorized"}, status_code=401)
+
         return await call_next(request)
 
     # --- API routers ---
@@ -98,9 +113,16 @@ def create_app() -> FastAPI:
 
     @app.exception_handler(RequestValidationError)
     async def validation_exception_handler(request, exc):
+        safe_errors = []
+        for err in exc.errors():
+            safe_errors.append({
+                "loc": err.get("loc", []),
+                "msg": err.get("msg", "Validation error"),
+                "type": err.get("type", ""),
+            })
         return JSONResponse(
             status_code=422,
-            content={"detail": str(exc), "type": "validation_error"},
+            content={"detail": safe_errors, "type": "validation_error"},
         )
 
     @app.exception_handler(Exception)

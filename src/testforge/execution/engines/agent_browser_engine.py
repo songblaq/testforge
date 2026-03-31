@@ -45,7 +45,8 @@ class AgentBrowserEngine(BaseEngine):
         timeout = kwargs.get("timeout", self.timeout)
         task = self._build_task(script_path)
 
-        cmd = ["npx", "-y", "agent-browser", "--task", task]
+        pkg = kwargs.get("package", "agent-browser@latest")
+        cmd = ["npx", "-y", pkg, "--task", task]
 
         start = time.monotonic()
         try:

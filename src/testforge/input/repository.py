@@ -98,6 +98,32 @@ def _read_file_safe(path: Path) -> str:
         return ""
 
 
+_DEFAULT_ALLOWED_HOSTS = {"github.com", "gitlab.com", "bitbucket.org"}
+
+
+def _validate_clone_host(url: str) -> None:
+    """Reject clone URLs targeting disallowed hosts."""
+    from urllib.parse import urlparse
+
+    allowed_str = os.environ.get("TESTFORGE_ALLOWED_GIT_HOSTS", "")
+    allowed = set(allowed_str.split(",")) if allowed_str else set()
+    ghe = os.environ.get("TESTFORGE_GHE_URL", "")
+    if ghe:
+        from urllib.parse import urlparse as _up
+        ghe_host = _up(ghe).hostname
+        if ghe_host:
+            allowed.add(ghe_host)
+    allowed |= _DEFAULT_ALLOWED_HOSTS
+
+    if url.startswith("git@"):
+        host = url.split("@", 1)[1].split(":", 1)[0]
+    else:
+        host = urlparse(url).hostname or ""
+
+    if host not in allowed:
+        raise ValueError(f"Git host not allowed: {host}. Allowed: {', '.join(sorted(allowed))}")
+
+
 def parse_repository(ref: str, clone_dir: Path | None = None) -> dict[str, Any]:
     """Clone a repository and analyze its contents.
 
@@ -109,12 +135,15 @@ def parse_repository(ref: str, clone_dir: Path | None = None) -> dict[str, Any]:
         dict with type, source, text (combined analysis), tree, key_files, source_summary.
     """
     url = _build_clone_url(ref)
+    _validate_clone_host(url)
     use_temp = clone_dir is None
     if use_temp:
         clone_dir = Path(tempfile.mkdtemp(prefix="testforge_repo_"))
 
     try:
         # Shallow clone
+        token = os.environ.get("TESTFORGE_GHE_TOKEN") or os.environ.get("GITHUB_TOKEN", "")
+
         result = subprocess.run(
             ["git", "clone", "--depth=1", "--single-branch", url, str(clone_dir)],
             capture_output=True,
@@ -122,7 +151,10 @@ def parse_repository(ref: str, clone_dir: Path | None = None) -> dict[str, Any]:
             timeout=120,
         )
         if result.returncode != 0:
-            raise RuntimeError(f"git clone failed: {result.stderr.strip()}")
+            stderr = result.stderr.strip()
+            if token:
+                stderr = stderr.replace(token, "***")
+            raise RuntimeError(f"git clone failed: {stderr}")
 
         parts: list[str] = []
 

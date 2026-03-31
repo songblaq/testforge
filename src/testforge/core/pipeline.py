@@ -151,22 +151,36 @@ def _run_execute(project_dir: Path, **kwargs: Any) -> dict[str, Any]:
         engine_configs=config.engine_configs,
         cross_validate_enabled=config.cross_validation,
     )
-    passed = sum(1 for r in results if r.get("status") == "passed")
+
+    test_rows = [r for r in results if r.get("case_id") != "__cross_validation__"]
+    cv_rows = [r for r in results if r.get("case_id") == "__cross_validation__"]
+    passed = sum(1 for r in test_rows if r.get("status") == "passed")
+    failed = sum(1 for r in test_rows if r.get("status") in ("failed", "error"))
+    skipped = sum(1 for r in test_rows if r.get("status") == "skipped")
+    errors = sum(1 for r in test_rows if r.get("status") == "error")
 
     results_path = project_dir / config.output_dir / "results.json"
     results_path.parent.mkdir(parents=True, exist_ok=True)
     results_data = {
         "started_at": datetime.now(timezone.utc).isoformat(),
-        "results": results,
-        "summary": {"total": len(results), "passed": passed, "failed": len(results) - passed},
+        "results": test_rows,
+        "summary": {
+            "total": len(test_rows),
+            "passed": passed,
+            "failed": failed,
+            "skipped": skipped,
+            "errors": errors,
+        },
     }
+    if cv_rows:
+        results_data["cross_validation"] = cv_rows
     results_path.write_text(json.dumps(results_data, indent=2, ensure_ascii=False))
 
     ts = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
     history_path = project_dir / config.output_dir / f"results-{ts}.json"
     history_path.write_text(json.dumps(results_data, indent=2, ensure_ascii=False))
 
-    return {"total": len(results), "passed": passed, "failed": len(results) - passed}
+    return {"total": len(test_rows), "passed": passed, "failed": failed, "skipped": skipped}
 
 
 def _run_report(project_dir: Path, **kwargs: Any) -> dict[str, Any]:

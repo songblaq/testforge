@@ -2,21 +2,45 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 from fastapi import HTTPException
 
+_PROJECTS_ROOT: Path | None = None
+
+
+def get_projects_root() -> Path:
+    """Return the allowed root for project access. Defaults to cwd."""
+    global _PROJECTS_ROOT
+    if _PROJECTS_ROOT is None:
+        env = os.environ.get("TESTFORGE_PROJECTS_ROOT", "")
+        _PROJECTS_ROOT = Path(env).resolve() if env else Path.cwd().resolve()
+    return _PROJECTS_ROOT
+
 
 def resolve_project(project_path: str) -> Path:
     """Resolve and validate a project path with path-traversal protection."""
-    # Block traversal attempts (e.g. ../../etc/passwd)
     if ".." in Path(project_path).parts:
         raise HTTPException(status_code=403, detail="Access denied: path traversal not allowed")
+
     p = Path(project_path).resolve()
+    root = get_projects_root()
+
+    env_root = os.environ.get("TESTFORGE_PROJECTS_ROOT", "")
+    if env_root:
+        try:
+            p.relative_to(root)
+        except ValueError:
+            raise HTTPException(
+                status_code=403,
+                detail="Access denied: project path outside allowed root",
+            )
+
     if not p.exists():
         raise HTTPException(status_code=404, detail=f"Project not found: {Path(project_path).name}")
     if not (p / ".testforge" / "config.yaml").exists():
-        raise HTTPException(status_code=400, detail=f"Not a TestForge project: {project_path}")
+        raise HTTPException(status_code=400, detail=f"Not a TestForge project: {Path(project_path).name}")
     return p
 
 

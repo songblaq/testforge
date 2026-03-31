@@ -208,21 +208,32 @@ def run(
     cv_rows = [r for r in results if r.get("case_id") == "__cross_validation__"]
     test_rows = [r for r in results if r.get("case_id") != "__cross_validation__"]
     passed = sum(1 for r in test_rows if r.get("status") == "passed")
-    failed = sum(1 for r in test_rows if r.get("status") == "failed")
-    skipped = len(test_rows) - passed - failed
+    failed = sum(1 for r in test_rows if r.get("status") in ("failed", "error"))
+    skipped = sum(1 for r in test_rows if r.get("status") == "skipped")
+    errors = sum(1 for r in test_rows if r.get("status") == "error")
 
-    # Persist results so `testforge report` can read them
+    # Persist results (excluding cross-validation meta rows)
     output_dir = Path(project) / config.output_dir
     output_dir.mkdir(parents=True, exist_ok=True)
     results_data = {
         "started_at": datetime.now(timezone.utc).isoformat(),
-        "results": results,
-        "summary": {"total": len(test_rows), "passed": passed, "failed": failed},
+        "results": [r for r in results if r.get("case_id") != "__cross_validation__"],
+        "summary": {
+            "total": len(test_rows),
+            "passed": passed,
+            "failed": failed,
+            "skipped": skipped,
+            "errors": errors,
+        },
     }
+    if cv_rows:
+        results_data["cross_validation"] = cv_rows
     results_path = output_dir / "results.json"
     results_path.write_text(json.dumps(results_data, indent=2, ensure_ascii=False))
 
     console.print(f"[green]Passed:[/green] {passed}  [red]Failed:[/red] {failed}  [dim]Skipped:[/dim] {skipped}")
+    if errors:
+        console.print(f"  [red]Errors:[/red] {errors}")
     if active_engines != ["playwright"]:
         console.print(f"  Engines: {', '.join(active_engines)}")
     for cv in cv_rows:
@@ -231,7 +242,7 @@ def run(
     console.print(f"  Results saved to: {results_path}")
 
     if failed > 0:
-        top_failures = [r["case_id"] for r in test_rows if r.get("status") == "failed"][:5]
+        top_failures = [r["case_id"] for r in test_rows if r.get("status") in ("failed", "error")][:5]
         console.print(f"\n[yellow]Top failures:[/yellow] {', '.join(top_failures)}")
         console.print("[dim]Run 'testforge report <project>' to generate a detailed report.[/dim]")
         raise SystemExit(1)
@@ -321,6 +332,7 @@ def pipeline(ctx: click.Context, project: str, stages: tuple[str, ...], inputs: 
     else:
         console.print(f"[red]Pipeline failed:[/red] {'; '.join(result.errors)}")
         console.print(f"  Completed stages: {', '.join(result.stages_completed)}")
+        raise SystemExit(1)
 
 
 @cli.command()
