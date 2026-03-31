@@ -12,6 +12,7 @@ from testforge.core.config import (
     effective_locale,
     load_config,
 )
+from testforge.core.locale_strings import s
 from testforge.core.project import load_analysis
 from testforge.llm import create_adapter
 from testforge.llm.utils import parse_llm_json
@@ -70,9 +71,11 @@ def generate_usecase_tests(project_dir: Path, no_llm: bool = False) -> list[dict
         logger.info("No analysis results; skipping use case generation")
         return []
 
+    locale = effective_locale(config)
+
     if no_llm:
-        results = _generate_skeleton_usecases(analysis)
-        results.extend(_generate_crud_usecases(analysis))
+        results = _generate_skeleton_usecases(analysis, locale)
+        results.extend(_generate_crud_usecases(analysis, locale))
         return results
 
     adapter_kwargs: dict[str, Any] = {}
@@ -83,16 +86,16 @@ def generate_usecase_tests(project_dir: Path, no_llm: bool = False) -> list[dict
         adapter = create_adapter(config.llm_provider, **adapter_kwargs)
     except (ValueError, ImportError) as exc:
         logger.warning("LLM unavailable (%s), generating skeleton use cases", exc)
-        results = _generate_skeleton_usecases(analysis)
-        results.extend(_generate_crud_usecases(analysis))
+        results = _generate_skeleton_usecases(analysis, locale)
+        results.extend(_generate_crud_usecases(analysis, locale))
         return results
 
     try:
-        return _llm_generate_usecases(adapter, analysis, effective_locale(config))
+        return _llm_generate_usecases(adapter, analysis, locale)
     except Exception as exc:
         logger.warning("LLM generation failed (%s), generating skeleton use cases", exc)
-        results = _generate_skeleton_usecases(analysis)
-        results.extend(_generate_crud_usecases(analysis))
+        results = _generate_skeleton_usecases(analysis, locale)
+        results.extend(_generate_crud_usecases(analysis, locale))
         return results
 
 
@@ -166,82 +169,82 @@ Return a JSON array only."""
     return scenarios
 
 
-def _generate_crud_usecases(analysis: Any) -> list[dict[str, Any]]:
+def _generate_crud_usecases(analysis: Any, locale: str = "ko") -> list[dict[str, Any]]:
     """Generate CRUD flow use cases for each feature — design-phase validation."""
     crud_cases = []
-    crud_patterns = [
-        {
-            "suffix": "list-view",
-            "title_template": "View {feature} list",
-            "steps": [
-                "Navigate to {feature} section",
-                "Verify list/table is displayed with items",
-                "Verify each item shows key information (ID, name, status)",
-                "Verify empty state message when no items exist",
-            ],
-            "expected": "List displays all items with sufficient information to identify each one",
-            "tags": ["crud", "list", "design-phase"],
-        },
-        {
-            "suffix": "detail-view",
-            "title_template": "View {feature} detail",
-            "steps": [
-                "Navigate to {feature} list",
-                "Click on a specific item",
-                "Verify detail view shows ALL fields (not just summary)",
-                "Verify user can see full description, attributes, metadata",
-                "Verify back/close navigation to return to list",
-            ],
-            "expected": "Detail view shows complete information about the selected item",
-            "tags": ["crud", "detail", "design-phase"],
-        },
-        {
-            "suffix": "edit-flow",
-            "title_template": "Edit {feature} item",
-            "steps": [
-                "Navigate to {feature} detail view",
-                "Click edit button or inline edit field",
-                "Modify one or more fields",
-                "Save changes",
-                "Verify updated data is reflected in list and detail views",
-            ],
-            "expected": "User can modify item data and changes persist",
-            "tags": ["crud", "edit", "design-phase"],
-        },
-        {
-            "suffix": "delete-flow",
-            "title_template": "Delete {feature} item",
-            "steps": [
-                "Navigate to {feature} list or detail view",
-                "Click delete button",
-                "Confirm deletion in dialog",
-                "Verify item is removed from list",
-                "Verify proper feedback (toast or message)",
-            ],
-            "expected": "Item is deleted with confirmation step and user feedback",
-            "tags": ["crud", "delete", "design-phase"],
-        },
-    ]
+
+    def _crud_patterns(feature_name: str) -> list[dict[str, Any]]:
+        return [
+            {
+                "suffix": "list-view",
+                "title": s("view_list", locale, feature=feature_name),
+                "steps": [
+                    s("navigate_section", locale, feature=feature_name),
+                    s("list_displayed", locale),
+                    s("item_shows_info", locale),
+                ],
+                "expected": s("list_displayed", locale),
+                "tags": ["crud", "list", "design-phase"],
+            },
+            {
+                "suffix": "detail-view",
+                "title": s("view_detail", locale, feature=feature_name),
+                "steps": [
+                    s("navigate_section", locale, feature=feature_name),
+                    s("select_item", locale),
+                    s("detail_shows_all", locale),
+                    s("back_navigation", locale),
+                ],
+                "expected": s("detail_shows_all", locale),
+                "tags": ["crud", "detail", "design-phase"],
+            },
+            {
+                "suffix": "edit-flow",
+                "title": s("edit_item", locale, feature=feature_name),
+                "steps": [
+                    s("navigate_section", locale, feature=feature_name),
+                    s("click_edit", locale),
+                    s("modify_fields", locale),
+                    s("save_changes", locale),
+                    s("updated_reflected", locale),
+                ],
+                "expected": s("updated_reflected", locale),
+                "tags": ["crud", "edit", "design-phase"],
+            },
+            {
+                "suffix": "delete-flow",
+                "title": s("delete_item", locale, feature=feature_name),
+                "steps": [
+                    s("navigate_section", locale, feature=feature_name),
+                    s("click_delete", locale),
+                    s("confirm_delete", locale),
+                    s("item_removed", locale),
+                ],
+                "expected": s("item_removed", locale),
+                "tags": ["crud", "delete", "design-phase"],
+            },
+        ]
 
     for i, feature in enumerate(analysis.features):
-        for pattern in crud_patterns:
+        for pattern in _crud_patterns(feature.name):
             case_id = f"UC-CRUD-{i+1:03d}-{pattern['suffix']}"
+            steps_list = pattern["steps"]
             crud_cases.append({
                 "id": case_id,
-                "title": pattern["title_template"].format(feature=feature.name),
-                "description": f"CRUD flow validation for {feature.name}",
+                "title": pattern["title"],
+                "description": s("uc_crud_validation", locale, feature=feature.name),
                 "persona_id": analysis.personas[0].id if analysis.personas else "",
                 "persona_name": analysis.personas[0].name if analysis.personas else "Default User",
-                "preconditions": [f"{feature.name} has existing data"],
-                "scenario_steps": [s.format(feature=feature.name) for s in pattern["steps"]],
+                "preconditions": [s("has_existing_data", locale, feature=feature.name)],
+                "scenario_steps": steps_list,
                 "steps": [
                     {
-                        "order": i + 1,
-                        "action": s.format(feature=feature.name),
+                        "order": j + 1,
+                        "action": step,
                         "expected_result": "",
                         "input_data": "",
                     }
-                    for i, s in enumerate(pattern["steps"])
+                    for j, step in enumerate(steps_list)
                 ],
                 "expected_outcome": pattern["expected"],
                 "features_covered": [feature.id],
@@ -252,7 +255,7 @@ def _generate_crud_usecases(analysis: Any) -> list[dict[str, Any]]:
     return crud_cases
 
 
-def _generate_skeleton_usecases(analysis: Any) -> list[dict[str, Any]]:
+def _generate_skeleton_usecases(analysis: Any, locale: str = "ko") -> list[dict[str, Any]]:
     """Generate minimal skeleton use case scenarios without LLM."""
     scenarios: list[dict[str, Any]] = []
 
@@ -273,17 +276,17 @@ def _generate_skeleton_usecases(analysis: Any) -> list[dict[str, Any]]:
         feature_names = [f.name for f in analysis.features[:3]]
         uc = UseCaseScenario(
             id=f"UC-{i+1:03d}",
-            title=f"{persona.name} -- primary workflow",
-            description=f"End-to-end scenario for {persona.name}",
+            title=s("uc_primary_workflow", locale, persona=persona.name),
+            description=s("uc_e2e_scenario", locale, persona=persona.name),
             persona_id=persona.id,
             persona_name=persona.name,
-            preconditions=["User is authenticated", "System is in default state"],
+            preconditions=[s("user_authenticated", locale), s("default_state", locale)],
             scenario_steps=[
-                f"As {persona.name}, navigate to the application",
-                *[f"Interact with {fn}" for fn in feature_names],
-                "Verify final state matches expectations",
+                s("uc_navigate_app", locale, persona=persona.name),
+                *[s("uc_interact_feature", locale, feature=fn) for fn in feature_names],
+                s("uc_verify_final", locale),
             ],
-            expected_outcome="All interactions complete successfully",
+            expected_outcome=s("uc_all_success", locale),
             features_covered=[f.id for f in analysis.features[:3]],
             priority="medium",
             tags=["e2e", "skeleton"],

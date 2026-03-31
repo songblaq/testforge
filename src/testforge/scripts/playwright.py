@@ -14,6 +14,7 @@ from testforge.core.config import (
     effective_locale,
     load_config,
 )
+from testforge.core.locale_strings import s
 from testforge.core.project import load_cases
 from testforge.llm.utils import parse_llm_json
 
@@ -57,8 +58,10 @@ def generate_playwright_scripts(project_dir: Path, no_llm: bool = False) -> list
     config = load_config(project_dir)
     base_url = config.extra.get("base_url", "http://localhost:3000")
 
+    locale = effective_locale(config)
+
     if no_llm:
-        return _generate_skeleton_scripts(cases, base_url)
+        return _generate_skeleton_scripts(cases, base_url, locale)
 
     # Try LLM-powered generation
     from testforge.llm import create_adapter
@@ -71,15 +74,15 @@ def generate_playwright_scripts(project_dir: Path, no_llm: bool = False) -> list
         adapter = create_adapter(config.llm_provider, **adapter_kwargs)
     except (ValueError, ImportError) as exc:
         logger.warning("LLM unavailable (%s), generating skeleton scripts", exc)
-        return _generate_skeleton_scripts(cases, base_url)
+        return _generate_skeleton_scripts(cases, base_url, locale)
 
     try:
         return _llm_generate_scripts(
-            adapter, cases, base_url, effective_locale(config)
+            adapter, cases, base_url, locale
         )
     except Exception as exc:
         logger.warning("LLM generation failed (%s), generating skeleton scripts", exc)
-        return _generate_skeleton_scripts(cases, base_url)
+        return _generate_skeleton_scripts(cases, base_url, locale)
 
 
 def _llm_generate_scripts(
@@ -137,7 +140,7 @@ Return ONLY the Python code, no markdown fences or explanation."""
                 "LLM-generated script for %s failed syntax check, using skeleton",
                 case_id,
             )
-            source = _skeleton_script(case, base_url)
+            source = _skeleton_script(case, base_url, locale)
 
         results.append(
             {
@@ -152,7 +155,7 @@ Return ONLY the Python code, no markdown fences or explanation."""
 
 
 def _generate_skeleton_scripts(
-    cases: list[dict[str, Any]], base_url: str
+    cases: list[dict[str, Any]], base_url: str, locale: str = "ko"
 ) -> list[dict[str, Any]]:
     """Generate minimal skeleton Playwright scripts without LLM."""
     results: list[dict[str, Any]] = []
@@ -160,7 +163,7 @@ def _generate_skeleton_scripts(
     for case in cases:
         case_id = case.get("id", "TC-UNKNOWN")
         title = case.get("title", "Untitled")
-        source = _skeleton_script(case, base_url)
+        source = _skeleton_script(case, base_url, locale)
 
         results.append(
             {
@@ -174,7 +177,7 @@ def _generate_skeleton_scripts(
     return results
 
 
-def _skeleton_script(case: dict[str, Any], base_url: str) -> str:
+def _skeleton_script(case: dict[str, Any], base_url: str, locale: str = "ko") -> str:
     """Build a skeleton Playwright Python test script for a single case."""
     case_id = case.get("id", "TC-UNKNOWN")
     title = case.get("title", "Untitled")
@@ -220,10 +223,10 @@ def _skeleton_script(case: dict[str, Any], base_url: str) -> str:
             order = step.get("order", i + 1)
             action = step.get("action", "Perform action")
             exp = step.get("expected_result", "")
-            lines.append(f"    # Step {order}: {action}")
+            lines.append(f"    # {s('step_n', locale, n=order)}: {action}")
             if exp:
                 lines.append(f"    # Expected: {exp}")
-            lines.append("    # TODO: implement step action")
+            lines.append(f"    {s('todo_implement', locale)}")
             lines.append("")
     else:
         lines.append("    # No steps defined")

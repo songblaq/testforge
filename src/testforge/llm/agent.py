@@ -30,6 +30,8 @@ def detect_agent_runtime() -> str | None:
         return "codex"
     if os.environ.get("AIDER_MODEL"):
         return "aider"
+    if os.environ.get("GITHUB_COPILOT") or os.environ.get("COPILOT_ENV"):
+        return "copilot"
 
     ppid = os.getppid()
     try:
@@ -68,6 +70,7 @@ class AgentAdapter(LLMAdapter):
             "claude-code": ["claude", "--print"],
             "codex": ["codex", "--quiet"],
             "aider": ["aider", "--message"],
+            "copilot": ["gh", "copilot", "suggest", "-t", "shell"],
         }
         cmd = candidates.get(self.runtime)
         if cmd and self._command_exists(cmd[0]):

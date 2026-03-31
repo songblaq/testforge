@@ -143,15 +143,19 @@ def generate_report(
 
     test_run = load_test_run(project_dir)
 
+    from testforge.core.config import effective_locale
+
+    locale = effective_locale(config)
+
     if fmt == "html":
         from testforge.report.html import render_html
 
-        content = render_html(test_run)
+        content = render_html(test_run, locale=locale)
         ext = ".html"
     else:
         from testforge.report.markdown import render_markdown
 
-        content = render_markdown(test_run)
+        content = render_markdown(test_run, locale=locale)
         ext = ".md"
 
     if output:

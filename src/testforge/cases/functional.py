@@ -12,6 +12,7 @@ from testforge.core.config import (
     effective_locale,
     load_config,
 )
+from testforge.core.locale_strings import s
 from testforge.core.project import load_analysis
 from testforge.llm.utils import parse_llm_json
 
@@ -68,8 +69,10 @@ def generate_functional_cases(project_dir: Path, no_llm: bool = False) -> list[d
         logger.info("No analysis results found; skipping functional case generation")
         return []
 
+    locale = effective_locale(config)
+
     if no_llm:
-        return _generate_skeleton_cases(analysis)
+        return _generate_skeleton_cases(analysis, locale)
 
     # Try LLM-powered generation
     from testforge.llm import create_adapter
@@ -82,13 +85,13 @@ def generate_functional_cases(project_dir: Path, no_llm: bool = False) -> list[d
         adapter = create_adapter(config.llm_provider, **adapter_kwargs)
     except (ValueError, ImportError) as exc:
         logger.warning("LLM unavailable (%s), generating skeleton cases", exc)
-        return _generate_skeleton_cases(analysis)
+        return _generate_skeleton_cases(analysis, locale)
 
     try:
-        return _llm_generate_functional(adapter, analysis, effective_locale(config))
+        return _llm_generate_functional(adapter, analysis, locale)
     except Exception as exc:
         logger.warning("LLM generation failed (%s), generating skeleton cases", exc)
-        return _generate_skeleton_cases(analysis)
+        return _generate_skeleton_cases(analysis, locale)
 
 
 def _llm_generate_functional(
@@ -192,23 +195,23 @@ def _map_rule_ids_for_feature(feature_id: str, analysis: Any) -> list[str]:
     return matched if matched else [r.id for r in analysis.rules]
 
 
-def _generate_skeleton_cases(analysis: Any) -> list[dict[str, Any]]:
+def _generate_skeleton_cases(analysis: Any, locale: str = "ko") -> list[dict[str, Any]]:
     """Generate minimal skeleton test cases without LLM."""
     cases: list[dict[str, Any]] = []
     for i, feature in enumerate(analysis.features):
         rule_ids = _map_rule_ids_for_feature(feature.id, analysis)
         case = FunctionalTestCase(
             id=f"TC-F{i+1:03d}-01",
-            title=f"Verify {feature.name}",
-            description=f"Validate that {feature.name} works as described: {feature.description}",
+            title=s("verify_feature", locale, feature=feature.name),
+            description=s("validate_feature", locale, feature=feature.name, description=feature.description),
             feature_id=feature.id,
-            preconditions=["System is accessible", "User is authenticated"],
+            preconditions=[s("system_accessible", locale), s("user_authenticated", locale)],
             steps=[
-                TestStep(order=1, action=f"Navigate to {feature.name} feature", expected_result="Feature is displayed"),
-                TestStep(order=2, action="Perform primary action", expected_result="Expected behavior observed"),
-                TestStep(order=3, action="Verify result", expected_result="Result matches specification"),
+                TestStep(order=1, action=s("navigate_to", locale, feature=feature.name), expected_result=s("feature_displayed", locale)),
+                TestStep(order=2, action=s("perform_primary", locale), expected_result=s("expected_observed", locale)),
+                TestStep(order=3, action=s("verify_result", locale), expected_result=s("result_matches", locale)),
             ],
-            expected_result=f"{feature.name} functions correctly as specified",
+            expected_result=s("functions_correctly", locale, feature=feature.name),
             priority=feature.priority,
             tags=["functional", "skeleton"],
             rule_ids=rule_ids,

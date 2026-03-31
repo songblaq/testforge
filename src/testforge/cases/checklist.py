@@ -15,6 +15,7 @@ from testforge.core.config import (
     effective_locale,
     load_config,
 )
+from testforge.core.locale_strings import s
 from testforge.core.project import load_analysis
 from testforge.llm import create_adapter
 from testforge.llm.utils import parse_llm_json
@@ -230,8 +231,10 @@ def generate_checklist(project_dir: Path, no_llm: bool = False) -> list[dict[str
         logger.info("No analysis results; skipping checklist generation")
         return []
 
+    locale = effective_locale(config)
+
     if no_llm:
-        return _generate_skeleton_checklist(analysis)
+        return _generate_skeleton_checklist(analysis, locale)
 
     adapter_kwargs: dict[str, Any] = {}
     if config.llm_model:
@@ -241,13 +244,13 @@ def generate_checklist(project_dir: Path, no_llm: bool = False) -> list[dict[str
         adapter = create_adapter(config.llm_provider, **adapter_kwargs)
     except (ValueError, ImportError) as exc:
         logger.warning("LLM unavailable (%s), generating skeleton checklist", exc)
-        return _generate_skeleton_checklist(analysis)
+        return _generate_skeleton_checklist(analysis, locale)
 
     try:
-        return _llm_generate_checklist(adapter, analysis, effective_locale(config))
+        return _llm_generate_checklist(adapter, analysis, locale)
     except Exception as exc:
         logger.warning("LLM generation failed (%s), generating skeleton checklist", exc)
-        return _generate_skeleton_checklist(analysis)
+        return _generate_skeleton_checklist(analysis, locale)
 
 
 def _llm_generate_checklist(
@@ -304,23 +307,23 @@ Return a JSON array only."""
     return items
 
 
-def _generate_skeleton_checklist(analysis: Any) -> list[dict[str, Any]]:
+def _generate_skeleton_checklist(analysis: Any, locale: str = "ko") -> list[dict[str, Any]]:
     """Generate minimal skeleton checklist without LLM."""
     items: list[dict[str, Any]] = []
     for i, feature in enumerate(analysis.features):
         cl = ChecklistItem(
             id=f"CL-{i+1:03d}",
-            title=f"Manual check: {feature.name}",
-            description=f"Verify {feature.name} manually: {feature.description}",
+            title=s("manual_check", locale, feature=feature.name),
+            description=s("verify_manually", locale, feature=feature.name, description=feature.description),
             category="functionality",
             feature_id=feature.id,
             check_steps=[
-                f"Navigate to the {feature.name} area",
-                "Verify all UI elements are displayed correctly",
-                "Perform the primary action and observe results",
-                "Check error handling with invalid input",
+                s("navigate_area", locale, feature=feature.name),
+                s("verify_ui", locale),
+                s("perform_action", locale),
+                s("check_error_handling", locale),
             ],
-            pass_criteria=f"{feature.name} behaves as documented",
+            pass_criteria=s("behaves_as_documented", locale, feature=feature.name),
             priority=feature.priority,
         )
         items.append(cl.to_dict())

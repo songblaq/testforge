@@ -143,7 +143,14 @@ def _run_execute(project_dir: Path, **kwargs: Any) -> dict[str, Any]:
     config = kwargs["config"]
     tags = kwargs.get("tags", [])
     parallel = kwargs.get("parallel", 1)
-    results = run_tests(project_dir, tags, parallel)
+    results = run_tests(
+        project_dir,
+        tags=tags,
+        parallel=parallel,
+        engines=config.execution_engines,
+        engine_configs=config.engine_configs,
+        cross_validate_enabled=config.cross_validation,
+    )
     passed = sum(1 for r in results if r.get("status") == "passed")
 
     results_path = project_dir / config.output_dir / "results.json"

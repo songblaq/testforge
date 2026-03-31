@@ -25,6 +25,9 @@ class TestForgeConfig:
     cases_dir: str = "cases"
     analysis_dir: str = "analysis"
     extra: dict[str, Any] = field(default_factory=dict)
+    execution_engines: list[str] = field(default_factory=lambda: ["playwright"])
+    engine_configs: dict[str, dict[str, Any]] = field(default_factory=dict)
+    cross_validation: bool = False
 
 
 def effective_locale(config: TestForgeConfig) -> str:
@@ -82,6 +85,9 @@ def load_config(project_dir: Path) -> TestForgeConfig:
         cases_dir=data.get("cases_dir", "cases"),
         analysis_dir=data.get("analysis_dir", "analysis"),
         extra=data.get("extra", {}),
+        execution_engines=data.get("execution_engines", ["playwright"]),
+        engine_configs=data.get("engine_configs", {}),
+        cross_validation=data.get("cross_validation", False),
     )
 
 
@@ -103,6 +109,9 @@ def save_config(project_dir: Path, config: TestForgeConfig) -> Path:
         "cases_dir": config.cases_dir,
         "analysis_dir": config.analysis_dir,
         "extra": config.extra,
+        "execution_engines": config.execution_engines,
+        "engine_configs": config.engine_configs,
+        "cross_validation": config.cross_validation,
     }
 
     with open(config_path, "w") as f:

@@ -238,6 +238,9 @@ def run_tests(
     project_dir: Path,
     tags: list[str] | None = None,
     parallel: int = 1,
+    engines: list[str] | None = None,
+    engine_configs: dict[str, dict[str, Any]] | None = None,
+    cross_validate_enabled: bool = False,
 ) -> list[dict[str, Any]]:
     """Execute test scripts in a project.
 
@@ -249,6 +252,14 @@ def run_tests(
         Optional tag filter.
     parallel:
         Number of parallel workers.
+    engines:
+        List of engine names to use.  Defaults to ``["playwright"]`` (legacy
+        pytest subprocess path).
+    engine_configs:
+        Per-engine configuration dicts keyed by engine name.
+    cross_validate_enabled:
+        When ``True`` and multiple engines are provided, compare results across
+        engines and append a cross-validation summary entry.
 
     Returns
     -------
@@ -256,7 +267,29 @@ def run_tests(
         Test execution results.
     """
     project_dir = project_dir.resolve()
+    active_engines = engines or ["playwright"]
 
+    # Legacy single-engine path (backward compat)
+    if active_engines == ["playwright"]:
+        return _run_tests_pytest(project_dir, tags=tags, parallel=parallel)
+
+    # Multi-engine path via registry
+    return _run_tests_multi_engine(
+        project_dir,
+        tags=tags,
+        parallel=parallel,
+        engines=active_engines,
+        engine_configs=engine_configs or {},
+        cross_validate_enabled=cross_validate_enabled,
+    )
+
+
+def _run_tests_pytest(
+    project_dir: Path,
+    tags: list[str] | None = None,
+    parallel: int = 1,
+) -> list[dict[str, Any]]:
+    """Legacy pytest subprocess runner (single Playwright engine)."""
     # Discover test scripts under project_dir/scripts/
     scripts_dir = project_dir / "scripts"
     if not scripts_dir.exists():
@@ -326,5 +359,74 @@ def run_tests(
             futures = {pool.submit(_run_one, s): s for s in scripts}
             for future in concurrent.futures.as_completed(futures):
                 results.append(future.result())
+
+    return results
+
+
+def _run_tests_multi_engine(
+    project_dir: Path,
+    engines: list[str],
+    tags: list[str] | None = None,
+    parallel: int = 1,
+    engine_configs: dict[str, dict[str, Any]] | None = None,
+    cross_validate_enabled: bool = False,
+) -> list[dict[str, Any]]:
+    """Run tests through multiple engines and optionally cross-validate."""
+    from testforge.execution.engines.registry import get_engine
+    from testforge.execution.engines.cross_validator import cross_validate, format_cross_validation_report
+
+    engine_configs = engine_configs or {}
+
+    scripts_dir = project_dir / "scripts"
+    if not scripts_dir.exists():
+        return []
+
+    scripts = sorted(
+        p for p in scripts_dir.glob("*.py") if p.name != "conftest.py"
+    )
+    if tags:
+        scripts = [s for s in scripts if any(tag in s.stem for tag in tags)]
+
+    results: list[dict[str, Any]] = []
+    results_by_engine: dict[str, list[Any]] = {}
+
+    for engine_name in engines:
+        cfg = engine_configs.get(engine_name, {})
+        try:
+            engine = get_engine(engine_name, **cfg)
+        except ValueError as exc:
+            logger.warning("Skipping unknown engine %s: %s", engine_name, exc)
+            continue
+
+        engine_results = []
+        for script in scripts:
+            case_id = script.stem
+            er = engine.execute(script, case_id)
+            engine_results.append(er)
+            results.append({
+                "case_id": case_id,
+                "script_name": script.name,
+                "status": er.status,
+                "output": er.output,
+                "stderr": er.error,
+                "duration": er.duration_ms / 1000.0,
+                "runner": engine_name,
+                "engine": engine_name,
+            })
+        results_by_engine[engine_name] = engine_results
+
+    if cross_validate_enabled and len(results_by_engine) > 1:
+        cv_results = cross_validate(results_by_engine)
+        report = format_cross_validation_report(cv_results)
+        disagree = sum(1 for r in cv_results if not r.all_agree)
+        results.append({
+            "case_id": "__cross_validation__",
+            "status": "disagree" if disagree > 0 else "agree",
+            "cross_validation_report": report,
+            "total_cases": len(cv_results),
+            "agreed": len(cv_results) - disagree,
+            "disagreed": disagree,
+            "runner": "cross_validator",
+        })
 
     return results

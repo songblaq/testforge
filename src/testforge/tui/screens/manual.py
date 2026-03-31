@@ -9,6 +9,8 @@ from textual.app import ComposeResult
 from textual.screen import Screen
 from textual.widgets import Checkbox, Label, Rule, ScrollableContainer, Static
 
+from testforge.core.locale_strings import s
+
 
 class ManualQAScreen(Screen):  # type: ignore[type-arg]
     """Manual QA checklist -- check off items as they are verified."""
@@ -42,28 +44,39 @@ class ManualQAScreen(Screen):  # type: ignore[type-arg]
     def __init__(self, project_path: str | None = None, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self._project_path = Path(project_path) if project_path else None
+        self._locale = self._resolve_locale()
         self._items = self._load_checklist_cases()
+
+    def _resolve_locale(self) -> str:
+        try:
+            from testforge.core.config import effective_locale, load_config
+
+            if self._project_path and self._project_path.exists():
+                return effective_locale(load_config(self._project_path))
+        except Exception:
+            pass
+        return "ko"
 
     def _load_checklist_cases(self) -> list[dict[str, Any]]:
         if self._project_path is None or not self._project_path.exists():
-            return self._default_checklist()
+            return self._default_checklist(self._locale)
         try:
             from testforge.core.project import load_cases
 
             all_cases = load_cases(self._project_path)
             checklist = [c for c in all_cases if c.get("type") in ("checklist", "manual")]
-            return checklist if checklist else self._default_checklist()
+            return checklist if checklist else self._default_checklist(self._locale)
         except Exception:
-            return self._default_checklist()
+            return self._default_checklist(self._locale)
 
     @staticmethod
-    def _default_checklist() -> list[dict[str, Any]]:
+    def _default_checklist(locale: str = "ko") -> list[dict[str, Any]]:
         return [
-            {"id": "c1", "name": "Verify project can be initialized"},
-            {"id": "c2", "name": "Verify analysis runs without errors"},
-            {"id": "c3", "name": "Verify test cases are generated"},
-            {"id": "c4", "name": "Verify run executes and returns results"},
-            {"id": "c5", "name": "Verify report is generated"},
+            {"id": "c1", "name": s("tui_init", locale)},
+            {"id": "c2", "name": s("tui_analysis", locale)},
+            {"id": "c3", "name": s("tui_cases_gen", locale)},
+            {"id": "c4", "name": s("tui_run", locale)},
+            {"id": "c5", "name": s("tui_report", locale)},
         ]
 
     def compose(self) -> ComposeResult:

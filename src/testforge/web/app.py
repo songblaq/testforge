@@ -61,6 +61,7 @@ def create_app() -> FastAPI:
     from testforge.web.routers.analysis import router as analysis_router
     from testforge.web.routers.cases import router as cases_router
     from testforge.web.routers.execution import router as execution_router
+    from testforge.web.routers.execution import engines_router
     from testforge.web.routers.reports import router as reports_router
     from testforge.web.routers.manual import router as manual_router
     from testforge.web.routers.scripts import router as scripts_router
@@ -71,6 +72,7 @@ def create_app() -> FastAPI:
     app.include_router(analysis_router)
     app.include_router(cases_router)
     app.include_router(execution_router)
+    app.include_router(engines_router)
     app.include_router(reports_router)
     app.include_router(manual_router)
     app.include_router(scripts_router)

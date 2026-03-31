@@ -15,11 +15,14 @@ from testforge.web.deps import resolve_project
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/projects", tags=["execution"])
+engines_router = APIRouter(prefix="/api", tags=["execution"])
 
 
 class RunRequest(BaseModel):
     tags: list[str] = []
     parallel: int = Field(default=1, ge=1, le=16)
+    engines: list[str] | None = None
+    cross_validate: bool | None = None
 
 
 @router.post("/{project_path:path}/run")
@@ -29,7 +32,19 @@ async def run_tests(project_path: str, body: RunRequest):
     from testforge.execution.runner import run_tests as _run
 
     p = resolve_project(project_path)
-    results = _run(p, body.tags or None, body.parallel)
+    config = load_config(p)
+
+    active_engines = body.engines if body.engines else config.execution_engines
+    cv_enabled = body.cross_validate if body.cross_validate is not None else config.cross_validation
+
+    results = _run(
+        p,
+        body.tags or None,
+        body.parallel,
+        engines=active_engines,
+        engine_configs=config.engine_configs,
+        cross_validate_enabled=cv_enabled,
+    )
 
     for r in results:
         if "returncode" in r and "return_code" not in r:
@@ -37,8 +52,10 @@ async def run_tests(project_path: str, body: RunRequest):
         if "duration" in r and "duration_ms" not in r:
             r["duration_ms"] = int(r.pop("duration") * 1000)
 
-    passed = sum(1 for r in results if r.get("status") == "passed")
-    failed = len(results) - passed
+    test_rows = [r for r in results if r.get("case_id") != "__cross_validation__"]
+    cv_rows = [r for r in results if r.get("case_id") == "__cross_validation__"]
+    passed = sum(1 for r in test_rows if r.get("status") == "passed")
+    failed = sum(1 for r in test_rows if r.get("status") == "failed")
 
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ") + "-" + uuid.uuid4().hex[:8]
     started_at = datetime.now(timezone.utc).isoformat()
@@ -51,12 +68,20 @@ async def run_tests(project_path: str, body: RunRequest):
         "run_id": run_id,
         "started_at": started_at,
         "finished_at": datetime.now(timezone.utc).isoformat(),
-        "summary": {"total": len(results), "passed": passed, "failed": failed},
+        "summary": {
+            "total": len(test_rows),
+            "passed": passed,
+            "failed": failed,
+            "skipped": len(test_rows) - passed - failed,
+        },
         "results": results,
+        "cross_validation": cv_rows[0] if cv_rows else None,
         "environment": {
             "project": str(p),
             "tags": body.tags,
             "parallel": body.parallel,
+            "engines": active_engines,
+            "cross_validate": cv_enabled,
         },
     }
 
@@ -132,6 +157,21 @@ async def get_run(project_path: str, run_id: str):
 
     data = json.loads(run_file.read_text())
     return {"run": data}
+
+
+@engines_router.get("/engines")
+async def list_engines():
+    """List all registered engines and their availability."""
+    from testforge.execution.engines.registry import all_engine_names, available_engines
+
+    all_names = all_engine_names()
+    avail = available_engines()
+    return {
+        "engines": [
+            {"name": n, "available": n in avail}
+            for n in all_names
+        ],
+    }
 
 
 @router.get("/{project_path:path}/run")

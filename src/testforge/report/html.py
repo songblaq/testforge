@@ -7,6 +7,7 @@ import html
 from datetime import datetime
 from pathlib import Path
 
+from testforge.core.locale_strings import s
 from testforge.report.generator import ReportRun
 
 
@@ -27,7 +28,7 @@ def _e(text: str) -> str:
     return html.escape(str(text))
 
 
-def _render_donut_svg(passed: int, failed: int, skipped: int, total: int) -> str:
+def _render_donut_svg(passed: int, failed: int, skipped: int, total: int, locale: str = "ko") -> str:
     """Render an inline SVG donut chart for test results."""
     if total == 0:
         return '<p><em>No test data for chart.</em></p>'
@@ -40,9 +41,9 @@ def _render_donut_svg(passed: int, failed: int, skipped: int, total: int) -> str
     offset = 0
 
     for count, color, label in [
-        (passed, "#28a745", "Passed"),
-        (failed, "#dc3545", "Failed"),
-        (skipped, "#ffc107", "Skipped"),
+        (passed, "#28a745", s("passed", locale)),
+        (failed, "#dc3545", s("failed", locale)),
+        (skipped, "#ffc107", s("skipped", locale)),
     ]:
         if count == 0:
             continue
@@ -59,9 +60,9 @@ def _render_donut_svg(passed: int, failed: int, skipped: int, total: int) -> str
 
     legend_items = ""
     for count, color, label in [
-        (passed, "#28a745", "Passed"),
-        (failed, "#dc3545", "Failed"),
-        (skipped, "#ffc107", "Skipped"),
+        (passed, "#28a745", s("passed", locale)),
+        (failed, "#dc3545", s("failed", locale)),
+        (skipped, "#ffc107", s("skipped", locale)),
     ]:
         if count > 0:
             pct = count / total * 100
@@ -112,7 +113,7 @@ def _try_inline_screenshot(path: str) -> str:
         return f'<li><code>{_e(path)}</code></li>'
 
 
-def render_html(test_run: ReportRun) -> str:
+def render_html(test_run: ReportRun, locale: str = "ko") -> str:
     """Render an enhanced HTML test report with charts, filters, search, dark mode."""
     generated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     pass_rate = (
@@ -120,7 +121,7 @@ def render_html(test_run: ReportRun) -> str:
     )
 
     # ---- donut chart ----
-    donut = _render_donut_svg(test_run.passed, test_run.failed, test_run.skipped, test_run.total)
+    donut = _render_donut_svg(test_run.passed, test_run.failed, test_run.skipped, test_run.total, locale)
 
     # ---- environment rows ----
     env_rows = ""
@@ -136,7 +137,7 @@ def render_html(test_run: ReportRun) -> str:
     all_screenshots: list[str] = []
 
     if not test_run.results:
-        cases_html = "<p><em>No test results available.</em></p>"
+        cases_html = f"<p><em>{s('no_results', locale)}</em></p>"
     else:
         for i, r in enumerate(test_run.results, 1):
             sc = _status_class(r.status)
@@ -212,6 +213,13 @@ def render_html(test_run: ReportRun) -> str:
         env_section=env_section,
         cases_html=cases_html,
         gallery_html=gallery_html,
+        lbl_summary=s("summary", locale),
+        lbl_total_tests=s("total_tests", locale),
+        lbl_passed=s("passed", locale),
+        lbl_failed=s("failed", locale),
+        lbl_skipped=s("skipped", locale),
+        lbl_pass_rate=s("pass_rate", locale),
+        lbl_test_results=s("test_results", locale),
     )
 
 
@@ -228,6 +236,13 @@ def _wrap_html(
     env_section: str,
     cases_html: str,
     gallery_html: str,
+    lbl_summary: str = "Summary",
+    lbl_total_tests: str = "Total Tests",
+    lbl_passed: str = "Passed",
+    lbl_failed: str = "Failed",
+    lbl_skipped: str = "Skipped",
+    lbl_pass_rate: str = "Pass Rate",
+    lbl_test_results: str = "Test Results",
 ) -> str:
     return f"""\
 <!DOCTYPE html>
@@ -313,20 +328,20 @@ def _wrap_html(
     <p><em>Generated: {_e(generated_at)}</em></p>
 
     <section>
-        <h2>Summary</h2>
+        <h2>{_e(lbl_summary)}</h2>
         {donut}
         <table class="summary-table">
             <tr><th>Metric</th><th>Value</th></tr>
-            <tr><td>Total Tests</td><td>{summary_total}</td></tr>
-            <tr><td>Passed</td><td style="color:#28a745;">{summary_passed}</td></tr>
-            <tr><td>Failed</td><td style="color:#dc3545;">{summary_failed}</td></tr>
-            <tr><td>Skipped</td><td style="color:#ffc107;">{summary_skipped}</td></tr>
-            <tr><td>Pass Rate</td><td>{_e(pass_rate)}</td></tr>
+            <tr><td>{_e(lbl_total_tests)}</td><td>{summary_total}</td></tr>
+            <tr><td>{_e(lbl_passed)}</td><td style="color:#28a745;">{summary_passed}</td></tr>
+            <tr><td>{_e(lbl_failed)}</td><td style="color:#dc3545;">{summary_failed}</td></tr>
+            <tr><td>{_e(lbl_skipped)}</td><td style="color:#ffc107;">{summary_skipped}</td></tr>
+            <tr><td>{_e(lbl_pass_rate)}</td><td>{_e(pass_rate)}</td></tr>
         </table>
     </section>
     {env_section}
     <section>
-        <h2>Test Results</h2>
+        <h2>{_e(lbl_test_results)}</h2>
         <div class="toolbar">
             <input type="text" id="search" placeholder="Search tests..." oninput="filterCases()" />
             <button class="filter-btn active" data-filter="all" onclick="setFilter('all')">All</button>

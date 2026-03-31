@@ -45,14 +45,14 @@ def parse(path: str) -> ParsedDocument:
             raw=raw,
         )
 
-    if path.startswith("github:") or path.startswith("gh:"):
-        from testforge.input.github import parse_github
+    if path.startswith(("github:", "gh:", "repo:")):
+        from testforge.input.repository import parse_repository
 
-        raw = parse_github(path)
+        raw = parse_repository(path)
         return ParsedDocument(
-            source_type="github",
+            source_type="repository",
             source_path=path,
-            source_format="github",
+            source_format="repository",
             text=raw.get("text", ""),
             raw=raw,
         )

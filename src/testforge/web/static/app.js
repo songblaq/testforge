@@ -1311,6 +1311,38 @@ async function deleteInput(filename) {
   }
 }
 
+async function addUrlInput() {
+  if (!currentProject) { toast(t("toast.select_project"), "error"); return; }
+  var urlEl = document.getElementById("url-input");
+  var url = (urlEl.value || "").trim();
+  if (!url) return;
+  try {
+    await api("POST", "/api/projects/" + encodePath(currentProject.path) + "/inputs/url", { url: url });
+    toast(t("toast.url_added", { url: url }), "success");
+    urlEl.value = "";
+    loadInputs();
+    updateContextBar();
+  } catch (e) {
+    toast(t("toast.url_error", { msg: e.message }), "error");
+  }
+}
+
+async function addRepoInput() {
+  if (!currentProject) { toast(t("toast.select_project"), "error"); return; }
+  var repoEl = document.getElementById("repo-input");
+  var repo = (repoEl.value || "").trim();
+  if (!repo) return;
+  try {
+    await api("POST", "/api/projects/" + encodePath(currentProject.path) + "/inputs/repo", { repo: repo });
+    toast(t("toast.repo_added", { repo: repo }), "success");
+    repoEl.value = "";
+    loadInputs();
+    updateContextBar();
+  } catch (e) {
+    toast(t("toast.repo_error", { msg: e.message }), "error");
+  }
+}
+
 async function uploadFiles(fileList) {
   if (!currentProject || !fileList || !fileList.length) return;
 
@@ -2533,6 +2565,16 @@ document.addEventListener("click", function(e) {
   document.getElementById("case-tag-select").addEventListener("change", filterCases);
   document.getElementById("file-upload").addEventListener("change", function(e) {
     uploadFiles(e.target.files);
+  });
+
+  document.getElementById("btn-add-url").addEventListener("click", addUrlInput);
+  document.getElementById("btn-add-repo").addEventListener("click", addRepoInput);
+
+  document.getElementById("url-input").addEventListener("keydown", function(e) {
+    if (e.key === "Enter") addUrlInput();
+  });
+  document.getElementById("repo-input").addEventListener("keydown", function(e) {
+    if (e.key === "Enter") addRepoInput();
   });
 
   // Drop zone

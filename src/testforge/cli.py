@@ -165,14 +165,54 @@ def script(ctx: click.Context, project: str, framework: str) -> None:
 @click.argument("project", type=click.Path(exists=True))
 @click.option("--tags", "-t", multiple=True, help="Filter tests by tags.")
 @click.option("--parallel", "-p", type=int, default=1, help="Parallel workers.")
-def run(project: str, tags: tuple[str, ...], parallel: int) -> None:
+@click.option(
+    "--engine",
+    "-e",
+    "engines",
+    multiple=True,
+    help="Execution engine(s): playwright, expect, agent-browser. Repeatable. Defaults to project config.",
+)
+@click.option(
+    "--cross-validate",
+    is_flag=True,
+    default=None,
+    help="Enable cross-validation across engines.",
+)
+def run(
+    project: str,
+    tags: tuple[str, ...],
+    parallel: int,
+    engines: tuple[str, ...],
+    cross_validate: bool | None,
+) -> None:
     """Execute test scripts and collect evidence."""
+    from testforge.core.config import load_config
     from testforge.execution.runner import run_tests
 
-    results = run_tests(Path(project), list(tags), parallel)
-    passed = sum(1 for r in results if r.get("status") == "passed")
-    failed = len(results) - passed
-    console.print(f"[green]Passed:[/green] {passed}  [red]Failed:[/red] {failed}")
+    config = load_config(Path(project))
+    active_engines = list(engines) if engines else config.execution_engines
+    cv_enabled = cross_validate if cross_validate is not None else config.cross_validation
+
+    results = run_tests(
+        Path(project),
+        list(tags),
+        parallel,
+        engines=active_engines,
+        engine_configs=config.engine_configs,
+        cross_validate_enabled=cv_enabled,
+    )
+
+    cv_rows = [r for r in results if r.get("case_id") == "__cross_validation__"]
+    test_rows = [r for r in results if r.get("case_id") != "__cross_validation__"]
+    passed = sum(1 for r in test_rows if r.get("status") == "passed")
+    failed = sum(1 for r in test_rows if r.get("status") == "failed")
+    skipped = len(test_rows) - passed - failed
+
+    console.print(f"[green]Passed:[/green] {passed}  [red]Failed:[/red] {failed}  [dim]Skipped:[/dim] {skipped}")
+    if active_engines != ["playwright"]:
+        console.print(f"  Engines: {', '.join(active_engines)}")
+    for cv in cv_rows:
+        console.print(f"  [bold]Cross-validation:[/bold] {cv.get('agreed', 0)} agree, {cv.get('disagreed', 0)} disagree")
 
 
 @cli.command()

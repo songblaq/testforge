@@ -4,6 +4,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, UploadFile, File, Query
+from pydantic import BaseModel
 
 from testforge.web.deps import resolve_project
 from testforge.core.config import load_config
@@ -88,6 +89,63 @@ async def get_input_content(project_path: str, filename: str):
     return Response(content=content, media_type=ct, headers={
         "Content-Disposition": f'inline; filename="{safe_name}"'
     })
+
+
+class URLInput(BaseModel):
+    url: str
+
+
+class RepoInput(BaseModel):
+    repo: str
+
+
+@router.post("/{project_path:path}/inputs/url")
+async def add_url_input(project_path: str, body: URLInput):
+    """Fetch URL content and save as an input document."""
+    from testforge.input.url import parse_url
+    from urllib.parse import urlparse
+
+    p = resolve_project(project_path)
+    config = load_config(p)
+    input_dir = p / config.input_dir
+    input_dir.mkdir(parents=True, exist_ok=True)
+
+    result = parse_url(body.url)
+
+    # Generate safe filename from URL
+    parsed = urlparse(body.url)
+    safe_name = (parsed.netloc + parsed.path).replace("/", "_").strip("_")[:80]
+    filename = f"url_{safe_name}.md"
+
+    # Save content
+    content = f"# {body.url}\n\n{result.get('text', '')}"
+    (input_dir / filename).write_text(content)
+
+    size = len(content.encode())
+    return {"name": filename, "size": size, "type": "url"}
+
+
+@router.post("/{project_path:path}/inputs/repo")
+async def add_repo_input(project_path: str, body: RepoInput):
+    """Clone repository and save analysis as input document."""
+    from testforge.input.repository import parse_repository
+
+    p = resolve_project(project_path)
+    config = load_config(p)
+    input_dir = p / config.input_dir
+    input_dir.mkdir(parents=True, exist_ok=True)
+
+    result = parse_repository(body.repo)
+
+    # Generate safe filename
+    safe_name = body.repo.replace("/", "_").replace(":", "_").strip("_")[:80]
+    filename = f"repo_{safe_name}.md"
+
+    content = result.get("text", "")
+    (input_dir / filename).write_text(content)
+
+    size = len(content.encode())
+    return {"name": filename, "size": size, "type": "repository"}
 
 
 @delete_router.delete("")

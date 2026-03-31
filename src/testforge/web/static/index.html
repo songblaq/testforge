@@ -164,6 +164,24 @@
           <input type="file" id="file-upload" multiple style="display:none;" accept=".md,.txt,.pdf,.docx,.pptx,.xlsx,.yaml,.json,.png,.jpg,.jpeg">
         </label>
       </div>
+      <div class="form-row" style="margin-bottom:12px;">
+        <div class="form-group" style="flex:1;">
+          <label for="url-input" data-i18n="inputs.url_label">URL</label>
+          <input type="url" id="url-input" data-i18n-placeholder="inputs.url_placeholder" placeholder="https://example.com/docs" style="width:100%;">
+        </div>
+        <div class="form-group" style="flex:0;display:flex;align-items:flex-end;">
+          <button class="btn btn-secondary" id="btn-add-url" data-i18n="inputs.add_url">+ 추가</button>
+        </div>
+      </div>
+      <div class="form-row" style="margin-bottom:12px;">
+        <div class="form-group" style="flex:1;">
+          <label for="repo-input" data-i18n="inputs.repo_label">저장소</label>
+          <input type="text" id="repo-input" data-i18n-placeholder="inputs.repo_placeholder" placeholder="owner/repo 또는 저장소 URL" style="width:100%;">
+        </div>
+        <div class="form-group" style="flex:0;display:flex;align-items:flex-end;">
+          <button class="btn btn-secondary" id="btn-add-repo" data-i18n="inputs.add_repo">+ 추가</button>
+        </div>
+      </div>
       <div class="drop-zone" id="drop-zone">
         <div class="drop-zone-text">
           <p class="drop-icon">&#128196;</p>

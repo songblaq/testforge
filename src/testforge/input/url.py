@@ -34,7 +34,7 @@ def parse_url(url: str) -> dict[str, Any]:
     if _is_private_url(url):
         raise ValueError("URL resolves to a private or disallowed address")
 
-    response = httpx.get(url, follow_redirects=False, timeout=30)
+    response = httpx.get(url, follow_redirects=True, timeout=30)
     response.raise_for_status()
 
     return {

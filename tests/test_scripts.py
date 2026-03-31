@@ -169,7 +169,8 @@ class TestGeneratePlaywrightSkeleton:
             scripts = generate_playwright_scripts(project_with_cases)
 
         first = scripts[0]["source"]
-        assert "Step 1" in first
+        # Accept both English ("Step 1") and Korean ("단계 1") locale labels
+        assert "Step 1" in first or "단계 1" in first
         assert "Navigate to login page" in first
 
     def test_no_cases_returns_empty(self, project_empty: Path) -> None:
@@ -261,7 +262,8 @@ def test_tc_f001_01(page: Page) -> None:
         # Skeleton should be used instead
         for script in scripts:
             assert _is_valid_python(script["source"])
-            assert "# TODO: implement step action" in script["source"]
+            # Accept both English and Korean locale TODO comments
+            assert "# TODO: implement step action" in script["source"] or "# TODO: 단계 동작 구현" in script["source"]
 
     def test_llm_markdown_fenced_code_extracted(self, project_with_cases: Path) -> None:
         """LLM response wrapped in markdown fences is properly extracted."""

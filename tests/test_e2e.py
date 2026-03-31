@@ -300,7 +300,8 @@ class TestReportGeneration:
     def test_report_contains_summary_section(self, e2e_project: Path) -> None:
         report_path = generate_report(e2e_project, fmt="markdown")
         content = report_path.read_text(encoding="utf-8")
-        assert "Summary" in content
+        # Accept both English ("Summary") and Korean ("요약") locale labels
+        assert "Summary" in content or "요약" in content
 
     def test_report_custom_output_path(self, e2e_project: Path, tmp_path: Path) -> None:
         custom_out = tmp_path / "custom-report.md"

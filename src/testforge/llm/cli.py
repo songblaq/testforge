@@ -45,6 +45,12 @@ BUILTIN_PROFILES: dict[str, CLIProfile] = {
         args_template=["--message", "{prompt}", "--yes"],
         timeout=180.0,
     ),
+    "copilot": CLIProfile(
+        name="copilot",
+        command="gh",
+        args_template=["copilot", "suggest", "-t", "shell", "{prompt}"],
+        timeout=120.0,
+    ),
 }
 
 
