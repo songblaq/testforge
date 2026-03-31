@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import string
 from datetime import datetime
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 from testforge.core.locale_strings import s
@@ -40,10 +39,10 @@ _Generated: {{ generated_at }}_
 
 | Metric | Value |
 |--------|-------|
-| Features Covered | {{ coverage.covered_features }}/{{ coverage.total_features }} ({{ "%.0f"|format(coverage.feature_coverage_pct) }}%) |
-| Rules Covered | {{ coverage.covered_rules }}/{{ coverage.total_rules }} ({{ "%.0f"|format(coverage.rule_coverage_pct) }}%) |
-{% if coverage.uncovered_features %}| Uncovered Features | {{ coverage.uncovered_features | join(", ") }} |{% endif %}
-{% if coverage.uncovered_rules %}| Uncovered Rules | {{ coverage.uncovered_rules | join(", ") }} |{% endif %}
+| {{ lbl_features_covered }} | {{ coverage.covered_features }}/{{ coverage.total_features }} ({{ "%.0f"|format(coverage.feature_coverage_pct) }}%) |
+| {{ lbl_rules_covered }} | {{ coverage.covered_rules }}/{{ coverage.total_rules }} ({{ "%.0f"|format(coverage.rule_coverage_pct) }}%) |
+{% if coverage.uncovered_features %}| {{ lbl_uncovered_features }} | {{ coverage.uncovered_features | join(", ") }} |{% endif %}
+{% if coverage.uncovered_rules %}| {{ lbl_uncovered_rules }} | {{ coverage.uncovered_rules | join(", ") }} |{% endif %}
 
 {% endif %}
 {% if started_at or finished_at %}
@@ -99,7 +98,7 @@ _{{ lbl_no_results }}_
 {% endif %}
 
 {% if all_screenshots %}
-## Evidence Gallery
+## {{ lbl_evidence_gallery }}
 
 {% for path in all_screenshots %}
 - `{{ path }}`
@@ -136,13 +135,16 @@ _${lbl_generated_by}_
 """
 
 
-def _status_badge(status: str) -> str:
-    badges = {
-        "passed": "PASSED",
-        "failed": "FAILED",
-        "skipped": "SKIPPED",
+def _status_badge(status: str, locale: str = "ko") -> str:
+    badge_keys = {
+        "passed": "status_passed",
+        "failed": "status_failed",
+        "skipped": "status_skipped",
     }
-    return badges.get(status.lower(), status.upper())
+    key = badge_keys.get(status.lower())
+    if key:
+        return s(key, locale)
+    return status.upper()
 
 
 def _render_with_jinja2(
@@ -154,7 +156,7 @@ def _render_with_jinja2(
     from jinja2 import Environment
 
     env = Environment(trim_blocks=True, lstrip_blocks=True)
-    env.globals["status_badge"] = _status_badge
+    env.globals["status_badge"] = lambda st: _status_badge(st, locale)
 
     tmpl = env.from_string(_TEMPLATE)
 
@@ -194,6 +196,11 @@ def _render_with_jinja2(
         lbl_no_results=s("no_results", locale),
         lbl_generated_by=s("generated_by", locale),
         lbl_screenshots=s("screenshots", locale),
+        lbl_features_covered=s("features_covered", locale),
+        lbl_rules_covered=s("rules_covered", locale),
+        lbl_uncovered_features=s("uncovered_features", locale),
+        lbl_uncovered_rules=s("uncovered_rules", locale),
+        lbl_evidence_gallery=s("evidence_gallery", locale),
     )
 
 
@@ -237,12 +244,12 @@ def _render_simple(
             f"## {s('coverage', locale)}\n\n"
             "| Metric | Value |\n"
             "|--------|-------|\n"
-            f"| Features Covered | {coverage.covered_features}/{coverage.total_features}"
+            f"| {s('features_covered', locale)} | {coverage.covered_features}/{coverage.total_features}"
             f" ({coverage.feature_coverage_pct:.0f}%) |\n"
-            f"| Rules Covered | {coverage.covered_rules}/{coverage.total_rules}"
+            f"| {s('rules_covered', locale)} | {coverage.covered_rules}/{coverage.total_rules}"
             f" ({coverage.rule_coverage_pct:.0f}%) |\n"
-            f"| Uncovered Features | {uncovered_f} |\n"
-            f"| Uncovered Rules | {uncovered_r} |\n\n"
+            f"| {s('uncovered_features', locale)} | {uncovered_f} |\n"
+            f"| {s('uncovered_rules', locale)} | {uncovered_r} |\n\n"
         )
 
     tmpl = string.Template(_SIMPLE_TEMPLATE)

@@ -64,13 +64,29 @@ class ReportRun:
 
         results = []
         for item in data.get("results", data if isinstance(data, list) else []):
+            # Normalize field names across CLI/pipeline/web result schemas
+            item_id = item.get("id") or item.get("case_id", "")
+            item_name = item.get("name") or item.get("script_name") or item_id
+
+            # duration may be seconds (runner) or ms (web); normalize to ms
+            dur = item.get("duration_ms") or item.get("duration", 0)
+            dur_ms = float(dur)
+            if dur_ms > 0 and dur_ms < 300 and "duration_ms" not in item:
+                dur_ms *= 1000  # likely seconds, convert to ms
+
+            error_msg = (
+                item.get("error_message")
+                or item.get("error")
+                or item.get("stderr", "")
+            )
+
             results.append(
                 TestCaseResult(
-                    id=item.get("id", ""),
-                    name=item.get("name", item.get("id", "")),
+                    id=item_id,
+                    name=item_name,
                     status=item.get("status", "skipped"),
-                    duration_ms=float(item.get("duration_ms", 0)),
-                    error_message=item.get("error_message", item.get("error", "")),
+                    duration_ms=dur_ms,
+                    error_message=error_msg,
                     screenshot_paths=item.get("screenshot_paths", item.get("screenshots", [])),
                     steps=item.get("steps", []),
                     tags=item.get("tags", []),

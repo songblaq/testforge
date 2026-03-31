@@ -16,7 +16,6 @@ from testforge.core.config import (
 )
 from testforge.core.locale_strings import s
 from testforge.core.project import load_cases
-from testforge.llm.utils import parse_llm_json
 
 logger = logging.getLogger(__name__)
 
@@ -213,8 +212,17 @@ def _skeleton_script(case: dict[str, Any], base_url: str, locale: str = "ko") ->
             lines.append(f"    #   - {pre}")
         lines.append("")
 
-    # Navigate to base URL
-    lines.append(f'    page.goto("{base_url}")')
+    # Skip skeleton tests when no real target URL is configured
+    if base_url == "http://localhost:3000":
+        lines.append('    import pytest')
+        lines.append('    if not page.context.browser:')
+        lines.append('        pytest.skip("Skeleton test -- configure base_url in .testforge/config.yaml")')
+        lines.append('    try:')
+        lines.append(f'        page.goto("{base_url}", timeout=5000)')
+        lines.append('    except Exception:')
+        lines.append(f'        pytest.skip("Target {base_url} not reachable -- skeleton test")')
+    else:
+        lines.append(f'    page.goto("{base_url}")')
     lines.append("")
 
     # Steps

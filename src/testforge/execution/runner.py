@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import concurrent.futures
 import logging
 import subprocess
 import sys
@@ -289,8 +288,7 @@ def _run_tests_pytest(
     tags: list[str] | None = None,
     parallel: int = 1,
 ) -> list[dict[str, Any]]:
-    """Legacy pytest subprocess runner (single Playwright engine)."""
-    # Discover test scripts under project_dir/scripts/
+    """Pytest runner -- runs all scripts in a single pytest session for efficiency."""
     scripts_dir = project_dir / "scripts"
     if not scripts_dir.exists():
         return []
@@ -307,58 +305,115 @@ def _run_tests_pytest(
         p for p in scripts_dir.glob("*.py") if p.name != "conftest.py"
     )
 
-    # Filter by tags: keep scripts whose stem contains any of the requested tags
     if tags:
         scripts = [s for s in scripts if any(tag in s.stem for tag in tags)]
 
-    def _run_one(script: Path) -> dict[str, Any]:
-        start = time.monotonic()
-        result = subprocess.run(
-            [
-                sys.executable,
-                "-m",
-                "pytest",
-                str(script),
-                "-v",
-                "--tb=short",
-                "-q",
-                "--no-header",
-            ],
-            capture_output=True,
-            text=True,
-            timeout=120,
-            cwd=str(project_dir),
-        )
-        duration = time.monotonic() - start
-        # pytest exit codes: 0=passed, 1=failed, 2=interrupted, 3=internal error,
-        # 4=command line error, 5=no tests collected
-        if result.returncode == 0:
-            status = "passed"
-        elif result.returncode in (4, 5):
-            status = "skipped"
-        else:
-            status = "failed"
-        return {
-            "case_id": script.stem,
-            "script_name": script.name,
-            "status": status,
-            "output": result.stdout,
-            "stderr": result.stderr,
-            "returncode": result.returncode,
-            "duration": duration,
-            "runner": "pytest",
-        }
+    if not scripts:
+        return []
+
+    # Run all scripts in a single pytest session with JUnit XML for per-test results
+    import tempfile
+    with tempfile.NamedTemporaryFile(suffix=".xml", delete=False) as tmp:
+        junit_path = tmp.name
+
+    start = time.monotonic()
+    cmd = [
+        sys.executable, "-m", "pytest",
+        *[str(s) for s in scripts],
+        f"--junitxml={junit_path}",
+        "-v", "--tb=short", "-q", "--no-header",
+    ]
+    workers = max(1, parallel)
+    if workers > 1:
+        cmd.extend(["-n", str(workers), "--dist=loadfile"])
+
+    proc = subprocess.run(
+        cmd,
+        capture_output=True,
+        text=True,
+        timeout=max(120, len(scripts) * 5),
+        cwd=str(project_dir),
+    )
+    total_duration = time.monotonic() - start
+
+    results = _parse_junit_results(junit_path, scripts, total_duration, proc)
+
+    # Clean up temp file
+    try:
+        Path(junit_path).unlink(missing_ok=True)
+    except OSError:
+        pass
+
+    return results
+
+
+def _parse_junit_results(
+    junit_path: str,
+    scripts: list[Path],
+    total_duration: float,
+    proc: subprocess.CompletedProcess[str],
+) -> list[dict[str, Any]]:
+    """Parse JUnit XML to extract per-test results."""
+    import xml.etree.ElementTree as ET
 
     results: list[dict[str, Any]] = []
-    workers = max(1, parallel)
-    if workers == 1:
+    script_map = {s.stem: s for s in scripts}
+
+    try:
+        tree = ET.parse(junit_path)
+        root = tree.getroot()
+        for testcase in root.iter("testcase"):
+            name = testcase.get("name", "")
+            duration = float(testcase.get("time", "0"))
+
+            failure = testcase.find("failure")
+            error = testcase.find("error")
+            skipped_el = testcase.find("skipped")
+
+            if failure is not None:
+                status = "failed"
+                err_msg = failure.get("message", "") or failure.text or ""
+            elif error is not None:
+                status = "error"
+                err_msg = error.get("message", "") or error.text or ""
+            elif skipped_el is not None:
+                status = "skipped"
+                err_msg = skipped_el.get("message", "")
+            else:
+                status = "passed"
+                err_msg = ""
+
+            case_id = name
+            script_name = f"{name}.py"
+            for stem, path in script_map.items():
+                if stem in name or name in stem:
+                    case_id = stem
+                    script_name = path.name
+                    break
+
+            results.append({
+                "case_id": case_id,
+                "script_name": script_name,
+                "status": status,
+                "output": "",
+                "stderr": err_msg,
+                "duration": duration,
+                "runner": "pytest",
+            })
+    except (ET.ParseError, FileNotFoundError):
+        # Fallback: treat entire run as one result per script
+        overall_status = "passed" if proc.returncode == 0 else "failed"
+        per_script_dur = total_duration / max(len(scripts), 1)
         for script in scripts:
-            results.append(_run_one(script))
-    else:
-        with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
-            futures = {pool.submit(_run_one, s): s for s in scripts}
-            for future in concurrent.futures.as_completed(futures):
-                results.append(future.result())
+            results.append({
+                "case_id": script.stem,
+                "script_name": script.name,
+                "status": overall_status,
+                "output": proc.stdout,
+                "stderr": proc.stderr,
+                "duration": per_script_dur,
+                "runner": "pytest",
+            })
 
     return results
 

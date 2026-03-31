@@ -207,9 +207,6 @@ def _llm_analysis(
     locale: str,
 ) -> AnalysisResult:
     """Run full LLM-powered analysis over the combined document text."""
-    from testforge.analysis.features import extract_features
-    from testforge.analysis.personas import derive_personas
-    from testforge.analysis.rules import extract_rules
     from testforge.core.project import Feature, Persona, BusinessRule, Screen
     from testforge.input.parser import ParsedDocument
 
@@ -333,6 +330,21 @@ Respond with valid JSON only, no markdown fences."""
 
 
 
+_CONFIG_EXTENSIONS = {
+    ".toml", ".cfg", ".ini", ".env", ".yaml", ".yml", ".json", ".lock",
+    ".gitignore", ".editorconfig",
+}
+
+
+def _is_config_file(source_path: str) -> bool:
+    """Return True if the file is a config/build artifact unlikely to contain features."""
+    p = Path(source_path)
+    return p.suffix.lower() in _CONFIG_EXTENSIONS or p.name.lower() in {
+        "pyproject.toml", "setup.cfg", "package.json", "tsconfig.json",
+        "cargo.toml", "go.mod", "makefile", "dockerfile",
+    }
+
+
 def _offline_analysis(parsed_docs: list[Any]) -> AnalysisResult:
     """Fallback: produce minimal persisted analysis without LLM."""
     from testforge.core.project import AnalysisResult, BusinessRule, Feature
@@ -355,6 +367,10 @@ def _offline_analysis(parsed_docs: list[Any]) -> AnalysisResult:
             text = doc.get("text", "") or doc.get("content", "")
 
         raw_sources.append({"source": source_path, "type": source_type})
+
+        if _is_config_file(source_path):
+            logger.info("Skipping config file from offline feature extraction: %s", source_path)
+            continue
 
         feature_names = _extract_offline_feature_names(headings, text, source_path)
         for name in feature_names:

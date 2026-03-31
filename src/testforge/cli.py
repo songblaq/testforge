@@ -186,6 +186,9 @@ def run(
     cross_validate: bool | None,
 ) -> None:
     """Execute test scripts and collect evidence."""
+    import json
+    from datetime import datetime, timezone
+
     from testforge.core.config import load_config
     from testforge.execution.runner import run_tests
 
@@ -208,11 +211,30 @@ def run(
     failed = sum(1 for r in test_rows if r.get("status") == "failed")
     skipped = len(test_rows) - passed - failed
 
+    # Persist results so `testforge report` can read them
+    output_dir = Path(project) / config.output_dir
+    output_dir.mkdir(parents=True, exist_ok=True)
+    results_data = {
+        "started_at": datetime.now(timezone.utc).isoformat(),
+        "results": results,
+        "summary": {"total": len(test_rows), "passed": passed, "failed": failed},
+    }
+    results_path = output_dir / "results.json"
+    results_path.write_text(json.dumps(results_data, indent=2, ensure_ascii=False))
+
     console.print(f"[green]Passed:[/green] {passed}  [red]Failed:[/red] {failed}  [dim]Skipped:[/dim] {skipped}")
     if active_engines != ["playwright"]:
         console.print(f"  Engines: {', '.join(active_engines)}")
     for cv in cv_rows:
         console.print(f"  [bold]Cross-validation:[/bold] {cv.get('agreed', 0)} agree, {cv.get('disagreed', 0)} disagree")
+
+    console.print(f"  Results saved to: {results_path}")
+
+    if failed > 0:
+        top_failures = [r["case_id"] for r in test_rows if r.get("status") == "failed"][:5]
+        console.print(f"\n[yellow]Top failures:[/yellow] {', '.join(top_failures)}")
+        console.print("[dim]Run 'testforge report <project>' to generate a detailed report.[/dim]")
+        raise SystemExit(1)
 
 
 @cli.command()
@@ -251,7 +273,8 @@ def coverage(project: str) -> None:
 
     report = compute_coverage(analysis_path, cases_path)
 
-    console.print("\n[bold]Coverage Report[/bold]")
+    console.print("\n[bold]Traceability Coverage Report[/bold]")
+    console.print("[dim](Measures whether test cases reference each feature/rule, NOT execution pass rate)[/dim]")
     console.print(f"  Features: {report.covered_features}/{report.total_features} ({report.feature_coverage_pct:.0f}%)")
     console.print(f"  Rules:    {report.covered_rules}/{report.total_rules} ({report.rule_coverage_pct:.0f}%)")
 
@@ -261,7 +284,19 @@ def coverage(project: str) -> None:
         console.print(f"[yellow]Uncovered rules:[/yellow] {', '.join(report.uncovered_rules)}")
 
     if not report.uncovered_features and not report.uncovered_rules:
-        console.print("\n[green]Full coverage achieved.[/green]")
+        console.print("\n[green]All features and rules are mapped to test cases.[/green]")
+
+    # Show execution pass rate if results exist
+    results_path = project_dir / config.output_dir / "results.json"
+    if results_path.exists():
+        import json
+        with open(results_path) as f:
+            results_data = json.load(f)
+        summary = results_data.get("summary", {})
+        total = summary.get("total", 0)
+        p = summary.get("passed", 0)
+        if total > 0:
+            console.print(f"\n[bold]Execution Pass Rate:[/bold] {p}/{total} ({p/total*100:.0f}%)")
 
 
 @cli.command()

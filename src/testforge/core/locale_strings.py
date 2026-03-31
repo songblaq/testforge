@@ -79,6 +79,16 @@ SKELETON_STRINGS: dict[str, dict[str, str]] = {
         "uc_all_success": "모든 상호작용이 성공적으로 완료",
         "uc_crud_validation": "{feature} CRUD 흐름 검증",
 
+        # Report coverage labels
+        "features_covered": "기능 커버리지",
+        "rules_covered": "규칙 커버리지",
+        "uncovered_features": "미커버 기능",
+        "uncovered_rules": "미커버 규칙",
+        "evidence_gallery": "증거 갤러리",
+        "status_passed": "통과",
+        "status_failed": "실패",
+        "status_skipped": "건너뜀",
+
         # TUI manual defaults
         "tui_init": "프로젝트 초기화 가능 여부 확인",
         "tui_analysis": "분석이 오류 없이 실행되는지 확인",
@@ -154,6 +164,15 @@ SKELETON_STRINGS: dict[str, dict[str, str]] = {
         "uc_verify_final": "Verify final state matches expectations",
         "uc_all_success": "All interactions complete successfully",
         "uc_crud_validation": "CRUD flow validation for {feature}",
+
+        "features_covered": "Features Covered",
+        "rules_covered": "Rules Covered",
+        "uncovered_features": "Uncovered Features",
+        "uncovered_rules": "Uncovered Rules",
+        "evidence_gallery": "Evidence Gallery",
+        "status_passed": "PASSED",
+        "status_failed": "FAILED",
+        "status_skipped": "SKIPPED",
 
         "tui_init": "Verify project can be initialized",
         "tui_analysis": "Verify analysis runs without errors",
